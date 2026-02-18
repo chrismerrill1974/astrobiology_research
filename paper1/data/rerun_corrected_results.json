@@ -1,0 +1,83 @@
+{
+  "correction_note": {
+    "bug": "R[i,j] = coeff changed to R[i,j] += coeff in simulator._parse_reactions()",
+    "effect": "X+X+Y->3X now correctly computed as k*X^2*Y instead of k*X*Y",
+    "mode_change": "CSTR -> CHEMOSTAT (food species A,B clamped at fixed concentrations)",
+    "reason": "Corrected trimolecular kinetics require higher effective food concentrations"
+  },
+  "experiment_1": {
+    "name": "Control vs Test (Additional Autocatalysis)",
+    "hypothesis": "Additional autocatalytic reactions increase eta",
+    "n_networks": 60,
+    "n_successful": 29,
+    "group1": {
+      "label": "Control",
+      "eta_median": 0.14241113277453113,
+      "eta_iqr": 0.022469957736785867,
+      "n": 13
+    },
+    "group2": {
+      "label": "Test",
+      "eta_median": 0.14240146330006878,
+      "eta_iqr": 0.022215270935205006,
+      "n": 16
+    },
+    "delta_eta": -9.669474462348226e-06,
+    "parameters": {
+      "n_networks": 30,
+      "template": "brusselator",
+      "n_added_control": 3,
+      "n_autocatalytic_test": 2,
+      "n_random_test": 1,
+      "dilution_rate": 0.1,
+      "seed": 42
+    },
+    "timestamp": "2026-02-15T18:02:53.670248"
+  },
+  "experiment_2": {
+    "name": "Progressive Autocatalysis",
+    "hypothesis": "Adding autocatalytic reactions increases eta",
+    "n_trajectories": 15,
+    "n_autocatalytic_range": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "eta_medians": [
+      0.24920388233455026,
+      0.19936273183720116,
+      0.1661357273901261,
+      0.1424023901159259,
+      0.12509005851799276,
+      0.11075693450053431
+    ],
+    "eta_lower": [
+      0.24920388233455026,
+      0.19936225233415478,
+      0.16613539229203309,
+      0.1424020897835713,
+      0.12484580491554692,
+      0.11075693450053431
+    ],
+    "eta_upper": [
+      0.24920388233455026,
+      0.19990202516875338,
+      0.1667466331744892,
+      0.14291499673393618,
+      0.14636526356361496,
+      0.11075693450053431
+    ],
+    "eta_slope": -0.02682245989719727,
+    "parameters": {
+      "n_trajectories": 15,
+      "n_steps": 5,
+      "template": "brusselator",
+      "dilution_rate": 0.1,
+      "seed": 42
+    }
+  },
+  "timestamp": "2026-02-15T18:03:18.978700"
+}

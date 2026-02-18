@@ -1,0 +1,54 @@
+{
+  "table1_latex": "\\begin{table}[ht]\n\\centering\n\\caption{Oscillation survival by addition step. OR = odds ratio (B/A); CI = 95\\% Wald interval on log-OR; $p$ values from Fisher exact test, Holm--Bonferroni adjusted.}\n\\label{tab:survival}\n\\begin{tabular}{ccccccc}\n\\toprule\n$k$ & A surv & B surv & OR & 95\\% CI & $p_{\\mathrm{raw}}$ & $p_{\\mathrm{adj}}$ \\\\\n\\midrule\n0 & 200/200 & 200/200 & --- & --- & --- & --- \\\\\n1 & 148/200 & 187/200 & 5.05 & [2.60, 9.27] & $1.2 \\times 10^{-7}$ & $1.2 \\times 10^{-7}$ \\\\\n2 & 105/200 & 170/200 & 5.13 & [3.15, 8.13] & $2.1 \\times 10^{-12}$ & $4.2 \\times 10^{-12}$ \\\\\n3 & 73/200 & 153/200 & 5.66 & [3.63, 8.65] & $< 10^{-16}$ & $2.5 \\times 10^{-15}$ \\\\\n4 & 55/200 & 133/200 & 5.23 & [3.39, 7.94] & $5.5 \\times 10^{-15}$ & $1.6 \\times 10^{-14}$ \\\\\n5 & 36/200 & 121/200 & 6.98 & [4.36, 10.87] & $< 10^{-18}$ & $< 10^{-18}$ \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}",
+  "table2_latex": "\\begin{table}[ht]\n\\centering\n\\caption{Activation ratio $\\eta$ by addition step (valid networks only). Cliff's $\\delta$ is the non-parametric effect size (B vs A).}\n\\label{tab:eta}\n\\begin{tabular}{ccccccc}\n\\toprule\n$k$ & A med & A IQR & B med & B IQR & MW $p$ & Cliff's $\\delta$ \\\\\n\\midrule\n0 & 0.2492 & 0.0000 & 0.2492 & 0.0000 & 1.000 & +0.000 \\\\\n1 & 0.1994 & 0.0000 & 0.1994 & 0.0000 & 0.826 & -0.014 \\\\\n2 & 0.1661 & 0.0332 & 0.1661 & 0.0000 & 0.089 & -0.122 \\\\\n3 & 0.1424 & 0.0237 & 0.1424 & 0.0237 & 0.196 & -0.107 \\\\\n4 & 0.1340 & 0.0178 & 0.1424 & 0.0178 & 0.385 & +0.081 \\\\\n5 & 0.1246 & 0.0316 & 0.1246 & 0.0005 & 0.962 & +0.006 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}",
+  "prediction_comparison": [
+    {
+      "prediction": "\u03b7 at k=0 \u2248 0.43",
+      "actual": "0.249",
+      "match": "PARTIAL \u2014 baseline is 0.249 (lower due to CHEMOSTAT correction)"
+    },
+    {
+      "prediction": "A: \u03b7(k=5) \u2248 0.17, B: \u03b7(k=5) \u2248 0.25\u20130.35",
+      "actual": "A: 0.125, B: 0.125",
+      "match": "PARTIAL \u2014 proportional decline correct but absolute values shifted"
+    },
+    {
+      "prediction": "A slope \u2248 -0.04, B slope \u2248 -0.02 to 0.00",
+      "actual": "A: -0.0241, B: -0.0234, \u0394 = 0.0007 (p = 0.193)",
+      "match": "FAILED \u2014 slopes are indistinguishable"
+    },
+    {
+      "prediction": "A: P(\u03b7>0.25) < 10%, B: P(\u03b7>0.25) > 25%",
+      "actual": "A: 2.8%, B: 0.0%",
+      "match": "PARTIAL \u2014 both near zero (baseline lower than predicted)"
+    },
+    {
+      "prediction": "Acceptance \u2248 50% at k=1, declining to 10\u201320% at k=5",
+      "actual": "Median acceptance: ['100%', '100%', '100%', '100%', '100%']",
+      "match": "FAILED \u2014 acceptance stays near 100% (filter is not restrictive)"
+    },
+    {
+      "prediction": "10\u201330% of trajectories terminate before k=5",
+      "actual": "0.0%",
+      "match": "FAILED \u2014 zero early terminations"
+    },
+    {
+      "prediction": "|r(CV, D\u2082)| < 0.3",
+      "actual": "r = -0.356",
+      "match": "MARGINAL \u2014 r = -0.356, slightly above 0.3 threshold"
+    },
+    {
+      "prediction": "(Not pre-registered)",
+      "actual": "Survival at k=5: A = 36/200 (18%), B = 121/200 (60%)",
+      "match": "EMERGENT FINDING \u2014 3.4\u00d7 survival advantage for aligned additions"
+    }
+  ],
+  "figures": [
+    "fig1_survival_fraction.pdf",
+    "fig2_eta_progressive.pdf",
+    "fig3_odds_ratio.pdf",
+    "fig4_selection_bias.pdf",
+    "figS1_logistic_survival.pdf",
+    "figS2_cv_vs_k.pdf"
+  ]
+}

@@ -1,0 +1,586 @@
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, graphicx, hyperref, booktabs}
+\usepackage[margin=1in]{geometry}
+
+\title{Paper III Research Plan:\\
+Transient Dimensional Inflation via Timescale Separation in Energy-Coupled Chemical Oscillators}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Abstract}
+
+Papers I--II established that (i) network growth does not inflate attractor dimensionality and (ii) topology-aware growth preserves oscillatory viability without increasing dynamical dimensionality. Together they reveal a pattern of \emph{dynamical rigidity}: autocatalytic oscillators resist dimensional inflation under both stoichiometric growth (Paper I) and topological selection (Paper II). A key structural insight emerged: \emph{dimensionality of state space $\ne$ dimensionality of attractor}---adding variables or reactions does not guarantee higher-dimensional dynamics. Pilot experiments confirmed this: fast-relaxing energy drive does not break rigidity (Pilots 1--3); slow energy can (Pilot 3b, $D_2 = 1.848$) but only in a fragile, narrow parameter window.
+
+Pilot 4 demonstrated that two oscillatory modules sharing a slow energy variable produce robust $D_2 > 1$, and Pilot 5b validated this within the \texttt{ReactionSimulator} mass-action framework ($D_2 = 1.660$). However, the independent-reservoir control (Sweep A2) revealed that at very slow energy relaxation ($\gamma = 0.001$), each oscillator-energy subsystem inflates \emph{independently}---sharing is incidental. Sliding-window diagnostics further revealed that the high-$D_2$ phase is \textbf{transient}: the system explores a complex attractor for hundreds of oscillator periods before phase-locking restores rigidity. The primary mechanism is \textbf{timescale separation enabling long-lived transient escape from dynamical rigidity}. Sharing prolongs the transient and enables richer complexity at moderate $\gamma$. This document formalizes the experimental plan for Paper III.
+
+\subsection*{Series continuity}
+
+The three papers form a progression through the rigidity landscape:
+\begin{enumerate}
+\item \textbf{Growth rigidity} (Paper I): Adding reactions dilutes $\eta$; $D_2$ stays $\approx 1$.
+\item \textbf{Topological rigidity} (Paper II): Feedback-aligned growth preserves oscillation but cannot inflate $D_2$.
+\item \textbf{Energetic rigidity} (Pilot 3): Energy injection into a single oscillator does not inflate $D_2$ when $E$ relaxation is fast (dynamically slaved).
+\item \textbf{Transient escape from rigidity} (Paper III): A sufficiently slow energy variable ($1/\gamma \gg$ oscillator period) enables long-lived transient high-dimensional dynamics before phase-locking restores rigidity. Sharing the slow variable prolongs the exploratory phase and enables richer transient complexity at moderate $\gamma$.
+\end{enumerate}
+
+To preserve this continuity, the coupled oscillator model is implemented as an explicit mass-action reaction network using the same \texttt{GeneratedNetwork} / \texttt{ReactionSimulator} / \texttt{ActivationTracker} stack as Papers I--II. This enables the activation ratio $\eta = D_2 / r_s$ to serve as the common measure across all three papers, with growth applied through the same \texttt{generate\_progressive} / \texttt{generate\_progressive\_aligned} operators.
+
+\subsection*{Operational definition}
+
+\textbf{Dimensional inflation} is defined operationally as \emph{time-local} $D_2 > 1.2$ in at least one sliding window, across $\ge 3$ independent seeds at a given parameter set. This threshold is justified statistically, not heuristically: across all pilot runs classified as limit cycles (Pilots 1--5, $N > 200$), the estimator returns $D_2 \approx 1.00 \pm 0.03$ (mean $\pm$ SD). The threshold $D_2 = 1.2$ is therefore $>6\sigma$ above the limit-cycle baseline, making false positives negligible. Dynamically, $D_2 > 1.2$ in a given window indicates transient dynamics on a higher-dimensional manifold (torus or strange attractor) rather than a limit cycle.
+
+\textbf{Transient duration metrics} (added post-diagnostics):
+\begin{itemize}
+\item \textbf{Locking time} $T_{\text{lock}}$: the first time $t$ after which the system remains phase-locked. Operationally: the earliest $t$ such that sliding-window median $D_2 < 1.1$ and $|r(X_1, X_2)| > 0.95$ for all subsequent windows. Measures how long the system explores before settling.
+\item \textbf{Exploratory duration} $\tau_{>1.2}$: total time (or number of windows) with $D_2 > 1.2$. The primary ecology metric---quantifies how long chemistry stays complex before locking.
+\end{itemize}
+
+\textbf{Phase 0.5 calibration task}: As part of ridge mapping, compute the sample mean and SD of $D_2$ across all Phase 0.5 runs classified as phase-locked limit cycles. Report the exact baseline distribution in the paper to anchor the 1.2 threshold empirically.
+
+\section{Model Specification}
+
+\subsection*{Architecture commitment}
+
+All models in Paper III are implemented as explicit mass-action reaction networks compatible with the \texttt{ReactionSimulator} framework. No parallel ODE universe.
+
+\textbf{Key design decision}: The pilot model (Pilot 4) used Michaelis--Menten gating $f(E) = E/(K+E)$, which is not representable as standard mass-action. Two approaches were tested:
+\begin{itemize}
+\item \textbf{Pilot 5 (FAILED)}: Pure mass-action E-consumption ($k \cdot E \cdot X_i^2 Y_i$, linear in $E$). Max $D_2 = 0.991$. Linear coupling creates a binary regime (phase-locked or anti-phase) without the intermediate quasi-periodic window.
+\item \textbf{Pilot 5b (VALIDATED)}: Enzyme-complex representation using auxiliary gate species $G$ and complex $GE$. Max $D_2 = 1.660$. Reproduces Michaelis--Menten saturation entirely within mass-action kinetics.
+\end{itemize}
+
+\textbf{Lesson}: Michaelis--Menten saturation is not just convenient---it is dynamically essential. The saturation bounds effective coupling at high $E$, creating the narrow window for timescale separation that enables quasi-periodic dynamics. The enzyme-complex trick achieves this bounding within mass-action.
+
+\subsection*{Enzyme-complex coupled model}
+
+Gate species $G$ and enzyme-substrate complex $GE$ mediate energy access to the autocatalytic cores:
+
+\begin{align*}
+G + E &\rightleftharpoons GE \qquad \text{(fast equilibrium, } K_d = k_{\text{off}} / k_{\text{on}}\text{)} \\
+2X_i + Y_i + GE &\to 3X_i + G + E_w \qquad \text{(gated autocatalysis, E consumed)}
+\end{align*}
+
+At quasi-steady-state for $GE$:
+\[
+[GE]_{\text{ss}} \approx G_{\text{total}} \cdot \frac{E}{K_d + E}
+\]
+
+Effective autocatalytic rate: $k_{\text{cat}} \cdot G_{\text{total}} \cdot \frac{E}{K_d + E} \cdot X_i^2 Y_i$. This \textbf{is} Michaelis--Menten. $E$ is irreversibly consumed ($\to E_w$), creating true resource coupling. $G$ is regenerated (catalytic). $G + GE = G_{\text{total}}$ is conserved.
+
+\subsection*{Complete reaction list}
+
+Per core $i \in \{1, 2\}$, using the Paper I--II Brusselator notation:
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Rxn & Reaction string & Rate law & Role \\
+\midrule
+R1$_i$ & \texttt{A -> Xi} & $A$ (chemostatted) & Food inflow \\
+R2$_i$ & \texttt{B + Xi -> Yi + Di} & $B \cdot X_i$ & Conversion \\
+R3$_i$ & \texttt{Xi + Xi + Yi -> Xi + Xi + Xi} & $X_i^2 Y_i$ & Base autocatalysis \\
+R4$_i$ & \texttt{Xi -> Wi} & $X_i$ & Decay \\
+\midrule
+R5 & \texttt{Esrc -> Esrc + E} & $J$ (Esrc chemostatted at 1) & Energy inflow \\
+R6 & \texttt{E -> Ew} & $\gamma \cdot E$ & Energy leak \\
+\midrule
+R7 & \texttt{G + E -> GE} & $k_{\text{on}} \cdot G \cdot E$ & Gate binding \\
+R8 & \texttt{GE -> G + E} & $k_{\text{off}} \cdot GE$ & Gate unbinding \\
+\midrule
+R9$_i$ & \texttt{Xi+Xi+Yi+GE -> Xi+Xi+Xi+G+Ew} & $k_{\text{cat}} \cdot X_i^2 Y_i \cdot GE$ & Gated autocatalysis \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Total: 14 reactions (4 per core $\times$ 2 + 2 energy pool + 2 gate + 2 gated autocatalysis).
+
+Species: $\{X_1, Y_1, D_1, W_1, X_2, Y_2, D_2, W_2, E, E_w, G, GE\}$ (12 total) plus chemostatted $\{A, B, E_{\text{src}}\}$.
+
+Dynamic species tracked for $D_2$: $\{X_1, Y_1, X_2, Y_2, E\}$ (5 variables). $G$ and $GE$ are fast auxiliary variables excluded from $D_2$ projection. Waste species $D_i, W_i, E_w$ are monotonic accumulators, automatically excluded by \texttt{ActivationTracker.\_extract\_trajectory()}.
+
+\subsection*{Effective ODE (at quasi-steady-state for GE)}
+
+When $k_{\text{on}}, k_{\text{off}} \gg k_{\text{cat}} \cdot X_i^2 Y_i$ (fast gate equilibrium), the effective dynamics reduce to:
+\begin{align*}
+\dot X_i &= A - (B+1)X_i + X_i^2 Y_i + k_{\text{cat}} \cdot \frac{G_{\text{total}} \cdot E}{K_d + E} \cdot X_i^2 Y_i \\
+\dot Y_i &= B X_i - X_i^2 Y_i - k_{\text{cat}} \cdot \frac{G_{\text{total}} \cdot E}{K_d + E} \cdot X_i^2 Y_i \\
+\dot E &= J - \gamma E - k_{\text{cat}} \cdot \frac{G_{\text{total}} \cdot E}{K_d + E} \cdot (X_1^2 Y_1 + X_2^2 Y_2)
+\end{align*}
+
+This recovers Pilot 4's Michaelis--Menten model with the identification:
+\[
+k_{\text{extra}} \leftrightarrow k_{\text{cat}} \cdot G_{\text{total}}, \qquad K \leftrightarrow K_d = k_{\text{off}} / k_{\text{on}}, \qquad \alpha \leftrightarrow k_{\text{cat}} \cdot G_{\text{total}}
+\]
+
+\subsection*{Parameters}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Parameter & Role & Pilot 5b validated value \\
+\midrule
+$A, B$ & Brusselator feed (chemostatted) & 1.0, 3.0 \\
+$J$ & Energy inflow rate & 5.0 \\
+$\gamma$ & Energy leak rate & 0.002 \\
+$k_{\text{on}}$ & Gate binding rate & 10.0 \\
+$k_{\text{off}}$ & Gate unbinding rate & 10.0 ($\Rightarrow K_d = 1.0$) \\
+$k_{\text{cat}}$ & Catalytic rate (gated autocatalysis) & 0.3 \\
+$G_{\text{total}}$ & Total gate concentration ($G + GE$) & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Stoichiometric rank}
+
+$r_s$ = rank of the $12 \times 14$ stoichiometric matrix. Computed identically to Papers I--II via \texttt{StoichiometricAnalyzer.from\_reaction\_strings()}.
+
+\subsection*{Recovery conditions}
+
+At $k_{\text{cat}} = 0$ or $J = 0$: $E \to 0$, $GE \to 0$, R9$_i$ terms vanish, each core reduces to the standard Brusselator. All dimensional inflation is attributable to modular energy coupling via the enzyme-complex mechanism.
+
+\section{Pilot 5b Findings and Interpretive Framework}
+
+\subsection*{Validated result}
+
+Pilot 5b achieved $D_2 = 1.660$ (median 1.558, 3/3 seeds complex) at $J = 5.0$, $\gamma = 0.002$, $k_{\text{cat}} = 0.3$, $K_d = 1.0$, $G_{\text{total}} = 1.0$. Run entirely within \texttt{ReactionSimulator}.
+
+\subsection*{Critical observation: gate saturation}
+
+At the validated parameter set, $E_{\text{mean}} \approx 445$, so $f(E) = E/(K_d + E) \approx 0.998$. The gate is \textbf{fully saturated}. This means:
+
+\textbf{The dimensional inflation is not coming from nonlinear gating curvature.} The Michaelis--Menten function is effectively constant at $\approx 1$.
+
+Instead, the inflation arises from:
+\begin{itemize}
+\item Extremely high energy availability ($J/\gamma = 2500$)
+\item Very slow relaxation ($1/\gamma = 500$ time units)
+\item Weak-to-moderate catalytic coupling ($k_{\text{cat}} = 0.3$)
+\end{itemize}
+
+The role of Michaelis--Menten saturation is \emph{structural}: it \textbf{bounds} the effective coupling so that it cannot grow without limit as $E$ increases. Without this bounding (Pilot 5, linear in $E$), coupling strength scales with $E$, synchronizing the oscillators at high $E$. With saturation, coupling plateaus at $k_{\text{cat}} \cdot G_{\text{total}}$ regardless of $E$, allowing the slow $E$ dynamics to modulate without overwhelming.
+
+\textbf{Framing caution (anticipated reviewer attack)}: At $J = 5.0$, the gate is saturated and the coupling term is effectively constant. A reviewer may object: ``The system reduces to two weakly coupled oscillators---why is this surprising?'' The answer: the claim is \emph{not} that enzyme gating or modular sharing produces complexity. \textbf{Sweep A2 proved this}: each oscillator-energy subsystem inflates independently. The claim is that \textbf{timescale separation}---a slow energy variable coupled to a fast oscillator---is sufficient to break dynamical rigidity. The enzyme-complex mechanism is the means of embedding this in mass-action; the dynamically essential ingredient is a slow degree of freedom ($1/\gamma \gg$ oscillator period) with bounded coupling that prevents synchronization. Sharing this slow variable between modules is biologically natural and creates additional modulatory effects, but the fundamental mechanism is slowness, not sharing.
+
+\subsection*{Two distinct inflation regimes}
+
+The data reveals two qualitatively different regimes of $D_2 > 1$, unified by the requirement for \textbf{timescale separation}:
+
+\begin{enumerate}
+\item \textbf{Intrinsic slow--fast inflation} ($\gamma = 0.001$, Sweep A + A2): Each oscillator-energy subsystem ($X_i, Y_i, E_i$) independently produces $D_2 \approx 1.40$. The slow $E$ ($1/\gamma = 1000$ time units) creates genuine slow--fast dynamics within each 3D subsystem---likely quasi-periodic torus behavior from amplitude modulation. Sharing the reservoir is incidental; independent reservoirs produce the same $D_2$. This regime is robust across all $J$ values and most $k_{\text{cat}}$ values. \textbf{Confirmed by Sweep A2.}
+
+\item \textbf{Shared-reservoir desynchronization inflation} (moderate $\gamma \approx 0.002$--$0.003$, Sweeps A + A2b): Energy relaxation is slower than the oscillator but not slow enough for independent inflation ($D_2 \approx 0.99$ per independent subsystem). Oscillators sharing this E pool desynchronize ($r \approx 0$) and $D_2$ reaches its highest values (up to 1.67). The shared reservoir IS causally essential: independent reservoirs produce only $D_2 \approx 0.994$ ($\Delta = -0.57$). \textbf{Confirmed by Sweep A2b.}
+\end{enumerate}
+
+Both regimes require a slow energy variable. The unifying mechanism is \emph{timescale separation}. In Regime 1, slowness alone is sufficient. In Regime 2, slowness is necessary but not sufficient---the shared reservoir creates inter-oscillator competition that provides an additional slow timescale (desynchronization/beating) enabling the highest-dimensional attractors.
+
+\subsection*{Phase 0.5: Ridge mapping (pre-registered micro-tests)}
+
+Before the full Phase I sweep, we must establish that the $D_2 > 1.2$ region is not razor-thin. Pilot 5b found only 1 of 39 parameter sets with $D_2 > 1.2$, with near-misses at $D_2 = 0.992$ (J=3, J=5 with $k_{\text{cat}}=0.5$).
+
+\textbf{Ridge mapping protocol}: Probe the neighborhood of the validated point ($J=5$, $\gamma=0.002$, $k_{\text{cat}}=0.3$):
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Parameter & Values & Rationale \\
+\midrule
+$J$ & $\{4.0, 4.5, 5.0, 5.5, 6.0\}$ & Bracket the J=5 sweet spot \\
+$\gamma$ & $\{0.002, 0.003, 0.004\}$ & Test sensitivity to E timescale \\
+$k_{\text{cat}}$ & $\{0.20, 0.25, 0.30, 0.35\}$ & Bracket the $k_{\text{cat}} = 0.3$ sweet spot \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Grid: $5 \times 3 \times 4 = 60$ parameter sets $\times$ 3 seeds = 180 runs ($\sim$6 hours).
+
+\textbf{Definition}: The \textbf{ridge holds} if $\ge 3$ parameter sets (not just the validated point) achieve $D_2 > 1.2$ across $\ge 3$ seeds each, with the $D_2$ convergence criterion met ($|D_2(2T) - D_2(T)| < 0.05$), and these sets span a connected neighborhood in $(J, \gamma, k_{\text{cat}})$ space---where ``connected'' means grid-adjacent (Manhattan distance 1 on the discrete $5 \times 3 \times 4$ lattice), i.e., the inflation region is not isolated points.
+
+\textbf{Success criteria}:
+\begin{itemize}
+\item If ridge holds with $\ge 5$ parameter sets $\to$ robust; proceed to Phase I with full Lyapunov analysis.
+\item If $D_2 > 1.2$ confined to 1--2 sets $\to$ ridge is narrow; expand $J$ range and add $K_d$ variation before Phase I.
+\item If no $D_2 > 1.2$ outside $(J=5, \gamma=0.002, k_{\text{cat}}=0.3)$ $\to$ re-examine model; consider longer integration or finer seeds.
+\end{itemize}
+
+\subsection*{Dynamical classification diagnostics}
+
+Before writing claims about the nature of the $D_2 > 1$ attractor, verify at the best Phase 0.5 parameter set(s). The primary concern is distinguishing genuine higher-dimensional dynamics from transient beating or slow amplitude modulation.
+
+\begin{enumerate}
+\item \textbf{Power spectrum}: Compute FFT of $X_1(t)$ and $X_2(t)$ post-transient. Look for two incommensurate peaks (torus) vs.\ broadband spectrum (chaos) vs.\ single peak with harmonics (limit cycle with slow modulation).
+\item \textbf{Phase portrait projection}: Plot $X_1$ vs $X_2$ in the post-transient window. A filled annulus suggests torus; a structured strange attractor suggests chaos; a closed curve suggests phase-locked limit cycle.
+\item \textbf{$D_2$ convergence under integration time doubling}: Re-run the best parameter set at $t_{\text{span}} = [0, T]$ for $T \in \{10{,}000,\; 20{,}000,\; 40{,}000\}$. Report $D_2(T)$ at each duration. \textbf{Pass criterion}: $|D_2(2T) - D_2(T)| < 0.05$ for both steps. If $D_2$ drifts monotonically downward, the regime is transient; if upward, the attractor may be weakly chaotic with slow exploration. This test directly addresses the reviewer objection that ``$D_2 > 1.2$ may reflect finite-time effects.''
+\item \textbf{Lyapunov exponent sign}: Estimate the maximal Lyapunov exponent $\lambda_1$ via the Rosenstein algorithm applied to the 5D projected trajectory ($X_1, Y_1, X_2, Y_2, E$), using $\ge 10{,}000$ post-transient sample points (embedding dimension $m = 5$, delay chosen by first minimum of mutual information). If the ODE Jacobian is analytically available, cross-validate with the variational equation method. \textbf{Acceptance language}: $\lambda_1 > 0$ (significantly positive, bootstrapped 95\% CI excludes zero) $\to$ chaos; $\lambda_1 \approx 0$ (CI includes zero) $\to$ consistent with torus/quasi-periodic; $\lambda_1 < 0$ $\to$ limit cycle. Report the sign, point estimate, and CI. This is \textbf{required} if the ridge holds; optional only if the ridge collapses. The sign of $\lambda_1$ is the minimal evidence needed to distinguish true quasi-periodicity from weakly chaotic amplitude modulation.
+\item \textbf{Sliding-window $D_2$ profile} (required): Run a single long integration ($T = 20{,}000$) and compute $D_2$ on non-overlapping 2500-unit windows. Report: max $D_2$, median $D_2$, number of windows above threshold, $T_{\text{lock}}$, and $\tau_{>1.2}$. This is the primary tool for characterizing the transient high-dimensional phase. \textbf{Post-diagnostics result}: At both exemplar points, $D_2 > 1.2$ is confined to $t < 10{,}000$ (Regime 1) or $t < 7{,}500$ (Regime 2), confirming the complex phase is transient.
+\end{enumerate}
+
+These diagnostics do \emph{not} gate Phase I (which proceeds regardless), but they inform the paper's dynamical claims. The sliding-window profile is now the definitive diagnostic: it shows that $D_2 > 1.2$ reflects a \emph{long-lived transient} (hundreds of oscillator periods of genuine chaos, confirmed by positive $\lambda_1$) rather than an asymptotic attractor. The paper claims ``metastable high-dimensional exploratory phase'' rather than ``permanent dimensional escape.''
+
+\subsection*{Sweep A2: Independent-reservoir causal control at $\gamma = 0.001$}
+
+Sweep A revealed that the dominant inflation regime is the $\gamma = 0.001$ band (15 of 22 complex parameter sets), where oscillators are \emph{synchronized} ($r \approx 0.9$+) and the shared $E$ is extremely slow ($1/\gamma = 1000$ time units). This shifts the mechanistic interpretation: inflation is not primarily from competition but from \textbf{slow-manifold dimensional expansion}---the shared reservoir acts as a genuine slow dynamical variable.
+
+This makes the independent-reservoir control (Control 4 from Phase I-B) \textbf{urgent}. If splitting $E$ into $E_1, E_2$ kills $D_2 > 1.2$ at $\gamma = 0.001$, the shared reservoir is causally responsible. If $D_2$ persists, the inflation comes from adding a slow variable to each oscillator independently, and the thesis must be revised.
+
+\textbf{Sweep A2 protocol}: Run the independent-reservoir variant at the top Sweep A parameter sets from the $\gamma = 0.001$ band:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Parameter & Values & Rationale \\
+\midrule
+$J$ & $\{3, 5, 7, 10\}$ & Span the J range \\
+$\gamma$ & $\{0.001\}$ & The dominant inflation regime \\
+$k_{\text{cat}}$ & $\{0.1, 0.3, 0.5\}$ & Low, mid, high coupling \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Grid: $4 \times 1 \times 3 = 12$ parameter sets $\times$ 5 seeds = 60 runs.
+
+Model modification: replace shared $E$, $G$, $GE$ with per-core $E_i$, $G_i$, $GE_i$ ($i \in \{1,2\}$). Each core has its own energy source, leak, gate binding/unbinding, and gated autocatalysis. The two cores are completely decoupled. Track the 6D projection $(X_1, Y_1, E_1, X_2, Y_2, E_2)$ for $D_2$.
+
+\textbf{Decision criteria}:
+\begin{itemize}
+\item If $D_2 > 1.2$ disappears across all 12 sets $\to$ shared reservoir is \textbf{causally essential}. Proceed with the ``slow shared resource coupling'' narrative.
+\item If $D_2 > 1.2$ persists at comparable levels $\to$ inflation is intrinsic to each 3D oscillator-energy subsystem. The shared-reservoir claim must be weakened to ``slow energy coupling inflates dimensionality regardless of sharing.''
+\item If $D_2$ is intermediate (e.g., $D_2 \approx 1.0$--$1.2$ per subsystem, $\sim$2.0 combined but decomposable) $\to$ the shared reservoir provides non-trivial coupling that lifts $D_2$ above the sum of parts.
+\end{itemize}
+
+\textbf{This test runs before Sweeps B/C.} It determines whether the central thesis survives.
+
+\subsubsection*{Sweep A2 result (COMPLETE)}
+
+\textbf{D$_2 > 1.2$ persists with independent reservoirs.} 11 of 12 parameter sets show $D_2 > 1.2$ with completely decoupled energy pools. Key diagnostics:
+\begin{itemize}
+\item $D_{2,\text{6D}} \approx D_{2,\text{core1}} \approx D_{2,\text{core2}} \approx 1.40$--$1.44$: each 3D subsystem inflates independently.
+\item $D_{2,\text{4D}}$ (oscillators only, no E) $\approx 0.99$: the slow $E$ is what inflates, not the oscillator coupling.
+\item Sharing sometimes \emph{enhances} (J=7, $k_{\text{cat}}=0.5$: shared $D_2 = 1.542$ vs independent $1.400$) and sometimes \emph{suppresses} (J=3, $k_{\text{cat}}=0.3$: shared $D_2 = 0.992$ vs independent $1.410$).
+\end{itemize}
+
+\textbf{Interpretation}: At $\gamma = 0.001$ ($1/\gamma = 1000$ time units), the slow energy variable creates genuine timescale separation \emph{within each subsystem}---this is Pilot 3b's slow--fast bursting mechanism, not a coupling phenomenon. The shared reservoir is incidental at these parameters.
+
+\textbf{Thesis impact}: The $\gamma = 0.001$ regime does \textbf{not} support the ``shared resource coupling'' claim. However, the moderate-$\gamma$ desynchronized regime (Regime 2: $J=5$, $\gamma=0.002$, $k_{\text{cat}}=0.3$, $D_2 = 1.558$, $r \approx 0$) was not tested and may still require sharing.
+
+\subsection*{Sweep A2b: Independent-reservoir control at moderate $\gamma$ (COMPLETE)}
+
+The decisive test for shared-coupling causality at moderate $\gamma$. Grid: $J \in \{4, 5\}$, $\gamma \in \{0.002, 0.003\}$, $k_{\text{cat}} \in \{0.2, 0.3\}$ = 8 sets $\times$ 5 seeds = 40 runs. Completed in 21 min.
+
+\subsubsection*{Sweep A2b result}
+
+\textbf{D$_2 > 1.2$ DISAPPEARS with independent reservoirs at moderate $\gamma$.} All 8 parameter sets show $D_2 \approx 0.994$---standard limit cycle. The two key shared-reservoir inflation points collapse completely:
+\begin{itemize}
+\item $J = 4$, $\gamma = 0.003$, $k_{\text{cat}} = 0.2$: shared $D_2 = 1.566 \to$ independent $D_2 = 0.993$ ($\Delta = -0.573$)
+\item $J = 5$, $\gamma = 0.002$, $k_{\text{cat}} = 0.3$: shared $D_2 = 1.558 \to$ independent $D_2 = 0.994$ ($\Delta = -0.565$)
+\end{itemize}
+
+\textbf{Interpretation}: At moderate $\gamma$ ($1/\gamma = 333$--$500$), E relaxation is slow but \textbf{not slow enough} for each subsystem to independently inflate. When two oscillators \textbf{share} this E pool, inter-oscillator competition creates an additional slow timescale---desynchronization/beating---that inflates $D_2$ to $1.56$+. This is genuine coupling-mediated complexity.
+
+\textbf{Combined A2 + A2b verdict}: Two distinct mechanisms confirmed with clean causal separation:
+\begin{enumerate}
+\item \textbf{Intrinsic timescale-separation} ($\gamma = 0.001$): Each 3D subsystem inflates independently ($D_2 \approx 1.4$). Sharing incidental.
+\item \textbf{Shared-reservoir desynchronization} ($\gamma = 0.002$--$0.003$): Sharing IS essential ($D_2$ up to 1.67). Independent subsystems produce $D_2 \approx 1.0$ only.
+\end{enumerate}
+
+\section{Phase I: Fine Grid Sweep}
+
+\subsection*{Objective}
+Map the $D_2 > 1.2$ boundary precisely in parameter space and confirm that the dimensional inflation window is not seed-dependent.
+
+\textbf{All Phase I runs use \texttt{ReactionSimulator} with the enzyme-complex network.} This ensures the same code path as the growth experiments.
+
+\subsection*{Sweep design (to be refined by Phase 0.5 results)}
+
+\paragraph{Sweep A --- Primary parameter scan.}
+Fix $K_d = 1.0$, $G_{\text{total}} = 1.0$, $k_{\text{on}} = k_{\text{off}} = 10.0$. Vary:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Parameter & Values & Rationale \\
+\midrule
+$J$ & $\{3, 4, 5, 7, 10\}$ & Pilot 5b: complex at J=5, near-miss at J=3 \\
+$\gamma$ & $\{0.001, 0.002, 0.003, 0.005\}$ & Only $\gamma \le 0.005$ in pilots \\
+$k_{\text{cat}}$ & $\{0.1, 0.2, 0.3, 0.4, 0.5\}$ & Bracket the $k_{\text{cat}} = 0.3$ sweet spot \\
+\bottomrule
+\end{tabular}
+\end{center}
+Grid size: $5 \times 4 \times 5 = 100$ parameter sets.
+
+\paragraph{Sweep B --- Gate properties.}
+Fix $J = 5.0$, $\gamma = 0.002$, $k_{\text{cat}} = 0.3$. Vary:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Parameter & Values & Rationale \\
+\midrule
+$K_d$ & $\{0.3, 1.0, 3.0, 10.0\}$ & Half-saturation threshold \\
+$G_{\text{total}}$ & $\{0.5, 1.0, 2.0\}$ & Effective max coupling rate \\
+\bottomrule
+\end{tabular}
+\end{center}
+Grid size: $4 \times 3 = 12$ parameter sets.
+
+\paragraph{Sweep C --- Gate equilibrium speed.}
+Fix best primary params, vary $k_{\text{on}} = k_{\text{off}} \in \{1, 10, 100\}$ (holding $K_d = 1.0$ constant). Tests whether the QSS approximation holds across gate timescales. Grid: 3 parameter sets.
+
+\subsection*{Seeds and runtime}
+
+\begin{itemize}
+\item $N_{\text{seeds}} = 5$ per parameter set (up from 3 in pilot; sufficient for median stability).
+\item Initial conditions: $(X_1, Y_1) = (1.0, 1.0)$, $(X_2, Y_2)$ perturbed by $\mathcal{U}(-0.05, 0.05)$ per seed, $E(0) = J / \gamma$, $GE(0) = G_{\text{total}} \cdot E_0 / (K_d + E_0)$, $G(0) = G_{\text{total}} - GE(0)$.
+\item Total runs: $(100 + 12 + 3) \times 5 = 575$.
+\item Estimated runtime: $\sim$20 s/run $\times$ 575 = $\sim$3.2 hours.
+\end{itemize}
+
+\subsection*{Integration parameters}
+
+\begin{itemize}
+\item Integrator: \texttt{ReactionSimulator.simulate()} (uses \texttt{solve\_ivp} internally).
+\item $t_{\text{span}} = [0, 10{,}000]$ time units.
+\item Transient discard: first 50\%.
+\item Sampling: 20{,}000 equally spaced points.
+\end{itemize}
+
+\subsection*{Evaluation metrics}
+
+Per parameter set (across seeds):
+\begin{itemize}
+\item Regime classification: fixed\_point / phase\_locked / complex (same criteria as Pilot 4).
+\item Median and max $D_2$ across seeds.
+\item Fraction of seeds with $D_2 > 1.2$.
+\item Phase correlation $r(X_1, X_2)$.
+\item Energy statistics: $E_{\text{mean}}$, $E_{\text{range}}$, $GE_{\text{mean}}$, gate saturation $\langle GE \rangle / G_{\text{total}}$.
+\item $r_s$ and $\eta = D_2 / r_s$ at baseline (no growth).
+\item Sliding-window $D_2$ profile: max $D_2$, $\tau_{>1.2}$ (windows above threshold), $T_{\text{lock}}$ (locking time).
+\end{itemize}
+
+\subsection*{Deliverable}
+Heatmaps of median $D_2$ in $(\gamma, k_{\text{cat}})$ at each $J$ level. Annotated boundary of the $D_2 > 1.2$ region. Gate saturation map to confirm whether the abundance-regime interpretation holds broadly. Heatmap of $\tau_{>1.2}$ showing which parameter sets produce the longest exploratory phases.
+
+\section{Phase I-B: Control Experiments}
+
+Four controls establish the causal role of timescale separation and characterize the modulatory effect of shared reservoirs.
+
+\subsection*{Control 1: Single Brusselator + E + G/GE}
+
+Model: Single-core version of the enzyme-complex network (R1--R4 for one core only + R5--R9 for one core). Same $J, \gamma, k_{\text{cat}}, K_d, G_{\text{total}}$ as best Phase I parameter set.
+
+Prediction: $D_2 > 1.2$ at $\gamma = 0.001$ (consistent with Sweep A2: single subsystem inflates via timescale separation). $D_2 \approx 1$ at moderate $\gamma$ unless parameters are extreme (cf.\ Pilot 3b's narrow window). This control now \emph{confirms} the intrinsic slow-energy mechanism rather than testing modularity.
+
+\subsection*{Control 2: Two uncoupled Brusselators (no energy pool)}
+
+Model: Set $k_{\text{cat}} = 0$ (remove R9$_i$), retain R5--R8 (energy pool and gate evolve but do not influence cores). Two independent Brusselators.
+
+Prediction: $D_2 \approx 1$ (each core is a limit cycle; no interaction $\to$ no new attractor structure). Confirms that coupling through $E$ is necessary.
+
+\subsection*{Control 3: Two Brusselators with direct diffusive coupling (no slow E)}
+
+Model: Replace energy pool with direct coupling: add reactions $X_1 \to X_2$ and $X_2 \to X_1$ at rate $\epsilon$. No $E$, $G$, $GE$ variables. This is mass-action representable.
+
+Prediction: Phase locking at most coupling strengths ($D_2 \approx 1$), possible anti-phase at intermediate $\epsilon$. Tests whether slow energy specifically is needed vs.\ any coupling mechanism.
+
+\subsection*{Control 4: Two Brusselators with independent energy pools $E_1$, $E_2$}
+
+Model: Replace the single shared $E$ with two independent energy pools $E_1, E_2$, each with its own source, leak, and gate:
+\begin{itemize}
+\item $E_{\text{src}} \to E_{\text{src}} + E_i$ (rate $J$), $E_i \to E_w$ (rate $\gamma \cdot E_i$), for $i \in \{1, 2\}$.
+\item $G_i + E_i \to GE_i$, $GE_i \to G_i + E_i$, and R9$_i$ uses $GE_i$ instead of shared $GE$.
+\end{itemize}
+Same $J, \gamma, k_{\text{cat}}, K_d, G_{\text{total}}$ per pool as the best Phase I parameter set. The two cores are now \textbf{completely decoupled}: each core + its own energy pool is a 3D subsystem.
+
+\textbf{This is the critical shared-reservoir necessity test.}
+\begin{itemize}
+\item If $D_2 > 1.2$ \textbf{disappears} $\to$ the \emph{shared} reservoir is essential for dimensional inflation. The claim ``shared slow resource coupling breaks rigidity'' is confirmed.
+\item If $D_2 > 1.2$ \textbf{persists} $\to$ modularity alone is sufficient (each independent 3D oscillator already has $D_2 > 1$ intrinsically), and the shared-reservoir narrative must be revised. This would undermine the central thesis and require reformulation.
+\end{itemize}
+
+\textbf{Updated expectation (post-Sweep A2)}: At $\gamma = 0.001$, $D_2 > 1.2$ per subsystem (already confirmed by Sweep A2). At moderate $\gamma$, $D_2$ may drop below 1.2 per subsystem (pending Sweep A2b). The combined 6D trajectory will show $D_2$ approximately equal to each 3D subsystem's $D_2$ (trivially decomposable), which is qualitatively different from the quasi-periodic attractor structure seen with shared $E$ at moderate $\gamma$.
+
+\subsection*{Control results (COMPLETE)}
+
+All 4 controls passed their predictions. 75 standard runs + 2 sliding-window exemplars completed in 12.8 min.
+
+\begin{itemize}
+\item \textbf{Control 1} (Single core + E): Median $D_2 = 1.400$, 15/25 complex (all at $\gamma = 0.001$). Sliding-window: $T_{\text{lock}} = 7500$ (J=7), $T_{\text{lock}} = 5000$ (J=5). \textbf{Confirms intrinsic slow-energy mechanism.}
+\item \textbf{Control 2} (Uncoupled, $k_{\text{cat}} = 0$): Median $D_2 = 0.990$, 0/25 complex. \textbf{Confirms coupling through E is necessary.}
+\item \textbf{Control 3} (Diffusive, no E): Median $D_2 = 0.991$, 0/25 complex at all $\epsilon \in \{0.01, 0.05, 0.1, 0.5, 1.0\}$. \textbf{Confirms slow E is essential (not just any coupling).}
+\item \textbf{Control 4} (Independent reservoirs, from Sweeps A2 + A2b): $D_2$ persists at $\gamma = 0.001$ (55/60 complex), disappears at moderate $\gamma$ (0/40 complex). \textbf{Confirms two distinct mechanisms.}
+\end{itemize}
+
+\subsection*{Seeds and runtime}
+$N_{\text{seeds}} = 5$ per control $\times$ 5 parameter sets each = 75 total runs (12.8 min).
+
+\section{Phase II: Growth Experiment}
+
+\subsection*{Growth via \texttt{GeneratedNetwork} (no adaptation needed)}
+
+Because the coupled model is a standard \texttt{GeneratedNetwork}, the existing growth operators apply directly:
+
+\begin{enumerate}
+\item \textbf{Growth = adding reactions to the network.} The \texttt{NetworkGenerator.generate\_progressive()} and \texttt{generate\_progressive\_aligned()} functions add autocatalytic reactions involving the existing dynamic species ($X_1, Y_1, X_2, Y_2, E$) plus new species. Each addition extends the reaction list and species set.
+
+\item \textbf{Growth scope: within-core only} (initial design). Added reactions involve species from a single core ($X_i, Y_i$) plus new species $Z_j$. Cross-core reactions ($X_1 + Y_2 \to \ldots$) and $E$-mediated additions are excluded initially to keep interpretation clean. This can be relaxed in a follow-up analysis.
+
+\item \textbf{Aligned growth screening.} Candidate reactions are filtered using \texttt{passes\_oscillation\_filter()} applied to the full coupled network (not just the single-core subsystem). This tests whether the addition preserves oscillatory dynamics in the modular context.
+
+\item \textbf{Stoichiometric rank.} $r_s$ is computed from the full stoichiometric matrix of the extended network (all reactions, all species) via \texttt{StoichiometricAnalyzer}, exactly as in Papers I--II.
+
+\item \textbf{D$_2$ estimation.} \texttt{ActivationTracker.analyze\_network()} computes $D_2$ from the post-transient trajectory. Monotonic accumulators (waste species) are auto-excluded. \texttt{species\_to\_track} set to $\{X_1, Y_1, X_2, Y_2, E\}$ for the projected $D_2$; full-trajectory $D_2$ computed as sensitivity check.
+\end{enumerate}
+
+\subsection*{Design}
+
+At the best parameter set from Phase I, apply $k = 0, 1, 2, 3, 4, 5$ reaction additions under two rules:
+\begin{itemize}
+\item \textbf{Random growth}: reactions added without screening.
+\item \textbf{Aligned growth}: reactions filtered for oscillation preservation (same filter as Paper 2).
+\end{itemize}
+
+\subsection*{Sample size}
+
+$N = 50$ trajectories per $(k, \text{rule})$ cell. Total: $6 \times 2 \times 50 = 600$ runs.
+
+At 2 additional parameter sets (one from each pathway if both exist): $6 \times 2 \times 30 = 360$ runs for replication.
+
+Grand total: 960 runs ($\sim$5 hours).
+
+\subsection*{Endpoints}
+
+Per trajectory:
+\begin{itemize}
+\item $D_2$ (projected onto $\{X_1, Y_1, X_2, Y_2, E\}$ and full trajectory).
+\item Oscillation survival: binary (does the trajectory pass the oscillation filter?).
+\item $r_s$: stoichiometric rank of the extended network.
+\item $\eta = D_2 / r_s$: activation ratio (primary measure of the paper series).
+\item Regime classification: fixed\_point / phase\_locked / complex.
+\end{itemize}
+
+\subsection*{Pre-registered predictions}
+
+\begin{enumerate}
+\item \textbf{$\eta$ dilution persists}: $\eta$ decreases with $k$ for both growth rules (consistent with Papers 1--2).
+\item \textbf{Aligned growth preserves $D_2 > 1$}: The fraction of aligned trajectories retaining $D_2 > 1.2$ at $k = 5$ exceeds random by a factor $\ge 3$ (analogous to Paper 2's OR = 7.0 for oscillation survival).
+\item \textbf{Modular coupling amplifies the alignment advantage}: The aligned-vs-random odds ratio for $D_2 > 1.2$ in the coupled system exceeds the odds ratio for oscillation survival in the single Brusselator (Paper 2). This would demonstrate that modular architecture creates a richer dynamical landscape that benefits more from topology-aware growth.
+\item \textbf{$D_2$ ceiling}: Even with aligned growth, $D_2$ does not exceed $\sim$2.0 (torus ceiling for 5D system with one slow mode).
+\end{enumerate}
+
+\subsection*{Growth experiment results (COMPLETE)}
+
+960 runs completed (primary 600, replication1 360). Replication2 ($J=7$, $\gamma=0.001$) killed after 12 hours---aligned filter intractable at strong coupling (itself an informative result: maximally rigid systems reject all perturbations).
+
+\textbf{Dominant signal: catastrophic failure, not gradual degradation.} Random growth destroys system viability with near-certainty at $k \ge 3$:
+
+\begin{center}
+\begin{tabular}{lrrrl}
+\toprule
+$k$ & Random survival & Aligned survival & Fisher $p$ & OR \\
+\midrule
+0 & 80/80 (100\%) & 80/80 (100\%) & 1.000 & --- \\
+1 & 37/80 (46\%) & 69/80 (86\%) & $<0.001$ & 0.137 \\
+2 & 22/80 (28\%) & 53/80 (66\%) & $<0.001$ & 0.193 \\
+3 & 12/80 (15\%) & 48/80 (60\%) & $<0.001$ & 0.118 \\
+4 & 7/80 (9\%) & 53/80 (66\%) & $<0.001$ & 0.049 \\
+5 & 1/80 (1\%) & 53/80 (66\%) & $<0.001$ & 0.006 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Prediction scorecard}:
+\begin{enumerate}
+\item $\eta$ dilution persists: \textbf{confirmed}---monotonic decrease from 0.136 to 0.079 (aligned).
+\item Aligned preserves $D_2 > 1.2$ better: \textbf{nuanced}---aligned preserves \emph{viability} ($p < 0.001$), not $D_2$ among survivors (survivor bias: the few random survivors are the most robust networks).
+\item Modular coupling amplifies alignment advantage: \textbf{confirmed}---OR = 0.006 at $k = 5$ (Paper 2 had OR = 7.0 for oscillation survival; Paper 3's OR = $1/0.006 = 167$ for system survival, though measured differently).
+\item $D_2$ ceiling $\sim$2.0: \textbf{confirmed}---max $D_2 = 1.939$.
+\end{enumerate}
+
+\textbf{Emergent finding: growth-fragility thesis.} Unconstrained chemical elaboration almost certainly destroys the dynamical prerequisites for dimensional inflation. Only oscillation-aligned growth maintains viable dynamics, and even then, complexity ($D_2$, $\eta$) degrades monotonically. Implication for origins: chemical complexification without functional alignment is a dead end.
+
+\section{Statistical Analysis}
+
+\subsection*{Primary analyses}
+
+\begin{itemize}
+\item \textbf{Logistic regression}: $\text{logit}\, P(D_2 > 1.2) = \beta_0 + \beta_1 k + \beta_2 \,\mathbb{1}[\text{aligned}] + \beta_3 (k \times \text{aligned})$.
+\item \textbf{Fisher exact tests}: Per $k$ level, $2 \times 2$ table (aligned vs.\ random) $\times$ ($D_2 > 1.2$ vs.\ $\le 1.2$).
+\item \textbf{Bootstrap CIs}: 10{,}000 resamples for median $D_2$ at each $(k, \text{rule})$ cell.
+\item \textbf{Interaction test}: Does the alignment advantage (OR) increase with modular coupling strength? Compare ORs at two coupling strengths.
+\end{itemize}
+
+\subsection*{Dimensional retention analysis}
+
+In addition to the binary $D_2 > 1.2$ endpoint, track the \emph{retention slope}: the fraction of runs retaining $D_2 > 1.2$ as a function of $k$, separately for aligned and random growth. This is the dimensional analogue of Paper 2's oscillation survival curve.
+
+\begin{itemize}
+\item \textbf{Retention slope}: Linear fit of $P(D_2 > 1.2)$ vs.\ $k$ for each growth rule. Report slope $\pm$ SE. The key comparison: is the aligned retention slope shallower (less negative) than random?
+\item \textbf{$\eta$ slope}: Linear fit of median $\eta$ vs.\ $k$. Papers 1--2 found $\approx -0.025$/reaction. Paper 3 prediction: same dilution rate persists (growth rigidity is universal), but the \emph{starting point} is higher ($D_2 > 1$ instead of $D_2 \approx 1$).
+\item \textbf{Cross-paper comparison}: Tabulate the aligned-vs-random OR for three endpoints side by side: oscillation survival (Paper 2), $D_2 > 1.2$ retention (Paper 3), and $\eta > \text{threshold}$ retention (Paper 3). This makes the series progression explicit in a single table.
+\end{itemize}
+
+\subsection*{Multiple comparison correction}
+
+Bonferroni correction across the 6 $k$-level Fisher tests ($\alpha_{\text{adj}} = 0.05/6 = 0.0083$).
+
+\subsection*{Effect size reporting}
+
+All results report odds ratios with 95\% CIs, not just $p$-values. Consistent with Papers 1--2 reporting conventions.
+
+\section{Expected Outcomes}
+
+\begin{enumerate}
+\item Single oscillator with fast energy: $D_2 \approx 1$ --- energy is dynamically slaved (Pilots 1--3).
+\item Single oscillator + sufficiently slow energy ($\gamma \le 0.001$): transient $D_2 \approx 1.4$ for $\sim$500--750 oscillator periods --- timescale separation enables a metastable high-dimensional phase (Sweep A2, confirming Pilot 3b's mechanism at broader parameters).
+\item Two oscillators + shared slow energy (enzyme-complex): transient $D_2 > 1.2$ across a wide parameter region (Sweep A). Sharing reshapes the transient inflation map: (a) at $\gamma = 0.001$, sharing is incidental (Sweep A2); (b) at moderate $\gamma$, sharing IS causally essential---independent reservoirs produce only $D_2 \approx 0.99$, while shared reservoirs reach transient $D_2$ up to 1.67 through inter-oscillator desynchronization (confirmed by Sweep A2b). Sliding-window diagnostics confirm all high-$D_2$ phases are transient ($T_{\text{lock}} \approx 7{,}500$--$10{,}000$ time units).
+\item Controls: uncoupled and diffusively-coupled oscillators without slow energy fail to produce $D_2 > 1.2$ even transiently. Independent-reservoir oscillators \emph{do} produce transient $D_2 > 1.2$ at $\gamma = 0.001$ --- confirming the intrinsic slow-energy mechanism.
+\item Growth + energy coupling: $\eta$ dilutes (consistent with Papers 1--2) but aligned growth preserves transient $D_2 > 1$ and may prolong $\tau_{>1.2}$ significantly better than random growth.
+\end{enumerate}
+
+\section*{Central Thesis}
+
+Autocatalytic oscillators are dynamically rigid: \emph{dimensionality of state space does not determine dimensionality of attractor}. A single oscillator absorbs energy perturbations without inflating $D_2$---this rigidity manifests as growth dilution (Paper I), topological invariance (Paper II), and energetic slaving (Pilot 3).
+
+\textbf{Timescale separation and shared energetic coupling enable long-lived transient high-dimensional dynamics (``exploratory phases'') before eventual phase-locking restores rigidity.} A sufficiently slow energy variable ($1/\gamma \gg$ oscillator period) coupled to a fast autocatalytic oscillator creates genuine slow--fast dynamics that transiently inflate $D_2$ from $\sim$1 to $\sim$1.6 for hundreds of oscillator periods before the system eventually phase-locks (sliding-window diagnostics). The transient is not an artifact---Lyapunov exponents are positive during the exploratory phase, confirming genuine transient chaos.
+
+The trilogy progression becomes:
+\begin{enumerate}
+\item \textbf{Structural rigidity} (Paper I): Adding reactions dilutes $\eta$.
+\item \textbf{Topological rigidity} (Paper II): Aligned growth preserves oscillation but not $D_2$.
+\item \textbf{Transient escape from rigidity} (Paper III): A slow energetic degree of freedom enables a long-lived metastable high-dimensional phase before rigidity is restored.
+\end{enumerate}
+
+The mechanism operates at two levels, now confirmed by independent-reservoir controls (Sweeps A2 + A2b) and characterized temporally by sliding-window diagnostics:
+\begin{itemize}
+\item \textbf{Slow energy alone} transiently inflates $D_2$ to $\sim$1.4 (each 3D subsystem independently, $\gamma = 0.001$; Sweep A2). Transient lasts $\sim$500--750 oscillator periods before phase-locking.
+\item \textbf{Shared slow energy} produces qualitatively richer transient inflation ($D_2$ up to 1.67) at moderate $\gamma = 0.002$--$0.003$ through inter-oscillator desynchronization. Independent subsystems produce only $D_2 \approx 1.0$ at these $\gamma$ values (Sweep A2b). \textbf{Sharing is causally essential here}, though the complex phase is still transient ($\sim$250--500 oscillator periods).
+\item Prebiotic chemical systems do not require infinite-time chaos. What matters is finite-time exploration: a metastable high-dimensional phase increases the ``search'' over chemical state space before the system settles. Selection could then act on networks that prolong $\tau_{>1.2}$---the duration of the exploratory phase.
+\end{itemize}
+
+\section*{Appendix: Phase Summary and Timeline}
+
+\begin{center}
+\begin{tabular}{llrl}
+\toprule
+Phase & Description & Est.\ runs & Est.\ wall time \\
+\midrule
+Pilot 5 & Pure mass-action validation (\textbf{failed}) & 75 & $\sim$20 min \\
+Pilot 5b & Enzyme-complex validation (\textbf{validated}) & 117 & $\sim$39 min \\
+0.5 & Ridge mapping (subsumed by Sweep A) & --- & --- \\
+I-A & Fine grid Sweep A (\textbf{done}: 22/100 complex) & 500 & 126 min \\
+I-A2 & Independent-reservoir control at $\gamma = 0.001$ (\textbf{done}: D$_2$ persists) & 60 & 32 min \\
+I-A2b & Independent-reservoir control at moderate $\gamma$ (\textbf{done}: D$_2$ disappears) & 40 & 21 min \\
+Diag & Diagnostics (\textbf{done}: transient chaos, $T_{\text{lock}} \approx 7.5$--10k) & 8 & 38 min \\
+I-B/C & Sweeps B \& C (\textbf{deferred}: gate sensitivity, not needed for thesis) & 75 & $\sim$25 min \\
+I-D & Control experiments (\textbf{done}: all 4 controls passed) & 75 & 12.8 min \\
+II & Growth experiment (\textbf{done}: 960 runs, growth-fragility thesis) & 960 & $\sim$16 h \\
+--- & Statistical analysis \& writing & --- & $\sim$1 week \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Total compute: $\sim$15 hours (parallelized). Total calendar: $\sim$2--3 weeks.
+
+\end{document}

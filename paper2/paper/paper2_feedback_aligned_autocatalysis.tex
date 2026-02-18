@@ -1,0 +1,365 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Feedback-Aligned Autocatalysis Preserves Dynamical Viability
+% but Not Activation in Growing Chemical Networks
+%
+% Paper 2 — February 2026
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb,prd,floatfix]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{Feedback-Aligned Autocatalysis Preserves Dynamical Viability\\
+but Not Activation in Growing Chemical Networks}
+
+\author{Christopher Merrill}
+\affiliation{Independent Researcher}
+\author{With computational collaboration from Claude (Anthropic) and ChatGPT (OpenAI)}
+
+\date{\today}
+
+\begin{abstract}
+Paper~1 in this series showed that randomly added autocatalytic reactions dilute the activation ratio $\eta = D_2/r_S$, where $D_2$ is the correlation dimension and $r_S$ the stoichiometric rank. Here we test whether \textit{feedback-aligned} additions---those that preserve oscillatory dynamics---can reduce or reverse this dilution. Using the Brusselator as a template oscillator, we compared $N=200$ trajectories of random progressive autocatalytic additions (Group~A) against $N=200$ trajectories where each addition was required to pass a dynamical validation filter (Group~B). The filter checks that at least one species retains oscillatory behavior after each addition. We find that feedback-aligned additions do \textit{not} reduce $\eta$ dilution: both groups lose activation at the same rate ($-0.024$/reaction, $p = 0.19$ for slope difference). However, aligned additions dramatically preserve \textit{dynamical viability}: at five additions, 60.5\% of aligned trajectories retain oscillatory dynamics versus 18.0\% of random trajectories (odds ratio $= 7.0$, $p < 10^{-17}$). The rate of dimensional dilution is invariant to selection, but the probability of remaining dynamically analyzable is not. These results demonstrate that topology-aware growth preserves the capacity for complex dynamics even as it cannot prevent activation dilution.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In Paper~1~\cite{paper1}, we introduced the activation ratio $\eta = D_2/r_S$ as a measure of how fully a chemical network's dynamics explore its stoichiometric degrees of freedom. We showed that randomly added autocatalytic reactions tend to \textit{dilute} $\eta$: the stoichiometric rank $r_S$ grows faster than the correlation dimension $D_2$, causing the activation ratio to decrease monotonically with network size. Both autocatalytic and non-autocatalytic additions produced identical dilution, establishing that the effect is stoichiometric rather than catalytic in origin.
+
+Paper~1 concluded by posing a natural follow-up question: can \textit{targeted} additions---specifically those that preserve oscillatory dynamics---slow or reverse the dilution trend? If the mechanism of dilution is that random additions break the dynamical coupling within the network, then selecting for additions that maintain coupling should, in principle, yield networks with higher $\eta$.
+
+This question connects to several threads in origins-of-life research. Reflexively autocatalytic food-generated (RAF) theory~\cite{hordijk2010,steel2000} studies the structural conditions under which autocatalytic sets can be maintained, but does not address the dynamical consequences of set growth. Oscillator robustness studies~\cite{strogatz2000,novak2008} characterize how biological oscillators resist perturbation, but typically consider parameter variation rather than topological growth. Our framework bridges these perspectives by asking how network \textit{growth} affects dynamical \textit{activation}.
+
+We operationalize ``feedback-aligned'' additions through a dynamical validation filter rather than static structural rules. An addition is accepted if and only if the augmented network retains oscillatory behavior, verified by simulation. This approach is agnostic about \textit{why} an addition preserves oscillation; it only requires that oscillation is preserved.
+
+Our pre-registered predictions hypothesized that aligned additions would yield a flatter $\eta$ slope, higher median $\eta$ at matched step counts, and preserved tail probability $P(\eta > 0.25)$. As we report below, these predictions were not confirmed. Instead, we discovered an unanticipated finding: while the \textit{rate} of $\eta$ dilution is invariant to selection, the \textit{probability} that a network remains dynamically viable---oscillating rather than collapsing to a fixed point or diverging---is dramatically higher for aligned additions. This distinction between activation level and dynamical viability constitutes the central finding of the paper.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Template Oscillator and Boundary Conditions}
+
+We used the Brusselator~\cite{prigogine1968} as our template, with chemostatted food species A and B held at fixed concentrations ($[A] = 1.0$, $[B] = 3.0$). The reaction scheme is:
+\begin{align}
+\text{A} &\rightarrow \text{X} \label{eq:bruss1} \\
+\text{B} + \text{X} &\rightarrow \text{Y} + \text{D} \\
+\text{X} + \text{X} + \text{Y} &\rightarrow 3\text{X} \\
+\text{X} &\rightarrow \text{E} \label{eq:bruss4}
+\end{align}
+The pure Brusselator under these conditions yields $D_2 \approx 1.0$ and $r_S = 4$, giving $\eta \approx 0.249$.
+
+Integration used LSODA with adaptive stepping over $t \in [0, 200]$ with 10{,}000 time points. The first half ($t < 100$) was discarded as transient; all measurements used the post-transient window $t \in [100, 200]$.
+
+\subsection{Oscillation Survival Filter}
+\label{sec:filter}
+
+The oscillation filter evaluates whether a network retains oscillatory dynamics after modification. A network passes the filter if at least one non-food, non-waste species satisfies all three of the following criteria:
+
+\begin{enumerate}
+\item \textbf{Boundedness}: The ratio of concentration at $t = 100$ to concentration at $t = 50$ satisfies $0.2 < c(100)/c(50) < 5$, excluding runaway growth and collapse.
+
+\item \textbf{Non-monotonicity}: The smoothed time derivative exhibits $\geq 5$ sign changes, confirming oscillatory behavior. A 5-point moving average is applied before counting sign changes to prevent noise-induced false positives.
+
+\item \textbf{Amplitude}: The coefficient of variation (CV = standard deviation / mean) exceeds 0.03, excluding fixed-point dynamics with numerical noise.
+\end{enumerate}
+
+These criteria were locked before data collection and not modified during the study.
+
+\subsection{Experimental Design}
+
+We conducted two parallel experiments, each with $N = 200$ independent trajectories:
+
+\textbf{Group A (Random)}: Starting from the pure Brusselator, we sequentially added $k = 1, 2, \ldots, 5$ random autocatalytic reactions. Each reaction has the form $\text{X}_i + \text{S}_j \rightarrow 2\text{X}_i + \ldots$ where $\text{X}_i$ appears with increased stoichiometry on the product side. No filtering was applied; all valid autocatalytic additions were accepted.
+
+\textbf{Group B (Aligned)}: The same progressive addition protocol, but each candidate reaction was tested against the oscillation filter (Section~\ref{sec:filter}). If the augmented network failed the filter, a new candidate was generated. Up to 50 candidates were tried per step; if all 50 failed, the trajectory was terminated early.
+
+Both groups used the same Brusselator template, the same class of autocatalytic additions, and the same analysis pipeline. The only difference was the oscillation filter applied to Group~B.
+
+At each step $k \in \{0, 1, 2, 3, 4, 5\}$, we computed $\eta = D_2/r_S$ using correlation dimension analysis~\cite{grassberger1983} on the post-transient time series. Networks that failed to produce valid dynamics (fixed point, blow-up, or integration failure) were recorded as invalid at that step and all subsequent steps.
+
+\subsection{Statistical Analysis}
+
+The analysis plan was specified before data collection and includes:
+
+\begin{itemize}
+\item \textbf{Primary endpoint}: Oscillation survival fraction at each $k$, compared via Fisher exact test with odds ratios and 95\% confidence intervals. Holm--Bonferroni correction applied across the five $k$-levels.
+
+\item \textbf{Secondary endpoint}: $\eta$ distributions compared via Mann--Whitney $U$ test and Cliff's delta effect size at each $k$. Slope of median $\eta$ vs.\ $k$ estimated with bootstrap confidence intervals (10{,}000 resamples). Slope difference tested by permutation test (5{,}000 permutations).
+
+\item \textbf{Logistic regression}: $\text{logit}(P(\text{survive})) = \beta_0 + \beta_1 k + \beta_2 \text{GroupB} + \beta_3 (k \times \text{GroupB})$.
+
+\item \textbf{Selection bias verification}: Pearson correlations $r(\text{CV}, D_2)$ and $r(\text{CV}, \eta)$ within the accepted set, to confirm the filter does not secretly select for higher-dimensional attractors.
+\end{itemize}
+
+\subsection{Robustness Checks}
+
+Two robustness analyses were performed on subsets:
+
+\begin{enumerate}
+\item \textbf{CV threshold sensitivity}: The survival analysis was repeated with CV thresholds of 0.02, 0.03 (default), and 0.05 on a subset of $N = 50$ trajectories.
+
+\item \textbf{Longer integration}: Twenty networks at $k = 3$ were simulated to $t = 200$ and the filter classification compared to the $t = 100$ result.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Selection Bias Check}
+
+Before interpreting main results, we verify that the oscillation filter does not introduce systematic bias into the $\eta$ measurements. The critical test is whether oscillation strength (CV) correlates with activation level ($\eta$). The Pearson correlation between CV and $\eta$ within accepted Group~B networks is $r = -0.024$, confirming negligible coupling---the filter does not select for higher or lower $\eta$ (Figure~4). A secondary correlation between CV and $D_2$ ($r = -0.356$) is moderate but does not propagate to $\eta$ because $D_2$ clusters near 1.0 with minimal variance; this is discussed further in the Supplementary Material.
+
+\subsection{Primary Outcome: Oscillation Survival}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig1_survival_fraction.png}
+\caption{Oscillation survival fraction as a function of autocatalytic additions $k$ ($N = 200$ per group). Shaded regions show 95\% Clopper--Pearson exact binomial confidence intervals (thinned for clarity). Annotations show surviving/total counts at each step. At $k = 5$, Group~B retains 121/200 (60.5\%) versus 36/200 (18.0\%) for Group~A, a 3.4$\times$ difference.}
+\label{fig:survival}
+\end{figure}
+
+Figure~\ref{fig:survival} shows the fraction of trajectories retaining valid oscillatory dynamics at each step. Both groups start at 100\% (the pure Brusselator oscillates by construction). Group~A (random additions) declines steeply, retaining only 36/200 (18.0\%) at $k = 5$. Group~B (aligned additions) declines more gradually, retaining 121/200 (60.5\%) at $k = 5$.
+
+\begin{table}[b]
+\centering
+\caption{Oscillation survival by addition step. OR = odds ratio (B/A); CI = 95\% Wald interval on log-OR; $p$ values from Fisher exact test, Holm--Bonferroni adjusted.}
+\label{tab:survival}
+\begin{tabular}{ccccc}
+\toprule
+$k$ & A surv & B surv & OR [95\% CI] & $p_{\mathrm{adj}}$ \\
+\midrule
+0 & 200/200 & 200/200 & --- & --- \\
+1 & 148/200 & 187/200 & 5.1 [2.6, 9.3] & $< 10^{-7}$ \\
+2 & 105/200 & 170/200 & 5.1 [3.1, 8.1] & $< 10^{-11}$ \\
+3 & 73/200 & 153/200 & 5.7 [3.6, 8.7] & $< 10^{-14}$ \\
+4 & 55/200 & 133/200 & 5.2 [3.4, 7.9] & $< 10^{-13}$ \\
+5 & 36/200 & 121/200 & 7.0 [4.4, 10.9] & $< 10^{-17}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:survival} reports Fisher exact tests at each step. The odds ratio ranges from 5.1 to 7.0, with all Holm--Bonferroni-adjusted $p$-values below $10^{-7}$. The effect is present from the first addition and grows slightly with $k$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig3_odds_ratio.png}
+\caption{Odds ratio for oscillation survival (Group~B / Group~A) at each addition step $k$, with 95\% Wald confidence intervals on the log-OR scale. Sample sizes: $N = 200$ per group at each $k$. OR ranges from 5.1 [2.6, 9.3] at $k = 1$ to 7.0 [4.4, 10.9] at $k = 5$. The dashed line at OR~$= 1$ indicates no effect. All Holm--Bonferroni-adjusted $p < 10^{-7}$.}
+\label{fig:or}
+\end{figure}
+
+Logistic regression confirms the pattern (Figure~S1). The Group~B coefficient $\beta_2 = 1.12$ ($p < 10^{-5}$) indicates a baseline survival advantage, and the interaction term $\beta_3 = 0.20$ ($p = 0.005$) indicates that the survival divergence \textit{accelerates} with network growth---each additional reaction degrades Group~A's viability faster than Group~B's.
+
+\subsection{Secondary Outcome: Activation Ratio $\eta$}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig2_eta_progressive.png}
+\caption{Median activation ratio $\eta$ as a function of autocatalytic additions, for valid (oscillating) networks only. Shaded regions show interquartile range. Both groups follow nearly identical dilution trajectories. Group~A slope: $-0.0241$/rxn [95\% CI: $-0.0252$, $-0.0228$]; Group~B slope: $-0.0234$/rxn [$-0.0248$, $-0.0233$]; $\Delta = +0.0007$/rxn [$-0.0013$, $+0.0018$], permutation $p = 0.19$. $\eta$ declines at identical rates across groups.}
+\label{fig:eta}
+\end{figure}
+
+Among networks that \textit{do} retain valid dynamics, the $\eta$ distributions are indistinguishable between groups. Figure~\ref{fig:eta} shows median $\eta$ declining from 0.249 at $k = 0$ to approximately 0.125 at $k = 5$ for both groups.
+
+\begin{table}[b]
+\centering
+\caption{Activation ratio $\eta$ by addition step (valid networks only). Cliff's $\delta$ is the non-parametric effect size (B~vs~A).}
+\label{tab:eta}
+\begin{tabular}{ccccccc}
+\toprule
+$k$ & A med & B med & A $n$ & B $n$ & MW $p$ & $\delta$ \\
+\midrule
+0 & 0.249 & 0.249 & 200 & 200 & 1.00 & 0.000 \\
+1 & 0.199 & 0.199 & 148 & 187 & 0.83 & $-$0.014 \\
+2 & 0.166 & 0.166 & 105 & 170 & 0.09 & $-$0.122 \\
+3 & 0.142 & 0.142 & 73 & 153 & 0.20 & $-$0.107 \\
+4 & 0.134 & 0.142 & 55 & 133 & 0.38 & $+$0.081 \\
+5 & 0.125 & 0.125 & 36 & 121 & 0.96 & $+$0.006 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:eta} reports per-step comparisons. Mann--Whitney $p$-values range from 0.09 to 1.00; Cliff's delta is negligible ($|\delta| < 0.147$) at every step. The slopes are:
+\begin{align}
+\text{Group A}: &\quad -0.0241 \text{/rxn} \; [-0.0252, -0.0228] \nonumber \\
+\text{Group B}: &\quad -0.0234 \text{/rxn} \; [-0.0248, -0.0233] \nonumber \\
+\Delta\text{slope}: &\quad +0.0007 \; [-0.0013, +0.0018] \nonumber
+\end{align}
+A permutation test on the slope difference yields $p = 0.19$, confirming that the dilution rates are statistically indistinguishable.
+
+\subsection{Acceptance Rate and Early Termination}
+
+Contrary to our pre-registered prediction that acceptance rates would decline to 10--20\% at high $k$, the oscillation filter proved minimally restrictive: median acceptance rate was 100\% at all steps. Zero of 200 Group~B trajectories terminated early. This indicates that within the space of autocatalytic additions to the Brusselator, oscillation-preserving candidates are abundant rather than rare.
+
+\subsection{Robustness}
+
+The Group~B survival advantage persists across CV thresholds. At $k = 5$ with $N = 50$:
+\begin{itemize}
+\item CV $\geq 0.02$: A = 22\%, B = 100\%
+\item CV $\geq 0.03$: A = 22\%, B = 100\%
+\item CV $\geq 0.05$: A = 22\%, B = 96\%
+\end{itemize}
+Longer integration ($t = 200$ vs.\ $t = 100$) showed 85\% agreement (17/20 networks), confirming that filter classifications are not transient artifacts.
+
+\subsection{Comparison to Pre-Registered Predictions}
+
+Our pre-registered predictions assumed CSTR boundary conditions (baseline $\eta \approx 0.43$) and hypothesized that aligned additions would yield a flatter $\eta$ slope. Following a bug fix in the reaction rate parser~\cite{paper1}, the experiment was conducted with chemostat boundary conditions (baseline $\eta = 0.249$).
+
+Of seven pre-registered predictions: (1)~the baseline $\eta$ was 0.249 rather than 0.43 (explained by the mode change); (2)~$\eta$ at $k = 5$ was identical for both groups (prediction failed); (3)~slopes were indistinguishable (prediction failed); (4)~tail probabilities were near zero for both groups (moot, given lower baseline); (5)~acceptance rates were near 100\%, not 50\% declining to 10\% (prediction failed); (6)~zero early terminations, not 10--30\% (prediction failed); (7)~selection bias $|r(\text{CV}, D_2)| = 0.356$, marginally above the 0.3 threshold but with $|r(\text{CV}, \eta)| = 0.024$ (marginal pass).
+
+The headline finding---the 3.4$\times$ survival advantage---was not pre-registered but emerged robustly from the data.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Two Distinct Effects of Network Growth}
+
+Our results reveal that network growth under autocatalytic addition has two separable consequences:
+
+\begin{enumerate}
+\item \textbf{Dimensional dilution}: Each added reaction increases $r_S$, but $D_2$ remains near 1.0 (the limit cycle dimension). This causes $\eta$ to decrease at a rate of approximately $-0.024$/reaction, regardless of whether the addition preserves oscillation. This is the phenomenon documented in Paper~1, and it is \textit{invariant} to selection.
+
+\item \textbf{Dynamical collapse}: Random additions frequently disrupt the feedback topology that sustains oscillation, causing the network to collapse to a fixed point or diverge. This is \textit{strongly} sensitive to selection: filtering for oscillation preservation yields a 3.4$\times$ higher survival rate at $k = 5$.
+\end{enumerate}
+
+The invariance of $\eta$ dilution to selection has a clear mechanistic explanation. Among networks that \textit{do} oscillate, $D_2 \approx 1.0$ regardless of topology: a limit cycle is one-dimensional by definition. Since $\eta = D_2/r_S \approx 1/r_S$, and both groups add reactions that increase $r_S$ at the same rate, the $\eta$ trajectories are identical. Only a transition to higher-dimensional dynamics (torus, chaos) could break this invariance, and such transitions were not observed.
+
+The key distinction is this: stoichiometric rank increases identically in both groups, but oscillation survival probability diverges sharply. The effect of feedback-aligned growth is therefore \textit{topological, not dimensional}---it preserves the functional core of the oscillatory network rather than altering the dimensionality of the attractor.
+
+\subsection{Why Does the Filter Preserve Viability?}
+
+The oscillation filter checks a simple dynamical property: does the network still oscillate? Yet this binary check has a large effect on survival. The most likely explanation is that random autocatalytic additions often introduce kinetic pathways that drain energy from the oscillatory cycle or create competing steady states. By rejecting these additions, the filter selects for topologies where the new reaction is either kinetically isolated from the oscillatory core or positively coupled to it.
+
+Notably, the filter is not very restrictive: acceptance rates are near 100\% at all steps. This means that for any given network state, oscillation-preserving autocatalytic additions are \textit{more common than not}. The viability collapse in Group~A is not because oscillation-destroying additions are common at any single step, but because destruction is \textit{irreversible}: once a network loses oscillation, it cannot recover through further random additions. The filter prevents this irreversible absorbing state.
+
+\subsection{Connection to RAF Theory}
+
+In RAF theory~\cite{hordijk2010,steel2000}, the focus is on structural closure: whether a set of reactions can sustain itself given available food. Our results suggest that dynamical closure---whether a network can sustain oscillatory dynamics---is an orthogonal constraint that may be relevant to the emergence of complex prebiotic chemistry. A growing autocatalytic set may be structurally closed in the RAF sense while being dynamically dead (fixed-point behavior). Selection for dynamical viability during growth would constitute a form of dynamical RAF closure that current theory does not address.
+
+\subsection{Implications for Origin of Life}
+
+Paper~1 showed that ``more reactions $\neq$ more dynamics.'' The present results refine this: \textit{topology-aware} growth preserves the \textit{capacity} for dynamics, even though it cannot increase the \textit{level} of activation. For prebiotic chemistry, this suggests a two-stage model:
+
+\begin{enumerate}
+\item \textbf{Viability maintenance}: During network growth, selection for oscillation preservation (or more generally, dynamical viability) prevents collapse to trivial dynamics.
+
+\item \textbf{Activation enhancement}: Increasing $\eta$ above the limit cycle floor requires qualitatively different innovations---transitions to torus or chaotic dynamics through specific topological motifs, not mere accumulation of oscillation-preserving additions.
+\end{enumerate}
+
+The first stage is achievable through the simple filter studied here. The second stage remains an open challenge.
+
+\subsection{Limitations}
+
+Several limitations should be noted:
+
+\begin{enumerate}
+\item \textbf{Single template}: All experiments used the Brusselator. Other oscillator templates (Oregonator, glycolytic oscillators, repressilators) may yield different viability decay rates.
+
+\item \textbf{Limit cycle floor}: Because $D_2 \approx 1.0$ for all oscillating networks, $\eta$ is mechanistically constrained to $1/r_S$. A template capable of torus or chaotic dynamics might show $\eta$ sensitivity to selection.
+
+\item \textbf{Chemostat boundary conditions}: Clamped food species are a strong constraint that may not reflect prebiotic environments.
+
+\item \textbf{Binary filter}: Our filter checks only oscillation existence, not quality. A filter that also selected for oscillation amplitude, period, or multi-species involvement might yield different results.
+
+\item \textbf{Abundant acceptance}: The high acceptance rates (near 100\%) suggest that the Brusselator's oscillation is relatively robust to autocatalytic additions. Less robust templates might show acceptance collapse and early termination as originally predicted.
+\end{enumerate}
+
+\subsection{Future Directions}
+
+Several extensions are suggested by these results:
+
+\begin{itemize}
+\item \textbf{Higher-dimensional templates}: Use templates capable of torus or chaotic dynamics (e.g., coupled Brusselators, three-variable oscillators) where $D_2 > 1$ and $\eta$ could respond to selection.
+
+\item \textbf{RAF-closing additions}: Test whether additions that close RAF sets~\cite{hordijk2010} differ from generic autocatalytic additions in their effect on viability and activation.
+
+\item \textbf{Multi-criterion filters}: Beyond oscillation existence, select for amplitude, period stability, or multi-species oscillation.
+
+\item \textbf{Longer growth trajectories}: Extend beyond $k = 5$ to test whether Group~B's viability advantage saturates, collapses, or continues to grow.
+
+\item \textbf{Reverse engineering}: Among the 121 surviving Group~B networks at $k = 5$, identify topological motifs that distinguish them from the 79 that lost oscillation, to characterize the ``grammar'' of viable growth.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We tested whether feedback-aligned autocatalytic additions---those that preserve oscillatory dynamics---can reduce the activation dilution documented in Paper~1. Our findings:
+
+\begin{enumerate}
+\item Feedback-aligned and random additions produce \textit{identical} $\eta$ dilution rates ($-0.024$/rxn for both, $p = 0.19$ for difference). The rate of dimensional dilution is invariant to selection.
+
+\item Feedback-aligned additions dramatically preserve dynamical viability: 60.5\% of aligned trajectories retain oscillation at $k = 5$ versus 18.0\% of random trajectories (OR $= 7.0$, $p < 10^{-17}$).
+
+\item The viability advantage is present from the first addition step (OR $= 5.1$ at $k = 1$) and grows with network size (logistic regression interaction $\beta_3 = 0.20$, $p = 0.005$).
+
+\item The $\eta$ invariance has a clear mechanism: all oscillating networks have $D_2 \approx 1.0$ (limit cycle), so $\eta \approx 1/r_S$ depends only on stoichiometric rank, not topology.
+
+\item Pre-registered predictions about $\eta$ improvement were not confirmed. The headline finding---viability preservation---was emergent.
+\end{enumerate}
+
+Feedback-aligned growth preserves functional dynamical cores under structural expansion, even though the level of dynamical activation is invariant to selection. For prebiotic chemistry, this suggests that maintaining oscillatory viability during autocatalytic network growth is achievable through simple dynamical selection, but that increasing activation beyond the limit cycle floor requires qualitatively different topological innovations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments}
+This work was conducted as part of an independent research program exploring connections between dynamical systems theory and prebiotic chemistry. Computational analysis was performed using the \texttt{dimensional\_opening} Python package. All code and data are available at \url{https://zenodo.org}.
+\end{acknowledgments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{99}
+
+\bibitem{paper1}
+C.~Merrill, ``Dynamical activation in autocatalytic chemical networks: A correlation dimension analysis,''
+Zenodo preprint (2026).
+
+\bibitem{kauffman1986}
+S.~A.~Kauffman, ``Autocatalytic sets of proteins,''
+J.\ Theor.\ Biol.\ \textbf{119}, 1 (1986).
+
+\bibitem{eigen1971}
+M.~Eigen, ``Selforganization of matter and the evolution of biological macromolecules,''
+Naturwissenschaften \textbf{58}, 465 (1971).
+
+\bibitem{hordijk2010}
+W.~Hordijk and M.~Steel, ``Detecting autocatalytic, self-sustaining sets in chemical reaction systems,''
+J.\ Theor.\ Biol.\ \textbf{227}, 451 (2004).
+
+\bibitem{steel2000}
+M.~Steel, ``The emergence of a self-catalysing structure in abstract origin-of-life models,''
+Appl.\ Math.\ Lett.\ \textbf{13}, 91 (2000).
+
+\bibitem{grassberger1983}
+P.~Grassberger and I.~Procaccia, ``Characterization of strange attractors,''
+Phys.\ Rev.\ Lett.\ \textbf{50}, 346 (1983).
+
+\bibitem{prigogine1968}
+I.~Prigogine and R.~Lefever, ``Symmetry breaking instabilities in dissipative systems. II,''
+J.\ Chem.\ Phys.\ \textbf{48}, 1695 (1968).
+
+\bibitem{strogatz2000}
+S.~H.~Strogatz, \textit{Nonlinear Dynamics and Chaos}
+(Westview Press, Cambridge, MA, 2000).
+
+\bibitem{novak2008}
+B.~Nov\'{a}k and J.~J.~Tyson, ``Design principles of biochemical oscillators,''
+Nat.\ Rev.\ Mol.\ Cell Biol.\ \textbf{9}, 981 (2008).
+
+\end{thebibliography}
+
+\end{document}

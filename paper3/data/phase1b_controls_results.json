@@ -1,0 +1,957 @@
+{
+  "test": "phase1b_controls",
+  "description": "Four control experiments for causal claims",
+  "runtime_seconds": 768.8851180076599,
+  "controls": {
+    "control1": {
+      "control": 1,
+      "results": [
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 42,
+          "D2": 1.4002209722021586,
+          "D2_unc": 0.00642602235055765,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.5
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 179,
+          "D2": 1.4002209722021586,
+          "D2_unc": 0.00642602235055765,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.5
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 316,
+          "D2": 1.4002209722021586,
+          "D2_unc": 0.00642602235055765,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.5
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 453,
+          "D2": 1.4002209722021586,
+          "D2_unc": 0.00642602235055765,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.5
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 590,
+          "D2": 1.4002209722021586,
+          "D2_unc": 0.00642602235055765,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.5
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 42,
+          "D2": 0.9938496733805599,
+          "D2_unc": 0.0009658223696070368,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 179,
+          "D2": 0.9938496733805599,
+          "D2_unc": 0.0009658223696070368,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 316,
+          "D2": 0.9938496733805599,
+          "D2_unc": 0.0009658223696070368,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 453,
+          "D2": 0.9938496733805599,
+          "D2_unc": 0.0009658223696070368,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 590,
+          "D2": 0.9938496733805599,
+          "D2_unc": 0.0009658223696070368,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 42,
+          "D2": 0.9930230511330049,
+          "D2_unc": 0.0010512290352995828,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.2
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 179,
+          "D2": 0.9930230511330049,
+          "D2_unc": 0.0010512290352995828,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.2
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 316,
+          "D2": 0.9930230511330049,
+          "D2_unc": 0.0010512290352995828,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.2
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 453,
+          "D2": 0.9930230511330049,
+          "D2_unc": 0.0010512290352995828,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.2
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 590,
+          "D2": 0.9930230511330049,
+          "D2_unc": 0.0010512290352995828,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.2
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 42,
+          "D2": 1.4371707392550843,
+          "D2_unc": 0.005787859881628609,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.1
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 179,
+          "D2": 1.4371707392550843,
+          "D2_unc": 0.005787859881628609,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.1
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 316,
+          "D2": 1.4371707392550843,
+          "D2_unc": 0.005787859881628609,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.1
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 453,
+          "D2": 1.4371707392550843,
+          "D2_unc": 0.005787859881628609,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.1
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 590,
+          "D2": 1.4371707392550843,
+          "D2_unc": 0.005787859881628609,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.1
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 42,
+          "D2": 1.4156041804563748,
+          "D2_unc": 0.005853357267182258,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 179,
+          "D2": 1.4156041804563748,
+          "D2_unc": 0.005853357267182258,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 316,
+          "D2": 1.4156041804563748,
+          "D2_unc": 0.005853357267182258,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 453,
+          "D2": 1.4156041804563748,
+          "D2_unc": 0.005853357267182258,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.3
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 590,
+          "D2": 1.4156041804563748,
+          "D2_unc": 0.005853357267182258,
+          "quality": "GOOD",
+          "regime": "complex",
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.3
+        }
+      ],
+      "sliding_window": [
+        {
+          "windows": [
+            {
+              "t_start": 0.0,
+              "t_end": 2500.0,
+              "D2": NaN,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 2500.0,
+              "t_end": 5000.0,
+              "D2": 2.061860254149828,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 5000.0,
+              "t_end": 7500.0,
+              "D2": 1.6048157633871492,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 7500.0,
+              "t_end": 10000.0,
+              "D2": 1.042369925957141,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 10000.0,
+              "t_end": 12500.0,
+              "D2": 1.0071890766654967,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 12500.0,
+              "t_end": 15000.0,
+              "D2": 1.0062449505407927,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 15000.0,
+              "t_end": 17500.0,
+              "D2": 1.0058607099817172,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 17500.0,
+              "t_end": 20000.0,
+              "D2": 1.0060201983440435,
+              "r_X1X2": NaN
+            }
+          ],
+          "T_lock": 7500.0,
+          "tau_above_1p2": 5000,
+          "n_windows_above": 2,
+          "n_windows_total": 8,
+          "label": "J7_g0.001_kc0.5"
+        },
+        {
+          "windows": [
+            {
+              "t_start": 0.0,
+              "t_end": 2500.0,
+              "D2": 1.6034809993475125,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 2500.0,
+              "t_end": 5000.0,
+              "D2": 1.3761486938865068,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 5000.0,
+              "t_end": 7500.0,
+              "D2": 1.0045618178799989,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 7500.0,
+              "t_end": 10000.0,
+              "D2": 1.004402261578062,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 10000.0,
+              "t_end": 12500.0,
+              "D2": 1.0043923252049844,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 12500.0,
+              "t_end": 15000.0,
+              "D2": 1.0043830438953907,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 15000.0,
+              "t_end": 17500.0,
+              "D2": 1.0043698710796203,
+              "r_X1X2": NaN
+            },
+            {
+              "t_start": 17500.0,
+              "t_end": 20000.0,
+              "D2": 1.004499899798267,
+              "r_X1X2": NaN
+            }
+          ],
+          "T_lock": 5000.0,
+          "tau_above_1p2": 5000,
+          "n_windows_above": 2,
+          "n_windows_total": 8,
+          "label": "J5_g0.002_kc0.3"
+        }
+      ]
+    },
+    "control2": {
+      "control": 2,
+      "results": [
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 42,
+          "D2": 0.9903874821942102,
+          "D2_unc": 0.001078145920794497,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9674151157027104,
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 179,
+          "D2": 0.99048413082445,
+          "D2_unc": 0.0010721081593208755,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9830410572632434,
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 316,
+          "D2": 0.9904957859249608,
+          "D2_unc": 0.0010665782611709205,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9429129789647062,
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 453,
+          "D2": 0.9903904164793121,
+          "D2_unc": 0.0010792864644316841,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9626045882050839,
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J7_g0.001_kc0.5",
+          "seed": 590,
+          "D2": 0.9905906763303981,
+          "D2_unc": 0.0010616385953733003,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9949670485649222,
+          "J": 7.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 42,
+          "D2": 0.9903855951049263,
+          "D2_unc": 0.0010766313448198072,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9673709038119377,
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 179,
+          "D2": 0.9904883958244213,
+          "D2_unc": 0.001072056795913631,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9829777019129209,
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 316,
+          "D2": 0.9904940972566283,
+          "D2_unc": 0.0010669394613360603,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9429734543792753,
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 453,
+          "D2": 0.9903876195863633,
+          "D2_unc": 0.0010762822026099874,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9625940610706188,
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J5_g0.002_kc0.3",
+          "seed": 590,
+          "D2": 0.9905904708337812,
+          "D2_unc": 0.0010627809238727267,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9949942505307124,
+          "J": 5.0,
+          "gamma": 0.002,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 42,
+          "D2": 0.9903844718272893,
+          "D2_unc": 0.001077156411087221,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9672945709440951,
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 179,
+          "D2": 0.9904918244235321,
+          "D2_unc": 0.0010741551278855073,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9830516275191058,
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 316,
+          "D2": 0.9904869284124542,
+          "D2_unc": 0.001064802057526456,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9428276756800891,
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 453,
+          "D2": 0.9903869488249077,
+          "D2_unc": 0.0010774950363186477,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9626528196888186,
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J4_g0.003_kc0.2",
+          "seed": 590,
+          "D2": 0.9905901476591624,
+          "D2_unc": 0.001061982265371866,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9949453008598879,
+          "J": 4.0,
+          "gamma": 0.003,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 42,
+          "D2": 0.9903829126517278,
+          "D2_unc": 0.0010770540222758574,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9673779513820108,
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 179,
+          "D2": 0.9904920088089897,
+          "D2_unc": 0.0010742255199875028,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9830667788490491,
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 316,
+          "D2": 0.9904856636330256,
+          "D2_unc": 0.001065002642664156,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9430169005681672,
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 453,
+          "D2": 0.9903860303737084,
+          "D2_unc": 0.001077923283990343,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9625990108485672,
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J3_g0.001_kc0.1",
+          "seed": 590,
+          "D2": 0.9905968162142855,
+          "D2_unc": 0.0010631911431382708,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9949868282983988,
+          "J": 3.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 42,
+          "D2": 0.9903796031773193,
+          "D2_unc": 0.001075867063607858,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9674722922712928,
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 179,
+          "D2": 0.9904952201233149,
+          "D2_unc": 0.0010732835655091733,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9829943151270758,
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 316,
+          "D2": 0.9905015762577323,
+          "D2_unc": 0.0010672739242332042,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9428861320815787,
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 453,
+          "D2": 0.9903863723516,
+          "D2_unc": 0.0010779627206612254,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9626135591288973,
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        },
+        {
+          "label": "J10_g0.001_kc0.3",
+          "seed": 590,
+          "D2": 0.9905914203145467,
+          "D2_unc": 0.0010624732816497818,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9949342745280311,
+          "J": 10.0,
+          "gamma": 0.001,
+          "k_cat": 0.0
+        }
+      ],
+      "sliding_window": []
+    },
+    "control3": {
+      "control": 3,
+      "results": [
+        {
+          "epsilon": 0.01,
+          "seed": 42,
+          "D2": 0.9905834795558552,
+          "D2_unc": 0.0010676874529001908,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999899473841547
+        },
+        {
+          "epsilon": 0.01,
+          "seed": 179,
+          "D2": 0.9905916691300989,
+          "D2_unc": 0.0010634111394993144,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.999994467913795
+        },
+        {
+          "epsilon": 0.01,
+          "seed": 316,
+          "D2": 0.9905901789462579,
+          "D2_unc": 0.0010778261202474347,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9998595452972471
+        },
+        {
+          "epsilon": 0.01,
+          "seed": 453,
+          "D2": 0.9905681971630628,
+          "D2_unc": 0.001069820134174387,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999880428809382
+        },
+        {
+          "epsilon": 0.01,
+          "seed": 590,
+          "D2": 0.9906312506365226,
+          "D2_unc": 0.0010629332218542252,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999973437164282
+        },
+        {
+          "epsilon": 0.05,
+          "seed": 42,
+          "D2": 0.9905491441637095,
+          "D2_unc": 0.001075034185395574,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999998
+        },
+        {
+          "epsilon": 0.05,
+          "seed": 179,
+          "D2": 0.9905698674934404,
+          "D2_unc": 0.0010693735881675943,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 0.05,
+          "seed": 316,
+          "D2": 0.9905609273912434,
+          "D2_unc": 0.0010873730794960473,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999993
+        },
+        {
+          "epsilon": 0.05,
+          "seed": 453,
+          "D2": 0.9905575084678432,
+          "D2_unc": 0.0010696964659674777,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999999
+        },
+        {
+          "epsilon": 0.05,
+          "seed": 590,
+          "D2": 0.9906086225971349,
+          "D2_unc": 0.0010644299913177768,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 0.1,
+          "seed": 42,
+          "D2": 0.9905504748130192,
+          "D2_unc": 0.0010754877819404635,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999997
+        },
+        {
+          "epsilon": 0.1,
+          "seed": 179,
+          "D2": 0.9905694130357755,
+          "D2_unc": 0.0010702434732202362,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 0.1,
+          "seed": 316,
+          "D2": 0.9905627652392345,
+          "D2_unc": 0.001087204335347606,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 0.1,
+          "seed": 453,
+          "D2": 0.9905459098331035,
+          "D2_unc": 0.0010771692950260114,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 0.1,
+          "seed": 590,
+          "D2": 0.9906218791684268,
+          "D2_unc": 0.001065519456179171,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999998
+        },
+        {
+          "epsilon": 0.5,
+          "seed": 42,
+          "D2": 0.99059153906152,
+          "D2_unc": 0.0010685425414172414,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 0.5,
+          "seed": 179,
+          "D2": 0.9905871263789634,
+          "D2_unc": 0.0010679555856804134,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999998
+        },
+        {
+          "epsilon": 0.5,
+          "seed": 316,
+          "D2": 0.9905804829359734,
+          "D2_unc": 0.0010715083429730364,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999999
+        },
+        {
+          "epsilon": 0.5,
+          "seed": 453,
+          "D2": 0.9905737998673068,
+          "D2_unc": 0.0010699250175798373,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999999
+        },
+        {
+          "epsilon": 0.5,
+          "seed": 590,
+          "D2": 0.9906195325441682,
+          "D2_unc": 0.0010635604701117209,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 1.0,
+          "seed": 42,
+          "D2": 0.9905985789262687,
+          "D2_unc": 0.0010672334238219822,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 1.0,
+          "seed": 179,
+          "D2": 0.9905880797903177,
+          "D2_unc": 0.0010684024252890798,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 1.0
+        },
+        {
+          "epsilon": 1.0,
+          "seed": 316,
+          "D2": 0.9905833499904367,
+          "D2_unc": 0.001071575598137379,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999998
+        },
+        {
+          "epsilon": 1.0,
+          "seed": 453,
+          "D2": 0.9905738494461086,
+          "D2_unc": 0.0010698687609189987,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999997
+        },
+        {
+          "epsilon": 1.0,
+          "seed": 590,
+          "D2": 0.9906192921234631,
+          "D2_unc": 0.0010633104174999687,
+          "quality": "GOOD",
+          "regime": "phase_locked",
+          "r_X1X2": 0.9999999999999999
+        }
+      ],
+      "sliding_window": []
+    },
+    "control4": {
+      "control": 4,
+      "summary": {
+        "A2 (\u03b3=0.001)": {
+          "n_runs": 60,
+          "n_complex": 55,
+          "source": "/Users/chris/Documents/systems_analysis/astrobiology3/pilot/results/phase1_sweep_a2_results.json"
+        },
+        "A2b (moderate \u03b3)": {
+          "n_runs": 40,
+          "n_complex": 0,
+          "source": "/Users/chris/Documents/systems_analysis/astrobiology3/pilot/results/phase1_sweep_a2b_results.json"
+        }
+      },
+      "results": [],
+      "sliding_window": []
+    }
+  }
+}

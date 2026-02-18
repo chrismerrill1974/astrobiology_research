@@ -1,0 +1,452 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Transient Dimensional Inflation via Timescale Separation
+% in Energy-Coupled Chemical Oscillators
+%
+% Paper 3 — February 2026
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb,prd,floatfix]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{Transient Dimensional Inflation via Timescale Separation\\
+in Energy-Coupled Chemical Oscillators}
+
+\author{Christopher Merrill}
+\affiliation{Independent Researcher}
+\author{With computational collaboration from Claude (Anthropic) and ChatGPT (OpenAI)}
+
+\date{\today}
+
+\begin{abstract}
+Papers~1 and~2 in this series established that autocatalytic network growth dilutes the activation ratio $\eta = D_2/r_S$ at $\approx -0.024$/reaction and that feedback-aligned growth preserves oscillatory viability but cannot increase the correlation dimension $D_2$ beyond the limit cycle floor of $\approx 1$. Here we identify the mechanism that breaks this floor: timescale separation between fast oscillatory cores and a slow shared energy reservoir. Using an enzyme-complex coupled oscillator model implemented entirely within the mass-action \texttt{ReactionSimulator} framework, we find that a sufficiently slow energy variable ($1/\gamma \gg$ oscillator period) transiently inflates $D_2$ to $1.67$ for hundreds of oscillator periods before phase-locking restores rigidity. Two distinct mechanisms are confirmed by independent-reservoir controls: intrinsic slow--fast inflation at $\gamma = 0.001$ (each subsystem inflates independently) and shared-reservoir desynchronization at moderate $\gamma$ (sharing is causally essential, $\Delta D_2 = -0.57$). Growth experiments reveal that random chemical elaboration catastrophically destroys these dynamics: system survival drops to 1\% at five additions versus 66\% for oscillation-aligned growth (OR $= 167$, $p < 10^{-20}$). The activation ratio $\eta$ dilutes monotonically under both rules, extending the universal dilution pattern across all three papers. These results establish a ``transient ecology'' framework: prebiotic chemical systems need not sustain permanent chaos---what matters is finite-time exploration of state space before dynamical rigidity is restored.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In Paper~1~\cite{paper1}, we introduced the activation ratio $\eta = D_2/r_S$ as a measure of how fully a chemical reaction network's dynamics explore its stoichiometric degrees of freedom. We showed that randomly added autocatalytic reactions dilute $\eta$: the stoichiometric rank $r_S$ grows faster than the correlation dimension $D_2$, so $\eta$ decreases monotonically with network size. Paper~2~\cite{paper2} tested whether feedback-aligned additions---those that preserve oscillatory dynamics---could slow or reverse this dilution. They cannot: both random and aligned additions produce identical $\eta$ slopes ($-0.024$/reaction, $p = 0.19$). However, aligned growth dramatically preserves dynamical viability (OR $= 7.0$ at $k = 5$, $p < 10^{-17}$).
+
+Together, these results reveal a pattern of \textit{dynamical rigidity}. Adding reactions to an oscillatory network increases the stoichiometric rank but not the attractor dimension, because $D_2 \approx 1$ (limit cycle) for all oscillating networks regardless of topology. This rigidity has three faces: \textit{structural} (Paper~1: growth dilutes $\eta$), \textit{topological} (Paper~2: alignment preserves viability but not $D_2$), and---as we will show---\textit{energetic} (a fast energy variable coupled to an oscillator is dynamically slaved and cannot inflate $D_2$).
+
+A key structural insight emerged from this program: \textit{dimensionality of state space does not determine dimensionality of attractor}. Adding variables or reactions to a network does not guarantee higher-dimensional dynamics. To break the $D_2 \approx 1$ floor, a qualitatively different mechanism is needed.
+
+In this paper, we identify that mechanism: \textbf{timescale separation}. When a slow energy reservoir ($1/\gamma \gg$ oscillator period) is coupled to fast autocatalytic oscillators, the system transiently explores a higher-dimensional attractor---genuine transient chaos with positive Lyapunov exponents and $D_2$ up to 1.67---before eventually phase-locking and returning to $D_2 \approx 1$. The transient lasts hundreds of oscillator periods: long enough to be biologically significant in a prebiotic context, even though it is not permanent.
+
+We frame this as \textit{transient ecology}: prebiotic chemical systems need not sustain permanent high-dimensional chaos. What matters is finite-time exploration of chemical state space---a metastable ``exploratory phase'' during which the system samples dynamical configurations that would be inaccessible under limit cycle rigidity. Selection could then act on networks that prolong the duration of this exploratory phase.
+
+To preserve series continuity with Papers~1 and~2, we implement the coupled oscillator model as an explicit mass-action reaction network using the same \texttt{GeneratedNetwork} / \texttt{ReactionSimulator} / \texttt{CorrelationDimension} stack. An enzyme-complex mechanism ($G + E \rightleftharpoons GE$) reproduces Michaelis--Menten saturation entirely within mass-action kinetics, enabling direct application of the activation ratio framework and growth operators from the earlier papers.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Enzyme-Complex Coupled Model}
+
+The model comprises two identical Brusselator oscillator cores sharing a single slow energy pool, mediated by an enzyme-complex gate. All reactions are standard mass-action, implemented within \texttt{ReactionSimulator}.
+
+Per core $i \in \{1, 2\}$:
+\begin{align}
+\text{A} &\rightarrow \text{X}_i \label{eq:r1} \\
+\text{B} + \text{X}_i &\rightarrow \text{Y}_i + \text{D}_i \label{eq:r2} \\
+2\text{X}_i + \text{Y}_i &\rightarrow 3\text{X}_i \label{eq:r3} \\
+\text{X}_i &\rightarrow \text{W}_i \label{eq:r4}
+\end{align}
+with chemostatted food species $[\text{A}] = 1.0$, $[\text{B}] = 3.0$.
+
+Energy pool:
+\begin{align}
+\text{E}_\text{src} &\rightarrow \text{E}_\text{src} + \text{E} & &(\text{rate } J) \label{eq:r5} \\
+\text{E} &\rightarrow \text{E}_w & &(\text{rate } \gamma \cdot E) \label{eq:r6}
+\end{align}
+
+Enzyme-complex gate:
+\begin{align}
+\text{G} + \text{E} &\rightarrow \text{GE} & &(\text{rate } k_\text{on} \cdot G \cdot E) \label{eq:r7} \\
+\text{GE} &\rightarrow \text{G} + \text{E} & &(\text{rate } k_\text{off} \cdot GE) \label{eq:r8}
+\end{align}
+
+Gated autocatalysis (per core):
+\begin{equation}
+2\text{X}_i + \text{Y}_i + \text{GE} \rightarrow 3\text{X}_i + \text{G} + \text{E}_w
+\label{eq:r9}
+\end{equation}
+at rate $k_\text{cat} \cdot X_i^2 Y_i \cdot GE$.
+
+Total: 14 reactions (4 per core $\times$ 2 + 2 energy + 2 gate + 2 gated). At quasi-steady-state for $GE$, the effective gated rate becomes $k_\text{cat} \cdot G_\text{total} \cdot E/(K_d + E) \cdot X_i^2 Y_i$, where $K_d = k_\text{off}/k_\text{on}$. This \textit{is} Michaelis--Menten saturation, achieved entirely within mass-action kinetics. The saturation bounds effective coupling at high $E$, preventing the synchronization that destroyed quasi-periodicity in a linear coupling variant (which produced only $D_2 \leq 1.0$; see Supplementary Material).
+
+Dynamic species tracked for $D_2$: $\{X_1, Y_1, X_2, Y_2, E\}$ (5 variables). Waste species ($D_i$, $W_i$, $E_w$) are monotonic accumulators excluded from analysis. Gate species ($G$, $GE$) equilibrate rapidly and are excluded from the $D_2$ projection.
+
+\subsection{Parameter Survey}
+
+We surveyed 100 parameter sets spanning $J \in \{3, 4, 5, 7, 10\}$, $\gamma \in \{0.001, 0.002, 0.003, 0.005\}$, $k_\text{cat} \in \{0.1, 0.2, 0.3, 0.4, 0.5\}$, with fixed $k_\text{on} = k_\text{off} = 10.0$ ($K_d = 1.0$), $G_\text{total} = 1.0$, $A = 1.0$, $B = 3.0$. Each set was run with $N_\text{seeds} = 5$ independent initial conditions ($X_2$, $Y_2$ perturbed by $\mathcal{U}(-0.05, 0.05)$), for 500 total runs. Integration used LSODA over $t \in [0, 10{,}000]$ with 20{,}000 time points; the first 50\% was discarded as transient. Regime classification: fixed\_point ($D_2 < 0.5$), phase\_locked ($0.5 \leq D_2 \leq 1.2$), complex ($D_2 > 1.2$).
+
+The threshold $D_2 > 1.2$ is justified statistically: across all phase-locked runs ($N = 392$), the estimator returns $D_2 = 1.030 \pm 0.063$. The threshold is $>$\,6$\sigma$ above this baseline.
+
+\subsection{Causal Controls}
+
+Four controls established the causal role of each model component:
+
+\begin{enumerate}
+\item \textbf{Single core + E}: One Brusselator core with gate and energy pool (3D subsystem). Tests whether modular coupling is necessary.
+
+\item \textbf{Uncoupled ($k_\text{cat} = 0$)}: Full 14-reaction network with gated autocatalysis removed. Tests whether coupling through $E$ is necessary.
+
+\item \textbf{Diffusive coupling (no E)}: Two Brusselators coupled by direct mass exchange ($X_1 \rightarrow X_2$, $X_2 \rightarrow X_1$ at rate $\epsilon$), without any energy pool. Tests whether slow $E$ specifically is required.
+
+\item \textbf{Independent reservoirs}: Separate energy pools $E_1$, $E_2$ with independent gates per core. Tests whether \textit{sharing} the reservoir is essential.
+\end{enumerate}
+
+Controls 1--3 used 5 parameter sets $\times$ 5 seeds each (75 runs). Control~4 was tested at two $\gamma$ regimes: $\gamma = 0.001$ (12 sets $\times$ 5 seeds = 60 runs) and moderate $\gamma \in \{0.002, 0.003\}$ (8 sets $\times$ 5 seeds = 40 runs).
+
+\subsection{Dynamical Diagnostics}
+\label{sec:diagnostics}
+
+At two exemplar parameter sets (Regime~1: $J = 7$, $\gamma = 0.001$, $k_\text{cat} = 0.5$; Regime~2: $J = 5$, $\gamma = 0.002$, $k_\text{cat} = 0.3$), we performed three diagnostic tests:
+
+\textbf{$D_2$ convergence}: Integration at $T \in \{5{,}000, 10{,}000, 20{,}000\}$ with 50\% transient discard. Pass criterion: $|D_2(2T) - D_2(T)| < 0.05$.
+
+\textbf{Sliding-window $D_2$}: Single $T = 20{,}000$ integration. $D_2$ computed on non-overlapping 2{,}500-unit windows from the \textit{full} trajectory (no transient discard). This yields a time-resolved profile of dynamical complexity.
+
+\textbf{Lyapunov exponent}: Maximal Lyapunov exponent $\lambda_1$ estimated via the Rosenstein algorithm~\cite{rosenstein1993} on the 5D projected trajectory, with 95\% confidence interval from block bootstrap.
+
+Two transient metrics were defined:
+\begin{itemize}
+\item $T_\text{lock}$: the first time after which sliding-window $D_2$ remains below 1.1 permanently.
+\item $\tau_{>1.2}$: total time (number of windows) with $D_2 > 1.2$.
+\end{itemize}
+
+\subsection{Growth Experiment}
+
+Starting from the enzyme-complex network at two parameter sets---primary ($J = 5$, $\gamma = 0.002$, $k_\text{cat} = 0.3$; $N = 50$ trajectories) and replication ($J = 4$, $\gamma = 0.003$, $k_\text{cat} = 0.2$; $N = 30$ trajectories)---we added $k = 0, 1, 2, 3, 4, 5$ within-core autocatalytic reactions under two growth rules:
+
+\textbf{Random growth}: Reactions added without screening. Each reaction has the form $\text{catalyst} + \text{substrate} \rightarrow 2 \cdot \text{catalyst} + \ldots$, with catalyst and substrate drawn from a single oscillator core ($\{X_i, Y_i\}$) plus new species $Z_j$. Rate constants drawn from $\mathcal{U}(0.3, 1.5)$.
+
+\textbf{Aligned growth}: Each candidate reaction tested against an oscillation filter (5 sign changes in smoothed derivative, $t_\text{end} = 500$, CV $> 0.03$; same criteria as Paper~2 with longer integration). Up to 100 candidates per step; trajectory terminated early if none pass.
+
+Per grown network: projected $D_2$ on $\{X_1, Y_1, X_2, Y_2, E\}$, stoichiometric rank $r_S$, activation ratio $\eta = D_2/r_S$, oscillation survival, and regime classification.
+
+Total: $(6 \times 2 \times 50) + (6 \times 2 \times 30) = 960$ runs.
+
+\subsection{Statistical Analysis}
+
+\begin{itemize}
+\item \textbf{Fisher exact tests}: $2 \times 2$ contingency tables (aligned vs.\ random) at each $k$. Holm--Bonferroni correction across $k = 1, \ldots, 5$. Odds ratios with 95\% Wald intervals on log-OR.
+
+\item \textbf{Risk differences}: Bootstrap CIs (10{,}000 resamples, percentile method).
+
+\item \textbf{Logistic regression}: $\text{logit}\, P(\text{survived}) = \beta_0 + \beta_1 k + \beta_2 \, \mathbb{1}[\text{aligned}] + \beta_3 (k \times \text{aligned})$.
+
+\item \textbf{$\eta$ slopes}: Bootstrap CIs on median $\eta$ vs.\ $k$ slope (10{,}000 resamples).
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Two Inflation Regimes}
+
+Of the 100 parameter sets surveyed, 22 produced $D_2 > 1.2$ (complex regime), with 17 showing complexity at all 5 seeds. The maximum $D_2$ was 1.673. Two qualitatively distinct regimes emerged:
+
+\textbf{Regime~1} ($\gamma = 0.001$, intrinsic slow--fast): The entire $\gamma = 0.001$ column (15 of 22 complex sets) shows $D_2 \approx 1.38$--$1.54$ with high phase synchronization $r(X_1, X_2) > 0.85$. The energy relaxation timescale ($1/\gamma = 1000$ time units) vastly exceeds the oscillator period ($\approx 10$ time units), creating genuine slow--fast dynamics.
+
+\textbf{Regime~2} (moderate $\gamma$, shared-reservoir desynchronization): A cluster of 7 parameter sets at $\gamma \in \{0.002, 0.003\}$ shows $D_2$ up to 1.673 with low phase correlation ($r \approx 0$--$0.4$). The oscillators are desynchronized---competing for a shared energy resource that relaxes fast enough that its dynamics are influenced by both cores simultaneously.
+
+\begin{table}[b]
+\centering
+\caption{Representative parameter sets from each inflation regime. $D_2$ is median across seeds. $r$ is median Pearson correlation $r(X_1, X_2)$.}
+\label{tab:regimes}
+\begin{tabular}{llcccc}
+\toprule
+Regime & $J$/$\gamma$/$k_\text{cat}$ & Seeds & $D_2$ & $r$ \\
+\midrule
+1 & 7 / 0.001 / 0.5 & 5/5 & 1.542 & 0.90 \\
+1 & 5 / 0.001 / 0.3 & 5/5 & 1.384 & 0.97 \\
+1 & 10 / 0.001 / 0.3 & 5/5 & 1.542 & 0.85 \\
+\midrule
+2 & 5 / 0.002 / 0.3 & 5/5 & 1.558 & 0.05 \\
+2 & 4 / 0.003 / 0.2 & 4/5 & 1.566 & 0.38 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Causal Controls Confirm Two Mechanisms}
+
+All four controls produced results consistent with their predictions (Table~\ref{tab:controls}).
+
+\begin{table}[t]
+\centering
+\caption{Control experiment results. ``Complex'' indicates fraction of runs with $D_2 > 1.2$.}
+\label{tab:controls}
+\begin{tabular}{lcc}
+\toprule
+Control & Median $D_2$ & Complex \\
+\midrule
+1. Single core + E & 1.400 & 15/25 \\
+2. Uncoupled ($k_\text{cat} = 0$) & 0.990 & 0/25 \\
+3. Diffusive (no E) & 0.991 & 0/25 \\
+4a. Independent, $\gamma = 0.001$ & 1.410 & 55/60 \\
+4b. Independent, moderate $\gamma$ & 0.994 & 0/40 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Control~1 confirms that a single oscillator--energy subsystem inflates $D_2$ to $\sim$1.4 at $\gamma = 0.001$, establishing the intrinsic slow--fast mechanism. Controls~2 and~3 confirm that coupling through a slow energy variable---not mere diffusive coupling or the energy pool's existence---is necessary.
+
+The independent-reservoir controls (4a and~4b) are the decisive causal tests. At $\gamma = 0.001$ (Control~4a), $D_2 > 1.2$ persists with completely decoupled energy pools: each 3D subsystem ($X_i, Y_i, E_i$) inflates independently. The slow energy variable creates genuine slow--fast dynamics within each subsystem; sharing is incidental.
+
+At moderate $\gamma$ (Control~4b), $D_2 > 1.2$ disappears entirely. The two key shared-reservoir inflation points collapse:
+\begin{align}
+J = 5, \gamma = 0.002:\; &D_2 = 1.558 \rightarrow 0.994 \; (\Delta = -0.565) \nonumber \\
+J = 4, \gamma = 0.003:\; &D_2 = 1.566 \rightarrow 0.993 \; (\Delta = -0.573) \nonumber
+\end{align}
+At these parameters, sharing the reservoir IS causally essential. The shared pool creates inter-oscillator competition---an additional slow timescale that enables the highest-dimensional transient dynamics.
+
+\subsection{The Complex Phase Is Transient}
+
+The $D_2$ convergence test fails at both exemplar points: $D_2$ does not converge under integration time doubling ($|D_2(2T) - D_2(T)| \gg 0.05$). Instead, $D_2$ rises from $T = 5{,}000$ to $T = 10{,}000$, then drops sharply at $T = 20{,}000$, revealing non-monotonic behavior inconsistent with asymptotic convergence.
+
+Sliding-window analysis resolves the ambiguity (Table~\ref{tab:sliding}). At both exemplar points, $D_2 > 1.2$ is confined to the first $\sim$7{,}500--10{,}000 time units. The system explores a high-dimensional attractor transiently---for 500--750 oscillator periods---before phase-locking restores $D_2 \approx 1$.
+
+\begin{table}[b]
+\centering
+\caption{Sliding-window $D_2$ at exemplar parameter sets ($T = 20{,}000$, 2{,}500-unit non-overlapping windows, seed 42).}
+\label{tab:sliding}
+\begin{tabular}{lcc}
+\toprule
+Window & Regime 2 & Regime 1 \\
+& ($J{=}5$, $\gamma{=}0.002$) & ($J{=}7$, $\gamma{=}0.001$) \\
+\midrule
+$[2500, 5000]$ & 1.357 & 1.420 \\
+$[5000, 7500]$ & 1.118 & 1.586 \\
+$[7500, 10{,}000]$ & 1.047 & 1.414 \\
+$[10{,}000, 12{,}500]$ & 1.010 & 1.035 \\
+$[12{,}500, 15{,}000]$ & 0.995 & 1.012 \\
+\midrule
+$T_\text{lock}$ & $\sim$7{,}500 & $\sim$10{,}000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The transient is not an artifact. All four Lyapunov exponent estimates (two seeds $\times$ two exemplars) are positive: $\lambda_1 = 0.008$--$0.058$ with 95\% CIs excluding zero. This confirms genuine transient chaos, not quasi-periodicity.
+
+The longer transient at Regime~1 ($T_\text{lock} \approx 10{,}000$ vs.\ $7{,}500$) is consistent with the slower energy relaxation ($1/\gamma = 1000$ vs.\ $500$ time units): the slow variable takes longer to equilibrate, extending the exploratory phase.
+
+\subsection{Growth Destroys Complexity---Unless Aligned}
+
+\begin{table*}[t]
+\centering
+\caption{System survival under growth (combined: primary $N = 50$ + replication $N = 30$ = 80 trajectories per cell). ``Survived'' = valid $D_2$ obtained (not solver failure, simulation failure, or fixed point). OR = odds ratio with 95\% Wald CI. All $p$-values Holm--Bonferroni adjusted.}
+\label{tab:survival}
+\begin{tabular}{ccccccl}
+\toprule
+$k$ & Random surv. & Aligned surv. & OR & 95\% CI & $p_\text{adj}$ \\
+\midrule
+0 & 80/80 (100\%) & 80/80 (100\%) & --- & --- & --- \\
+1 & 37/80 (46\%) & 69/80 (86\%) & 0.14 & [0.06, 0.30] & $2.3 \times 10^{-7}$ \\
+2 & 22/80 (28\%) & 53/80 (66\%) & 0.19 & [0.10, 0.38] & $1.5 \times 10^{-6}$ \\
+3 & 12/80 (15\%) & 48/80 (60\%) & 0.12 & [0.06, 0.25] & $1.5 \times 10^{-8}$ \\
+4 & 7/80 (9\%) & 53/80 (66\%) & 0.049 & [0.02, 0.12] & $6.8 \times 10^{-14}$ \\
+5 & 1/80 (1\%) & 53/80 (66\%) & 0.006 & [0.00, 0.05] & $7.0 \times 10^{-20}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The growth experiment reveals that the dominant consequence of random chemical elaboration is not gradual degradation but \textit{catastrophic failure}. At $k = 5$ random additions, only 1 of 80 trajectories (1.2\%) produced a valid dynamical trajectory; 79 suffered solver failure, simulation blowup, or collapse to a fixed point. Aligned growth maintains 66\% survival at the same $k$ (Table~\ref{tab:survival}).
+
+The survival advantage grows with $k$. Logistic regression confirms a significant interaction:
+\begin{align}
+\text{intercept}: &\quad \beta_0 = 1.77 \; (p < 10^{-14}) \nonumber \\
+k: &\quad \beta_1 = -1.24 \; (p < 10^{-28}) \nonumber \\
+\text{aligned}: &\quad \beta_2 = 0.31 \; (p = 0.33) \nonumber \\
+k \times \text{aligned}: &\quad \beta_3 = 0.87 \; (p < 10^{-11}) \nonumber
+\end{align}
+The interaction $\beta_3$ indicates that the alignment advantage does not merely offset the per-reaction damage but \textit{scales with it}: each reaction added is $e^{0.87} \approx 2.4$ times less likely to be fatal under aligned growth. The non-significant $\beta_2$ reflects that at $k = 0$ (no additions), both groups are identical by construction.
+
+The activation ratio $\eta$ dilutes monotonically under aligned growth, from $0.136 \pm 0.016$ at $k = 0$ to $0.079 \pm 0.021$ at $k = 5$ (slope: $-0.011$/rxn, 95\% CI $[-0.012, -0.010]$). The random-growth slope is imprecise ($-0.004$/rxn) due to extreme attrition. The $D_2$ ceiling is confirmed: the maximum $D_2$ observed across all 960 runs is 1.939, consistent with the 5D projection and one slow mode.
+
+\begin{table}[b]
+\centering
+\caption{Cross-paper comparison at $k = 5$. Paper~2 used $N = 200$ single-Brusselator trajectories; Paper~3 used $N = 80$ enzyme-complex coupled trajectories.}
+\label{tab:cross}
+\begin{tabular}{lccc}
+\toprule
+Endpoint & Random & Aligned & OR \\
+\midrule
+\multicolumn{4}{l}{\textit{Paper 2 (single oscillator)}} \\
+\quad Oscillation survival & 36/200 & 121/200 & 7.0 \\
+\midrule
+\multicolumn{4}{l}{\textit{Paper 3 (coupled oscillator)}} \\
+\quad System survival & 1/80 & 53/80 & 167 \\
+\quad Oscillation survival & 2/80 & 61/80 & 117 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The cross-paper comparison (Table~\ref{tab:cross}) reveals that modular energy coupling \textit{amplifies} the alignment advantage by more than an order of magnitude. Paper~2's single Brusselator has OR $= 7.0$ for oscillation survival at $k = 5$; Paper~3's enzyme-complex system has OR $= 167$ for system survival and OR $= 117$ for oscillation survival. The coupled system is far more fragile to random perturbation than the single oscillator, but aligned growth protects it at comparable rates ($\sim$66\% vs.\ 60.5\% survival).
+
+Both parameter sets show consistent patterns: in the primary set ($J = 5$, $\gamma = 0.002$), random survival at $k = 5$ is 1/50 (2\%); in the replication set ($J = 4$, $\gamma = 0.003$), it is 0/30 (0\%). Aligned survival is 34/50 (68\%) and 19/30 (63\%), respectively.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Three Faces of Dynamical Rigidity}
+
+The three papers in this series document a progression through increasingly specific forms of dynamical rigidity:
+
+\begin{enumerate}
+\item \textbf{Structural rigidity} (Paper~1): Adding reactions increases $r_S$ without proportionally increasing $D_2$, causing $\eta$ to dilute at $-0.024$/reaction.
+
+\item \textbf{Topological rigidity} (Paper~2): Feedback-aligned growth preserves the oscillatory core but cannot increase $D_2$ beyond the limit cycle floor. The dilution rate is invariant to selection.
+
+\item \textbf{Energetic rigidity} (Paper~3, initial finding): A fast energy variable coupled to an oscillator is dynamically slaved and cannot inflate $D_2$. Only when $E$ relaxation is much slower than the oscillator period does genuine timescale separation produce $D_2 > 1$.
+\end{enumerate}
+
+This progression suggests that dynamical rigidity is a generic property of autocatalytic oscillators. Breaking it requires not more reactions or better topology, but a qualitatively different dynamical ingredient: a slow degree of freedom that creates genuine separation of timescales.
+
+\subsection{Transient Ecology}
+
+The high-$D_2$ phase is transient, lasting 500--750 oscillator periods before phase-locking restores rigidity. This might initially seem like a negative result---the system does not achieve permanent high-dimensional chaos. But from an origin-of-life perspective, transience may be the relevant regime.
+
+Prebiotic chemical systems existed in fluctuating environments where energy sources, concentrations, and boundary conditions changed on timescales comparable to or shorter than the locking time $T_\text{lock}$. In such environments, a system that explores high-dimensional dynamics for hundreds of oscillator periods before locking is functionally equivalent to a permanently chaotic system---it never reaches the locked state before perturbation resets the transient. Selection could then act on $T_\text{lock}$ itself: networks with longer exploratory phases sample more of state space before locking, potentially discovering more favorable dynamical configurations.
+
+The fact that $T_\text{lock}$ varies across parameter sets ($\sim$7{,}500 at $\gamma = 0.002$ vs.\ $\sim$10{,}000 at $\gamma = 0.001$) and is controlled by $1/\gamma$ suggests a concrete selection target: slower energy relaxation extends the window of exploration. Whether such selection is achievable in realistic geochemical settings is an open question.
+
+\subsection{Growth-Fragility}
+
+The growth experiment reveals that the coupled oscillator system is dramatically more fragile than the single Brusselator. Paper~2 found 18\% random survival at $k = 5$; Paper~3 finds 1.2\%. The OR increases from 7 to 167. This amplification has a clear mechanistic explanation: the enzyme-complex model has more coupled dynamical variables and a narrower basin of attraction. Random perturbations are more likely to push the system out of the oscillatory regime.
+
+Critically, the dominant mode of failure is \textit{catastrophic}---solver blowup, simulation failure, or collapse to a fixed point---not gradual degradation. Among the few random trajectories that do survive, $D_2$ values are comparable to aligned survivors (Mann--Whitney $p > 0.05$ at most $k$ levels). The fragility is binary: networks either survive or are destroyed, and alignment dramatically shifts the balance.
+
+This suggests a \textit{growth-fragility thesis}: the dynamical prerequisites for dimensional inflation are inherently incompatible with unconstrained chemical elaboration. A system that achieves $D_2 > 1$ through timescale separation is sitting on a dynamical knife-edge. Random additions almost certainly push it off. Only functionally aligned growth---additions that preserve the oscillatory core---can maintain the system's capacity for transient complexity.
+
+\subsection{Two Mechanisms, One Principle}
+
+The independent-reservoir controls cleanly separate two mechanisms of dimensional inflation:
+
+\begin{enumerate}
+\item \textbf{Intrinsic slow--fast} ($\gamma = 0.001$): Each 3D oscillator--energy subsystem inflates independently ($D_2 \approx 1.4$). The mechanism is amplitude modulation of the fast oscillator by the slow energy variable, likely producing quasi-periodic torus-like dynamics before phase-locking.
+
+\item \textbf{Shared-reservoir desynchronization} (moderate $\gamma$): Independent subsystems produce only $D_2 \approx 1.0$. The shared reservoir creates inter-oscillator competition, where each core's activity depletes the other's energy supply, introducing an additional slow timescale (desynchronization/beating) that enables $D_2$ up to 1.67.
+\end{enumerate}
+
+Both mechanisms require \textit{timescale separation}: a slow variable coupled to fast oscillatory dynamics. In Regime~1, the slowness is extreme ($1/\gamma = 1000$) and sufficient alone. In Regime~2, the slowness is moderate ($1/\gamma = 333$--500) and must be supplemented by the shared-resource coupling to achieve inflation. The unifying principle is that breaking dynamical rigidity requires a degree of freedom that evolves on a fundamentally different timescale from the oscillatory core.
+
+\subsection{Limitations}
+
+\begin{enumerate}
+\item \textbf{Single template family}: All experiments used variants of the Brusselator. Other oscillator templates may show different fragility profiles and inflation thresholds.
+
+\item \textbf{Enzyme-complex saturation}: At the validated parameter set, the gate is nearly saturated ($f(E) \approx 0.998$). The inflation arises from timescale separation, not from nonlinear gating dynamics. This simplifies interpretation but limits claims about the role of enzymatic regulation.
+
+\item \textbf{Transient complexity}: The $D_2 > 1.2$ phase is transient by hundreds of oscillator periods. Whether environmental fluctuations can reset this transient in realistic geochemical settings is unknown.
+
+\item \textbf{Incomplete replication}: The third parameter set ($J = 7$, $\gamma = 0.001$) could not complete the growth experiment because the aligned oscillation filter was computationally intractable at strong coupling---essentially no autocatalytic reaction preserves oscillation. This itself supports the growth-fragility thesis (maximally rigid systems reject all perturbations) but limits statistical power.
+
+\item \textbf{Within-core growth only}: Added reactions were constrained to a single oscillator core. Cross-core or energy-mediated additions may show different patterns.
+\end{enumerate}
+
+\subsection{Future Directions}
+
+\begin{itemize}
+\item \textbf{Evolutionary selection on $T_\text{lock}$}: Can a population of networks, subject to selection for prolonged transient exploration, evolve longer $T_\text{lock}$ through parameter or structural adaptation?
+
+\item \textbf{Alternative templates}: Test whether the growth-fragility thesis generalizes to other oscillator families (Oregonator, glycolytic oscillators, repressilators).
+
+\item \textbf{Cross-core growth}: Allow reactions spanning both oscillator cores to test whether inter-module connections enhance or suppress transient complexity.
+
+\item \textbf{Spatial coupling}: Replace the well-mixed shared reservoir with diffusion-mediated energy transport, adding spatial degrees of freedom.
+
+\item \textbf{Environmental fluctuation}: Simulate time-varying $J$ or $\gamma$ to test whether transient resets extend the effective exploratory duration.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We investigated the mechanism by which autocatalytic oscillators can escape the $D_2 \approx 1$ limit cycle floor documented in Papers~1 and~2. Our findings:
+
+\begin{enumerate}
+\item Timescale separation---a slow energy variable coupled to fast oscillatory cores---enables transient dimensional inflation with $D_2$ up to 1.67 lasting 500--750 oscillator periods before phase-locking restores rigidity. The transient is genuine chaos ($\lambda_1 > 0$), not quasi-periodicity.
+
+\item Two distinct inflation mechanisms operate, both requiring timescale separation: intrinsic slow--fast dynamics ($\gamma = 0.001$, each subsystem inflates independently) and shared-reservoir desynchronization (moderate $\gamma$, sharing causally essential with $\Delta D_2 = -0.57$ when reservoirs are separated).
+
+\item Random chemical growth catastrophically destroys dimensional inflation: system survival at $k = 5$ is 1.2\% (random) versus 66\% (aligned), with OR $= 167$ ($p < 10^{-20}$). This is $>$\,20$\times$ the alignment advantage found in Paper~2 (OR $= 7$), confirming that modular energy coupling amplifies growth fragility.
+
+\item The activation ratio $\eta$ continues to dilute monotonically under both growth rules (aligned slope: $-0.011$/rxn). The universal dilution pattern holds across all three papers: network growth cannot increase $\eta$, only slow its decay by preserving viability.
+
+\item The $D_2$ ceiling of $\sim$2.0 is confirmed (max observed: 1.939), consistent with the 5D projected state space and one slow mode.
+
+\item We propose a ``transient ecology'' framework: prebiotic chemical systems need not sustain permanent chaos. Finite-time exploration of state space---prolonged by slow energy coupling and protected by oscillation-aligned growth---may be sufficient for the chemical search process that precedes biological organization.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments}
+This work was conducted as part of an independent research program exploring connections between dynamical systems theory and prebiotic chemistry. Computational analysis was performed using the \texttt{dimensional\_opening} Python package. All code and data are available at \url{https://zenodo.org}.
+\end{acknowledgments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{99}
+
+\bibitem{paper1}
+C.~Merrill, ``Dynamical activation in autocatalytic chemical networks: A correlation dimension analysis,''
+Zenodo preprint (2026).
+
+\bibitem{paper2}
+C.~Merrill, ``Feedback-aligned autocatalysis preserves dynamical viability but not activation in growing chemical networks,''
+Zenodo preprint (2026).
+
+\bibitem{kauffman1986}
+S.~A.~Kauffman, ``Autocatalytic sets of proteins,''
+J.\ Theor.\ Biol.\ \textbf{119}, 1 (1986).
+
+\bibitem{eigen1971}
+M.~Eigen, ``Selforganization of matter and the evolution of biological macromolecules,''
+Naturwissenschaften \textbf{58}, 465 (1971).
+
+\bibitem{hordijk2010}
+W.~Hordijk and M.~Steel, ``Detecting autocatalytic, self-sustaining sets in chemical reaction systems,''
+J.\ Theor.\ Biol.\ \textbf{227}, 451 (2004).
+
+\bibitem{grassberger1983}
+P.~Grassberger and I.~Procaccia, ``Characterization of strange attractors,''
+Phys.\ Rev.\ Lett.\ \textbf{50}, 346 (1983).
+
+\bibitem{prigogine1968}
+I.~Prigogine and R.~Lefever, ``Symmetry breaking instabilities in dissipative systems.\ II,''
+J.\ Chem.\ Phys.\ \textbf{48}, 1695 (1968).
+
+\bibitem{rosenstein1993}
+M.~T.~Rosenstein, J.~J.~Collins, and C.~J.~De~Luca, ``A practical method for calculating largest Lyapunov exponents from small data sets,''
+Physica~D \textbf{65}, 117 (1993).
+
+\bibitem{strogatz2000}
+S.~H.~Strogatz, \textit{Nonlinear Dynamics and Chaos}
+(Westview Press, Cambridge, MA, 2000).
+
+\bibitem{novak2008}
+B.~Nov\'{a}k and J.~J.~Tyson, ``Design principles of biochemical oscillators,''
+Nat.\ Rev.\ Mol.\ Cell Biol.\ \textbf{9}, 981 (2008).
+
+\bibitem{steel2000}
+M.~Steel, ``The emergence of a self-catalysing structure in abstract origin-of-life models,''
+Appl.\ Math.\ Lett.\ \textbf{13}, 91 (2000).
+
+\end{thebibliography}
+
+\end{document}

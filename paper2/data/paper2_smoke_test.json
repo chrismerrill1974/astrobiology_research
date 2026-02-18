@@ -1,0 +1,731 @@
+{
+  "name": "Paper 2: Random vs Feedback-Aligned Autocatalysis",
+  "hypothesis": "Feedback-aligned additions show less dynamical dilution than random additions",
+  "n_trajectories": 20,
+  "n_steps": 5,
+  "max_candidates": 50,
+  "group_a_eta_matrix": [
+    [
+      0.24920388233455026,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936259226300376,
+      0.16613529998733823,
+      0.14240168570343276,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936173186209732,
+      0.16613472681622124,
+      0.21988646689376598,
+      0.16503633835673778,
+      0.14669896742821137
+    ],
+    [
+      0.24920388233455026,
+      0.19936276525124913,
+      0.16613563770937426,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.3844481765994908,
+      0.3206374021520773,
+      null,
+      null,
+      0.10819036879683117
+    ],
+    [
+      0.24920388233455026,
+      0.1993626984231532,
+      0.16613558201929435,
+      0.14240192744510943,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.25285152415320294,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936259865729664,
+      0.16613581707087796,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      null,
+      null,
+      null,
+      null,
+      0.1195630176788973
+    ],
+    [
+      0.24920388233455026,
+      0.19936198207579284,
+      0.16613498506316068,
+      0.14240176282833134,
+      0.12460154247478991,
+      0.12519771426533827
+    ],
+    [
+      0.24920388233455026,
+      0.1993621368931075,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936310586764022,
+      0.166135582793941,
+      0.1424019281090923,
+      0.1246018590200877,
+      0.11075704739732568
+    ],
+    [
+      0.24920388233455026,
+      0.19936310586764022,
+      0.1661348231102493,
+      null,
+      0.11586747191120021,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.1993633116486174,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936310586764022,
+      0.1661357264274023,
+      0.14240205122348767,
+      0.1246015253901214,
+      0.11075691145788569
+    ],
+    [
+      0.24920388233455026,
+      0.19936172216878226,
+      0.1661347684739852,
+      0.142400985676238,
+      0.12460101753564688,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.1993634531595017,
+      0.1661350204620519,
+      0.14240296839108402,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  ],
+  "group_b_eta_matrix": [
+    [
+      0.24920388233455026,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936263033807905,
+      0.16613497007437988,
+      0.1661360089538448,
+      0.14240229338900984,
+      0.14240167413417956
+    ],
+    [
+      0.24920388233455026,
+      0.24920388233455026,
+      0.19936237081241373,
+      0.1661353494634313,
+      0.14240171211745434,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936272096510996,
+      0.16613404821475353,
+      0.14240243748873452,
+      0.12460146919641883,
+      0.12460102426866743
+    ],
+    [
+      0.24920388233455026,
+      0.19936226647757546,
+      0.16613522206464623,
+      0.1424017666350254,
+      0.12460165464614734,
+      0.1250805294054733
+    ],
+    [
+      0.24920388233455026,
+      0.19936308517975898,
+      0.16613549839197878,
+      0.14240185576455325,
+      0.1429950007120556,
+      0.1251243732521262
+    ],
+    [
+      0.24920388233455026,
+      0.19936372706732847,
+      0.16613628459858204,
+      0.1661353677559501,
+      0.14240174379081436,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936172216878226,
+      0.1661347684739852,
+      0.14240134630930296,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936336101372032,
+      0.1668392901734724,
+      0.14300510586297635,
+      0.1251294676301043,
+      0.11122509243097196
+    ],
+    [
+      0.24920388233455026,
+      0.19936289855460637,
+      0.16613574879550533,
+      0.1661356745012488,
+      0.14240207475077368,
+      0.12460181540692697
+    ],
+    [
+      0.24920388233455026,
+      0.19936122707209733,
+      0.16613482154467232,
+      0.1424013334041674,
+      0.1424013334041674,
+      0.1252120654084257
+    ],
+    [
+      0.24920388233455026,
+      0.19936310586764022,
+      0.19936220295676169,
+      0.1661368307531762,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.24920242473312826,
+      0.1993619397865026,
+      0.16613494982208551,
+      0.14240138556178758,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936347313599267,
+      0.1661355860658054,
+      0.142402208577917,
+      0.12460168019657375,
+      0.12460192728624143
+    ],
+    [
+      0.24920388233455026,
+      0.19936194874227103,
+      0.16613479695838648,
+      0.14240197386937925,
+      0.12460137121231436,
+      0.12460205947138471
+    ],
+    [
+      0.24920388233455026,
+      0.19936172216878226,
+      0.1661338610347729,
+      0.16613675486965554,
+      0.14240204399269965,
+      0.12460175383191148
+    ],
+    [
+      0.24920388233455026,
+      0.19936258950464866,
+      0.16613417333193206,
+      0.14240146286396,
+      0.14240186082782097,
+      0.12460162822434336
+    ],
+    [
+      0.24920388233455026,
+      0.19936172216878226,
+      0.1661353271444911,
+      0.16679986442750105,
+      null,
+      null
+    ],
+    [
+      0.24920388233455026,
+      0.19936128264892125,
+      0.1661344022074344,
+      0.1424017907311413,
+      0.12460156688974862,
+      0.11075670529966594
+    ],
+    [
+      0.24920388233455026,
+      0.19936336215270237,
+      0.16613365861552465,
+      0.14297660568096912,
+      0.12510452997084798,
+      0.12511715425986578
+    ]
+  ],
+  "group_a_valid_counts": [
+    20,
+    15,
+    12,
+    8,
+    6,
+    6
+  ],
+  "group_b_valid_counts": [
+    20,
+    19,
+    19,
+    19,
+    16,
+    13
+  ],
+  "group_a_medians": [
+    0.24920388233455026,
+    0.19936276525124913,
+    0.1661354410033163,
+    0.14240192777710087,
+    0.12460153393245565,
+    0.1151600325381115
+  ],
+  "group_a_iqr": [
+    0.0,
+    8.441800731784355e-07,
+    7.153139484350479e-07,
+    5.369682800626663e-07,
+    6.353844977380341e-07,
+    0.013032094675982334
+  ],
+  "group_b_medians": [
+    0.24920388233455026,
+    0.19936272096510996,
+    0.16613522206464623,
+    0.14297660568096912,
+    0.1424013594829775,
+    0.12460192728624143
+  ],
+  "group_b_iqr": [
+    0.0,
+    1.5261276846700866e-06,
+    1.431356333903011e-06,
+    0.023733697880752164,
+    0.017800232810073507,
+    0.0005155260355224206
+  ],
+  "group_a_slope": -0.026235327318993962,
+  "group_b_slope": -0.02334435645918909,
+  "group_a_slope_ci": [
+    -0.027231098202946186,
+    -0.021729737957078724
+  ],
+  "group_b_slope_ci": [
+    -0.024886430956717942,
+    -0.022614306260415284
+  ],
+  "group_a_tail_prob": [
+    0.0,
+    0.13333333333333333,
+    0.08333333333333333,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "group_b_tail_prob": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "mann_whitney_p": [
+    1.0,
+    0.578347429334559,
+    0.5429277401290524,
+    0.2376703489746968,
+    0.09802581319609184,
+    0.3676102019755271
+  ],
+  "ks_p": [
+    1.0,
+    0.8307994915773096,
+    0.5809796271662114,
+    0.24677814938684503,
+    0.10534357283583287,
+    0.17956656346749228
+  ],
+  "fisher_p": [
+    1.0,
+    0.18716577540106952,
+    0.3870967741935485,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "acceptance_rates_per_step": [
+    [
+      0.5,
+      1.0,
+      1.0,
+      1.0,
+      0.5
+    ],
+    [
+      0.5,
+      1.0,
+      0.5,
+      0.5,
+      1.0
+    ],
+    [
+      0.5,
+      1.0,
+      0.5,
+      1.0,
+      0.5
+    ],
+    [
+      1.0,
+      1.0,
+      0.5,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    [
+      1.0,
+      1.0,
+      0.5,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      0.5,
+      0.3333333333333333,
+      1.0
+    ],
+    [
+      0.5,
+      1.0,
+      1.0,
+      0.5,
+      0.5
+    ],
+    [
+      0.5,
+      0.5,
+      1.0,
+      1.0,
+      0.5
+    ],
+    [
+      1.0,
+      1.0,
+      0.2,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.3333333333333333,
+      1.0,
+      1.0,
+      1.0,
+      0.25
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      0.5,
+      1.0
+    ],
+    [
+      1.0,
+      0.5,
+      1.0,
+      1.0,
+      0.5
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      0.5,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.5,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      0.5,
+      1.0,
+      1.0,
+      0.3333333333333333
+    ],
+    [
+      0.5,
+      1.0,
+      1.0,
+      0.5,
+      1.0
+    ],
+    [
+      0.5,
+      1.0,
+      1.0,
+      1.0,
+      0.5
+    ],
+    [
+      0.5,
+      1.0,
+      0.5,
+      0.5,
+      1.0
+    ]
+  ],
+  "acceptance_rate_medians": [
+    0.75,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "early_termination_count": 0,
+  "early_termination_rate": 0.0,
+  "cv_d2_correlation": -0.9889600868412988,
+  "group_b_filter_results": [
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127718719214467), amplitude=np.float64(3.381114825910099), sign_changes=13, boundedness_ratio=np.float64(1.1010948305262966), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718719214467), amplitude=np.float64(3.381114825910099), sign_changes=13, boundedness_ratio=np.float64(1.1010948305262966), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718719214467), amplitude=np.float64(3.381114825910099), sign_changes=13, boundedness_ratio=np.float64(1.1010948305262966), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718719214467), amplitude=np.float64(3.381114825910099), sign_changes=13, boundedness_ratio=np.float64(1.1010948305262966), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718745831555), amplitude=np.float64(3.3811156006648053), sign_changes=13, boundedness_ratio=np.float64(1.101092919913782), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127716579876136), amplitude=np.float64(3.38111083856477), sign_changes=13, boundedness_ratio=np.float64(1.1010460635945656), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720936692991), amplitude=np.float64(3.3811168151329625), sign_changes=13, boundedness_ratio=np.float64(1.1010530060642199), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718461907749), amplitude=np.float64(3.3811143659240552), sign_changes=13, boundedness_ratio=np.float64(1.1010567740291066), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718461907749), amplitude=np.float64(3.3811143659240552), sign_changes=13, boundedness_ratio=np.float64(1.1010567740291066), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718131138798), amplitude=np.float64(3.3811139339291927), sign_changes=13, boundedness_ratio=np.float64(1.1010559640688775), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717253416049), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.1010299090427211), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720598896514), amplitude=np.float64(3.381115163920818), sign_changes=13, boundedness_ratio=np.float64(1.1010819251818504), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718790734356), amplitude=np.float64(3.381115566600858), sign_changes=13, boundedness_ratio=np.float64(1.101091130328134), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718822703298), amplitude=np.float64(3.381115606641327), sign_changes=13, boundedness_ratio=np.float64(1.1010911923027522), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127714336527268), amplitude=np.float64(3.3811141376454494), sign_changes=13, boundedness_ratio=np.float64(1.1011048677331814), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127718570286967), amplitude=np.float64(3.3811145435456136), sign_changes=13, boundedness_ratio=np.float64(1.1010528602852871), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719885188652), amplitude=np.float64(3.381112978510666), sign_changes=13, boundedness_ratio=np.float64(1.101054868412675), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720260464223), amplitude=np.float64(3.381113723600429), sign_changes=13, boundedness_ratio=np.float64(1.1010708677893712), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720665423068), amplitude=np.float64(3.381113723598686), sign_changes=13, boundedness_ratio=np.float64(1.101069199436954), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127721255517285), amplitude=np.float64(3.3811148426286834), sign_changes=13, boundedness_ratio=np.float64(1.1010669495948329), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.912772036854153), amplitude=np.float64(3.381110938137487), sign_changes=13, boundedness_ratio=np.float64(1.1010685001968066), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912772036854153), amplitude=np.float64(3.381110938137487), sign_changes=13, boundedness_ratio=np.float64(1.1010685001968066), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720345956076), amplitude=np.float64(3.381115719507601), sign_changes=13, boundedness_ratio=np.float64(1.1010664213021188), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720405900558), amplitude=np.float64(3.381116361979374), sign_changes=13, boundedness_ratio=np.float64(1.10107973104444), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.3657934094790331), amplitude=np.float64(1.9127345051189095), sign_changes=30, boundedness_ratio=np.float64(2.1132482529226606), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717630434155), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.101036810310309), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912772050102156), amplitude=np.float64(3.381115296364296), sign_changes=13, boundedness_ratio=np.float64(1.101063403267115), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912772050102156), amplitude=np.float64(3.381115296364296), sign_changes=13, boundedness_ratio=np.float64(1.101063403267115), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.31958333811451556), amplitude=np.float64(1.9430355102482435), sign_changes=30, boundedness_ratio=np.float64(0.7718822535454023), best_species_idx=1, best_species_name='Y')",
+      "OscillationResult(passes=True, cv=np.float64(0.3195861399980868), amplitude=np.float64(1.9430489731161944), sign_changes=30, boundedness_ratio=np.float64(0.7718479527793335), best_species_idx=1, best_species_name='Y')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.912771834751589), amplitude=np.float64(3.381115356717865), sign_changes=13, boundedness_ratio=np.float64(1.1010345877616574), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719094895635), amplitude=np.float64(3.3811135918278796), sign_changes=13, boundedness_ratio=np.float64(1.1010555936607298), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719366430745), amplitude=np.float64(3.3811147838575035), sign_changes=13, boundedness_ratio=np.float64(1.1010903402948269), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719366430745), amplitude=np.float64(3.3811147838575035), sign_changes=13, boundedness_ratio=np.float64(1.1010903402948269), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127717618812945), amplitude=np.float64(3.3811151224835583), sign_changes=13, boundedness_ratio=np.float64(1.1010993734906673), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717838797916), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.1010458269247496), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127717838797916), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.1010458269247496), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127717927336074), amplitude=np.float64(3.3811148347280495), sign_changes=13, boundedness_ratio=np.float64(1.101050208469144), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127716916191472), amplitude=np.float64(3.381113857306883), sign_changes=13, boundedness_ratio=np.float64(1.1010995028786474), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127716916191472), amplitude=np.float64(3.381113857306883), sign_changes=13, boundedness_ratio=np.float64(1.1010995028786474), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.912772087115662), amplitude=np.float64(3.381114641011933), sign_changes=13, boundedness_ratio=np.float64(1.101052528254471), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.1565851876292089), amplitude=np.float64(0.8743147734085011), sign_changes=33, boundedness_ratio=np.float64(1.338323645861914), best_species_idx=1, best_species_name='Y')",
+      "OscillationResult(passes=True, cv=np.float64(0.1565851876292089), amplitude=np.float64(0.8743147734085011), sign_changes=33, boundedness_ratio=np.float64(1.338323645861914), best_species_idx=1, best_species_name='Y')",
+      "OscillationResult(passes=True, cv=np.float64(0.1565851876292089), amplitude=np.float64(0.8743147734085011), sign_changes=33, boundedness_ratio=np.float64(1.338323645861914), best_species_idx=1, best_species_name='Y')",
+      "OscillationResult(passes=True, cv=np.float64(0.15657469918446254), amplitude=np.float64(0.8742892614787292), sign_changes=33, boundedness_ratio=np.float64(1.338126256824003), best_species_idx=1, best_species_name='Y')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127719517676954), amplitude=np.float64(3.3811131184657093), sign_changes=13, boundedness_ratio=np.float64(1.1010549897745676), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719517676954), amplitude=np.float64(3.3811131184657093), sign_changes=13, boundedness_ratio=np.float64(1.1010549897745676), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720004608186), amplitude=np.float64(3.3811152088771084), sign_changes=13, boundedness_ratio=np.float64(1.101063167770259), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127723535675355), amplitude=np.float64(3.381116788748877), sign_changes=13, boundedness_ratio=np.float64(1.1010623749757649), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127723535675355), amplitude=np.float64(3.381116788748877), sign_changes=13, boundedness_ratio=np.float64(1.1010623749757649), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127718476630542), amplitude=np.float64(3.381113960530187), sign_changes=13, boundedness_ratio=np.float64(1.101054028047666), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127717036900863), amplitude=np.float64(3.3811129244620304), sign_changes=13, boundedness_ratio=np.float64(1.1010584548076818), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720111649369), amplitude=np.float64(3.3811129750183175), sign_changes=13, boundedness_ratio=np.float64(1.1010550381800663), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720111649369), amplitude=np.float64(3.3811129750183175), sign_changes=13, boundedness_ratio=np.float64(1.1010550381800663), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.3441412196964025), amplitude=np.float64(1.5164861690208302), sign_changes=18, boundedness_ratio=np.float64(0.7914649015040657), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717253416049), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.1010299090427211), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718849280189), amplitude=np.float64(3.3811152405434424), sign_changes=13, boundedness_ratio=np.float64(1.1010691693028436), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720143875373), amplitude=np.float64(3.3811159052386612), sign_changes=13, boundedness_ratio=np.float64(1.1010857206903375), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718212766299), amplitude=np.float64(3.381115524711201), sign_changes=13, boundedness_ratio=np.float64(1.1010928414665562), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127715572664888), amplitude=np.float64(3.3811155924494076), sign_changes=13, boundedness_ratio=np.float64(1.1011045783023428), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127720266905072), amplitude=np.float64(3.3811163769572303), sign_changes=13, boundedness_ratio=np.float64(1.1010800704091626), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720266905072), amplitude=np.float64(3.3811163769572303), sign_changes=13, boundedness_ratio=np.float64(1.1010800704091626), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720266905072), amplitude=np.float64(3.3811163769572303), sign_changes=13, boundedness_ratio=np.float64(1.1010800704091626), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720266905072), amplitude=np.float64(3.3811163769572303), sign_changes=13, boundedness_ratio=np.float64(1.1010800704091626), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127714898222334), amplitude=np.float64(3.381115061549478), sign_changes=13, boundedness_ratio=np.float64(1.1011044253334894), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717149939865), amplitude=np.float64(3.3811118947654295), sign_changes=13, boundedness_ratio=np.float64(1.1010532995165245), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912772049003613), amplitude=np.float64(3.381115679351374), sign_changes=13, boundedness_ratio=np.float64(1.101076321450609), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912772046649103), amplitude=np.float64(3.3811159839562532), sign_changes=13, boundedness_ratio=np.float64(1.1010764388215335), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127721780542322), amplitude=np.float64(3.381115409149555), sign_changes=13, boundedness_ratio=np.float64(1.1010743955509483), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720345422123), amplitude=np.float64(3.381115440093701), sign_changes=13, boundedness_ratio=np.float64(1.1010753707386076), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127714310596724), amplitude=np.float64(3.3811108795698774), sign_changes=13, boundedness_ratio=np.float64(1.10105242931824), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720460459252), amplitude=np.float64(3.3811140271903724), sign_changes=13, boundedness_ratio=np.float64(1.10105674721083), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127722697880518), amplitude=np.float64(3.381117937849331), sign_changes=13, boundedness_ratio=np.float64(1.1010687356342794), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127722385929059), amplitude=np.float64(3.381115682767166), sign_changes=13, boundedness_ratio=np.float64(1.101065896665885), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720883160303), amplitude=np.float64(3.3811158508279147), sign_changes=13, boundedness_ratio=np.float64(1.1010749904435924), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717838797916), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.1010458269247496), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912771771397644), amplitude=np.float64(3.381114227786684), sign_changes=13, boundedness_ratio=np.float64(1.1010567656365882), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718323858529), amplitude=np.float64(3.381114690684127), sign_changes=13, boundedness_ratio=np.float64(1.1010849329455252), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912771868222318), amplitude=np.float64(3.381113551984934), sign_changes=13, boundedness_ratio=np.float64(1.1010911995994375), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719137524122), amplitude=np.float64(3.381116062641839), sign_changes=13, boundedness_ratio=np.float64(1.10108973938523), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717054016581), amplitude=np.float64(3.3811139642728927), sign_changes=13, boundedness_ratio=np.float64(1.1010615626784475), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.912771749529648), amplitude=np.float64(3.381114529477206), sign_changes=13, boundedness_ratio=np.float64(1.1010584578537952), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127722066608255), amplitude=np.float64(3.381115620831101), sign_changes=13, boundedness_ratio=np.float64(1.1010728527309794), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127722149553689), amplitude=np.float64(3.381115516006208), sign_changes=13, boundedness_ratio=np.float64(1.1010737525521679), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127722149553689), amplitude=np.float64(3.381115516006208), sign_changes=13, boundedness_ratio=np.float64(1.1010737525521679), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127717838797916), amplitude=np.float64(3.3811136846050256), sign_changes=13, boundedness_ratio=np.float64(1.1010458269247496), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127718828131985), amplitude=np.float64(3.3811132704228237), sign_changes=13, boundedness_ratio=np.float64(1.1010543080098678), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.2547973780299398), amplitude=np.float64(1.1300964953526795), sign_changes=18, boundedness_ratio=np.float64(0.6270362159418352), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.254797804446703), amplitude=np.float64(1.1300928585965602), sign_changes=18, boundedness_ratio=np.float64(0.6270366298496942), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.25479779851776985), amplitude=np.float64(1.130092795650623), sign_changes=18, boundedness_ratio=np.float64(0.6270364813895619), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.9127716830787466), amplitude=np.float64(3.38111450476749), sign_changes=13, boundedness_ratio=np.float64(1.101052118767191), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127716830787466), amplitude=np.float64(3.38111450476749), sign_changes=13, boundedness_ratio=np.float64(1.101052118767191), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719872102439), amplitude=np.float64(3.3811156594931613), sign_changes=13, boundedness_ratio=np.float64(1.1010742215113207), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127719872102439), amplitude=np.float64(3.3811156594931613), sign_changes=13, boundedness_ratio=np.float64(1.1010742215113207), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127720978357752), amplitude=np.float64(3.381116198933198), sign_changes=13, boundedness_ratio=np.float64(1.1010744019031642), best_species_idx=0, best_species_name='X')"
+    ],
+    [
+      "OscillationResult(passes=True, cv=np.float64(0.912771976900379), amplitude=np.float64(3.3811163666215083), sign_changes=13, boundedness_ratio=np.float64(1.1010593001940658), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.9127717145778067), amplitude=np.float64(3.381113712198868), sign_changes=13, boundedness_ratio=np.float64(1.1010532296778681), best_species_idx=0, best_species_name='X')",
+      "OscillationResult(passes=True, cv=np.float64(0.17891561915528836), amplitude=np.float64(0.99825250247524), sign_changes=32, boundedness_ratio=np.float64(1.5259259040680757), best_species_idx=1, best_species_name='Y')",
+      "OscillationResult(passes=True, cv=np.float64(0.17891561915528836), amplitude=np.float64(0.99825250247524), sign_changes=32, boundedness_ratio=np.float64(1.5259259040680757), best_species_idx=1, best_species_name='Y')",
+      "OscillationResult(passes=True, cv=np.float64(0.17891194440619834), amplitude=np.float64(0.9982450294494338), sign_changes=32, boundedness_ratio=np.float64(1.5259842782567432), best_species_idx=1, best_species_name='Y')"
+    ]
+  ],
+  "parameters": {
+    "n_trajectories": 20,
+    "n_steps": 5,
+    "max_candidates": 50,
+    "template": "brusselator",
+    "seed": 42
+  },
+  "timestamp": "2026-02-15T18:27:40.365440"
+}

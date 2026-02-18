@@ -1,0 +1,210 @@
+{
+  "estimates": [
+    {
+      "system": "Brusselator limit cycle",
+      "expected_D2": 1.0,
+      "seed": 42,
+      "measured_D2": 0.9972190323445044,
+      "uncertainty": 0.00032005995929285303,
+      "quality": "good"
+    },
+    {
+      "system": "Brusselator limit cycle",
+      "expected_D2": 1.0,
+      "seed": 49,
+      "measured_D2": 0.9972063170930965,
+      "uncertainty": 0.00032256546362652755,
+      "quality": "good"
+    },
+    {
+      "system": "Brusselator limit cycle",
+      "expected_D2": 1.0,
+      "seed": 56,
+      "measured_D2": 0.9972416188826481,
+      "uncertainty": 0.0003202231332369653,
+      "quality": "good"
+    },
+    {
+      "system": "Brusselator limit cycle",
+      "expected_D2": 1.0,
+      "seed": 63,
+      "measured_D2": 0.9971826939752578,
+      "uncertainty": 0.00032375724216855657,
+      "quality": "good"
+    },
+    {
+      "system": "Brusselator limit cycle",
+      "expected_D2": 1.0,
+      "seed": 70,
+      "measured_D2": 0.9972197708301626,
+      "uncertainty": 0.0003196704649841014,
+      "quality": "good"
+    },
+    {
+      "system": "R\u00f6ssler attractor",
+      "expected_D2": 1.99,
+      "seed": 42,
+      "measured_D2": 0.9985996325366642,
+      "uncertainty": 0.00016389937155634972,
+      "quality": "good"
+    },
+    {
+      "system": "R\u00f6ssler attractor",
+      "expected_D2": 1.99,
+      "seed": 49,
+      "measured_D2": 0.9986044405840823,
+      "uncertainty": 0.0001603465805692346,
+      "quality": "good"
+    },
+    {
+      "system": "R\u00f6ssler attractor",
+      "expected_D2": 1.99,
+      "seed": 56,
+      "measured_D2": 0.9988894482364115,
+      "uncertainty": 0.00014831691761665888,
+      "quality": "good"
+    },
+    {
+      "system": "R\u00f6ssler attractor",
+      "expected_D2": 1.99,
+      "seed": 63,
+      "measured_D2": 0.998598469746665,
+      "uncertainty": 0.0001620778437329756,
+      "quality": "good"
+    },
+    {
+      "system": "R\u00f6ssler attractor",
+      "expected_D2": 1.99,
+      "seed": 70,
+      "measured_D2": 0.9986058790989106,
+      "uncertainty": 0.0001624383869037164,
+      "quality": "good"
+    },
+    {
+      "system": "Lorenz attractor",
+      "expected_D2": 2.05,
+      "seed": 42,
+      "measured_D2": 2.0127790551222873,
+      "uncertainty": 0.00540909918181398,
+      "quality": "good"
+    },
+    {
+      "system": "Lorenz attractor",
+      "expected_D2": 2.05,
+      "seed": 49,
+      "measured_D2": 2.044639260935474,
+      "uncertainty": 0.006494397589118231,
+      "quality": "good"
+    },
+    {
+      "system": "Lorenz attractor",
+      "expected_D2": 2.05,
+      "seed": 56,
+      "measured_D2": 1.870597076704598,
+      "uncertainty": 0.0038241946942208045,
+      "quality": "good"
+    },
+    {
+      "system": "Lorenz attractor",
+      "expected_D2": 2.05,
+      "seed": 63,
+      "measured_D2": 2.0472670602999847,
+      "uncertainty": 0.0033222761471549136,
+      "quality": "good"
+    },
+    {
+      "system": "Lorenz attractor",
+      "expected_D2": 2.05,
+      "seed": 70,
+      "measured_D2": 1.844776798322735,
+      "uncertainty": 0.005045125998777467,
+      "quality": "good"
+    },
+    {
+      "system": "Coupled R\u00f6ssler (torus)",
+      "expected_D2": 2.0,
+      "seed": 42,
+      "measured_D2": 2.886240781524299,
+      "uncertainty": 0.008667707282185534,
+      "quality": "good"
+    },
+    {
+      "system": "Coupled R\u00f6ssler (torus)",
+      "expected_D2": 2.0,
+      "seed": 49,
+      "measured_D2": 2.7449718934469627,
+      "uncertainty": 0.015202857928832197,
+      "quality": "good"
+    },
+    {
+      "system": "Coupled R\u00f6ssler (torus)",
+      "expected_D2": 2.0,
+      "seed": 56,
+      "measured_D2": 2.684800185194871,
+      "uncertainty": 0.008790750047637269,
+      "quality": "good"
+    },
+    {
+      "system": "Coupled R\u00f6ssler (torus)",
+      "expected_D2": 2.0,
+      "seed": 63,
+      "measured_D2": 2.8255039212237816,
+      "uncertainty": 0.013056936098794217,
+      "quality": "good"
+    },
+    {
+      "system": "Coupled R\u00f6ssler (torus)",
+      "expected_D2": 2.0,
+      "seed": 70,
+      "measured_D2": 2.4811545768661145,
+      "uncertainty": 0.021478341262568146,
+      "quality": "marginal"
+    }
+  ],
+  "summaries": [
+    {
+      "system": "Brusselator limit cycle",
+      "expected_D2": 1.0,
+      "n_seeds": 5,
+      "n_good": 5,
+      "mean_D2": 0.9972138866251339,
+      "std_D2": 2.1566522813422112e-05,
+      "min_D2": 0.9971826939752578,
+      "max_D2": 0.9972416188826481,
+      "separable_from_1": false
+    },
+    {
+      "system": "R\u00f6ssler attractor",
+      "expected_D2": 1.99,
+      "n_seeds": 5,
+      "n_good": 5,
+      "mean_D2": 0.9986595740405466,
+      "std_D2": 0.00012854153931897552,
+      "min_D2": 0.998598469746665,
+      "max_D2": 0.9988894482364115,
+      "separable_from_1": false
+    },
+    {
+      "system": "Lorenz attractor",
+      "expected_D2": 2.05,
+      "n_seeds": 5,
+      "n_good": 5,
+      "mean_D2": 1.964011850277016,
+      "std_D2": 0.09842988259416337,
+      "min_D2": 1.844776798322735,
+      "max_D2": 2.0472670602999847,
+      "separable_from_1": true
+    },
+    {
+      "system": "Coupled R\u00f6ssler (torus)",
+      "expected_D2": 2.0,
+      "n_seeds": 5,
+      "n_good": 5,
+      "mean_D2": 2.7245342716512058,
+      "std_D2": 0.1561842144032293,
+      "min_D2": 2.4811545768661145,
+      "max_D2": 2.886240781524299,
+      "separable_from_1": true
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Dynamical Activation in Autocatalytic Chemical Networks:
+% A Correlation Dimension Analysis
+%
+% MANUSCRIPT v2 - February 2025 (corrected February 2026)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb,prd]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Dynamical Activation in Autocatalytic Chemical Networks:\\
+A Correlation Dimension Analysis}
+
+\author{Christopher Merrill}
+\affiliation{Independent Researcher}
+\author{With computational collaboration from Claude (Anthropic) and ChatGPT (OpenAI)}
+
+\date{\today}
+
+\begin{abstract}
+We investigate the relationship between autocatalysis and dynamical complexity in chemical reaction networks using correlation dimension analysis. Defining an ``activation ratio'' $\eta = D_2 / r_S$ that compares the attractor dimension $D_2$ to the stoichiometric degrees of freedom $r_S$, we test whether additional autocatalytic reactions increase dynamical activation. Using the Brusselator oscillator as a template with chemostatted food species, we find that randomly added autocatalytic reactions tend to increase $r_S$ faster than they increase $D_2$, leading to a net \textit{decrease} in $\eta$. Control (non-autocatalytic) and test (autocatalytic) additions produce indistinguishable $\eta$ distributions, indicating that the dilution effect is driven by stoichiometric expansion rather than the autocatalytic character of the additions. These results demonstrate that dynamical activation depends critically on network topology rather than the quantity of autocatalytic reactions, and that the distinction between structural possibility and dynamical realization is essential for understanding chemical complexity.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CORRECTION NOTE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent\textbf{Correction note (v2):} The original version (v1) contained a bug in the reaction rate parser: when a species appeared multiple times on the reactant side (e.g., $\text{X} + \text{X} + \text{Y}$), the reactant stoichiometry was set rather than accumulated, so the trimolecular rate $k[\text{X}]^2[\text{Y}]$ was incorrectly computed as $k[\text{X}][\text{Y}]$. This affected the Brusselator's core autocatalytic step. With corrected kinetics, the system requires chemostatted (clamped) food species to sustain oscillations, rather than CSTR dynamics. All quantitative results have been recomputed with corrected kinetics and chemostat boundary conditions. The qualitative conclusion that randomly added reactions dilute $\eta$ is confirmed under corrected kinetics. The v1 finding that autocatalytic additions increase $\eta$ variance relative to controls is \textit{not} reproduced; both groups show identical $\eta$ distributions under corrected kinetics. See Section~\ref{sec:results} for updated numbers.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Autocatalysis---the phenomenon whereby a chemical species catalyzes its own production---has long been recognized as a potentially important feature of prebiotic chemistry and the origin of life \cite{kauffman1986,eigen1971}. Autocatalytic sets and hypercycles have been proposed as mechanisms for the emergence of self-organization from random chemistry \cite{hordijk2010}. A natural question arises: does the presence of autocatalysis correlate with increased dynamical complexity?
+
+To address this question quantitatively, we employ correlation dimension analysis. The correlation dimension $D_2$ measures the effective dimensionality of a dynamical attractor---a limit cycle has $D_2 \approx 1$, a torus has $D_2 \approx 2$, and strange attractors have fractal dimensions \cite{grassberger1983}. For chemical reaction networks, the stoichiometric subspace dimension $r_S$ provides an upper bound on attractor dimensionality, as conservation laws constrain the accessible phase space.
+
+We define the \textit{activation ratio}:
+\begin{equation}
+\eta = \frac{D_2}{r_S}
+\label{eq:eta}
+\end{equation}
+which quantifies what fraction of the available degrees of freedom are dynamically activated. A system with $\eta \approx 1$ fully explores its stoichiometric subspace, while $\eta \ll 1$ indicates dynamics confined to a lower-dimensional manifold. Importantly, higher $\eta$ does not imply greater complexity, but greater utilization of available stoichiometric degrees of freedom.
+
+Crucially, this framework distinguishes between \textit{structural possibility} (what $r_S$ permits) and \textit{dynamical realization} (what $D_2$ achieves). Adding reactions to a network may increase $r_S$ without proportionally increasing $D_2$, leading to decreased $\eta$ even as the network becomes formally more complex.
+
+Our central question is whether autocatalytic reactions preferentially activate dynamical degrees of freedom. We test this using the Brusselator \cite{prigogine1968} as a template oscillator, systematically adding autocatalytic reactions and measuring the effect on $\eta$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{The Brusselator Template}
+
+The Brusselator is a minimal chemical oscillator with the reaction scheme:
+\begin{align}
+\text{A} &\rightarrow \text{X} \\
+\text{B} + \text{X} &\rightarrow \text{Y} + \text{D} \\
+\text{X} + \text{X} + \text{Y} &\rightarrow 3\text{X} \\
+\text{X} &\rightarrow \text{E}
+\end{align}
+where A and B are held at constant concentration (chemostatted food species), X and Y are dynamical intermediates, and D and E are waste products. The third reaction is autocatalytic: X catalyzes its own production from Y, with rate $k[\text{X}]^2[\text{Y}]$. For $A = 1$, $B = 3$, this system exhibits sustained limit cycle oscillations with $D_2 \approx 1.0$ and $r_S = 4$ (four dynamic species: X, Y, D, E), yielding $\eta \approx 0.25$.
+
+The Brusselator was chosen as a template because it reliably produces oscillatory dynamics, enabling meaningful correlation dimension measurements. Random chemical networks, by contrast, almost never oscillate---they typically decay to fixed points or exhibit runaway growth.
+
+\subsection{Network Generation}
+
+We generated two classes of networks:
+
+\textbf{Control networks}: Brusselator + 3 random non-autocatalytic reactions. These add structural complexity without additional autocatalysis.
+
+\textbf{Test networks}: Brusselator + 2 autocatalytic reactions + 1 random reaction. Autocatalytic reactions have the form $\text{X} + \text{S} \rightarrow 2\text{X} + \ldots$ where X appears on both sides with increased stoichiometry.
+
+For the progressive experiment, we started with the pure Brusselator and sequentially added 1, 2, 3, 4, and 5 autocatalytic reactions, measuring $\eta$ at each step across 15 independent network realizations.
+
+Food species A and B were held at fixed concentrations (chemostat boundary conditions). The dynamic species (X, Y, D, E, and any species introduced by added reactions) evolved according to mass-action kinetics. Integration was performed using LSODA with adaptive stepping over $t \in [0, 200]$ with 10,000 time points, discarding the first half as transient.
+
+\subsection{Correlation Dimension Estimation}
+
+We computed $D_2$ using the Grassberger-Procaccia algorithm \cite{grassberger1983}. Time series were embedded in a reconstruction space using time-delay embedding. The correlation sum:
+\begin{equation}
+C(\epsilon) = \lim_{N \to \infty} \frac{2}{N(N-1)} \sum_{i < j} \Theta(\epsilon - \|\mathbf{x}_i - \mathbf{x}_j\|)
+\end{equation}
+was computed for logarithmically spaced $\epsilon$ values, and $D_2$ was estimated from the scaling regime where $C(\epsilon) \propto \epsilon^{D_2}$.
+
+The stoichiometric dimension $r_S$ was computed as the rank of the stoichiometric matrix after removing clamped (food) species and monotonically accumulating waste species.
+
+Networks were excluded from analysis if: (1) integration failed, (2) no valid scaling regime was found, or (3) all species were monotonic (no oscillation).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Experiment 1: Control vs.\ Test Networks}
+
+We generated 30 control and 30 test networks. After quality filtering, 13 control networks and 16 test networks yielded valid $\eta$ measurements.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{exp1_boxplot_corrected.png}
+\caption{Comparison of activation ratio $\eta$ between control networks (Brusselator + random reactions) and test networks (Brusselator + autocatalytic reactions). Both groups show nearly identical distributions centered on $\eta \approx 0.14$, well below the pure Brusselator baseline of $\eta = 0.25$.}
+\label{fig:boxplot}
+\end{figure}
+
+Results are shown in Fig.~\ref{fig:boxplot}. Both groups had median $\eta = 0.142$ (IQR: 0.022 for both). The distributions are statistically indistinguishable.
+
+This null result is itself informative. The dilution of $\eta$ when reactions are added to the template is not specific to autocatalytic reactions---non-autocatalytic additions produce the same effect. The mechanism is purely stoichiometric: any added reaction increases $r_S$ (the structural degrees of freedom), while $D_2$ remains near 1.0 (the limit cycle dimension), causing $\eta$ to decrease.
+
+Both groups show substantially lower $\eta$ than the pure Brusselator baseline of 0.25, indicating that adding \textit{any} reactions tends to increase $r_S$ faster than $D_2$.
+
+\subsection{Experiment 2: Progressive Autocatalysis}
+
+To characterize the dose-response relationship, we performed a progressive experiment: starting from the pure Brusselator, we sequentially added 0, 1, 2, 3, 4, and 5 autocatalytic reactions across 15 independent trajectories.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{progressive_eta_corrected.png}
+\caption{Activation ratio $\eta$ as a function of additional autocatalytic reactions added to the Brusselator template. Shaded region indicates interquartile range across 15 trajectories. The linear slope is $-0.027$ per reaction. The monotonic decrease confirms that randomly added autocatalytic reactions increase $r_S$ faster than they increase $D_2$.}
+\label{fig:progressive}
+\end{figure}
+
+Results are shown in Fig.~\ref{fig:progressive}. The pure Brusselator (0 additions) achieved $\eta = 0.25$. Adding a single autocatalytic reaction caused a drop to $\eta \approx 0.20$. Further additions produced a steady decline to $\eta \approx 0.11$ at 5 additions.
+
+The overall linear slope was $-0.027$ per autocatalytic reaction added. The IQR is narrow across all steps, indicating that the dilution effect is robust across network realizations. This negative slope should be interpreted as a \textit{conditional} trend under random autocatalytic additions, not a general law of autocatalysis. The mechanism is clear: randomly added autocatalytic reactions tend to increase latent stoichiometric degrees of freedom ($r_S$) faster than they increase dynamical exploration ($D_2$), leading to a net decrease in $\eta$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Structural Possibility vs.\ Dynamical Realization}
+
+Our results illuminate the distinction between structural possibility and dynamical realization. Adding reactions to a network increases the stoichiometric rank $r_S$---the space of configurations permitted by conservation laws. But the dynamics need not explore this expanded space. Unless the new reactions are kinetically well-coupled and energy-driven, they add latent directions that remain dynamically inert.
+
+The negative slope in Fig.~\ref{fig:progressive} is not a failure of autocatalysis to matter; it is a demonstration that \textit{formal} autocatalysis (the stoichiometric pattern $\text{X} \rightarrow 2\text{X}$) is distinct from \textit{functional} autocatalysis (dynamics that actually amplify and couple degrees of freedom).
+
+\subsection{The Dilution Effect is Stoichiometric, Not Autocatalytic}
+
+The null result in Experiment~1---where autocatalytic and non-autocatalytic additions produce identical $\eta$ distributions---clarifies the nature of the dilution effect. When $D_2 \approx 1$ (as it must be for limit cycle dynamics), $\eta = 1/r_S$ and any reaction that increases $r_S$ will decrease $\eta$ regardless of whether it is autocatalytic. The character of the added reaction is irrelevant; only its contribution to the stoichiometric rank matters.
+
+This has an important implication: the question ``does autocatalysis increase dynamical complexity?'' cannot be answered by random additions to an existing oscillator. Random additions of \textit{any} kind dilute $\eta$. The relevant question is whether \textit{specific} autocatalytic topologies can increase $D_2$ beyond the limit cycle dimension, which would require transitions to torus or chaotic dynamics.
+
+\subsection{Implications for Origin of Life}
+
+Many origin-of-life models implicitly assume that more reactions yield more dynamics and more ``life-likeness.'' Our data challenge this intuition:
+\begin{quote}
+\textit{More reactions often lead to dynamical dilution, not dynamical enrichment.}
+\end{quote}
+
+This is a falsification of a sloppy intuition, not of the importance of autocatalysis. The framework survives because $\eta$ is explicitly constructed to detect this phenomenon: it measures relative activation, allowing for decrease even as absolute complexity grows.
+
+Our findings suggest that the emergence of complex prebiotic chemistry required not just autocatalysis, but:
+\begin{enumerate}
+\item The right \textit{topology} of autocatalytic coupling
+\item Kinetic parameters enabling sustained oscillation
+\item Selection for high-$\eta$ configurations from the broader ensemble
+\end{enumerate}
+
+The Brusselator's specific feedback architecture---where X autocatalytically amplifies while being regulated through Y---represents an optimized configuration. Random additions disrupt this balance rather than enhance it.
+
+\subsection{Limitations and Future Directions}
+
+Several limitations should be noted. First, our analysis used a single template (Brusselator); other oscillator motifs may behave differently. Second, the chemostat boundary conditions hold food species at fixed concentrations, which may not reflect prebiotic environments. Third, we tested only random autocatalytic additions; targeted additions---particularly those that preserve oscillation, are energy-coupled, close RAF sets, or create coherent new feedback loops---may behave qualitatively differently and could potentially increase rather than decrease $\eta$.
+
+Future work should explore:
+\begin{itemize}
+\item Targeted vs.\ random autocatalytic additions, especially those that preserve oscillatory dynamics (``feedback-aligned'' additions)
+\item Conditional $\eta$ distributions: what fraction exceed threshold values?
+\item Whether topological selection for oscillation survival can slow or reverse the dilution trend
+\item Other oscillator templates (Oregonator, glycolytic oscillators)
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We tested whether autocatalytic reactions increase dynamical activation in chemical networks, measuring the activation ratio $\eta = D_2/r_S$. Our findings:
+
+\begin{enumerate}
+\item Randomly added autocatalytic reactions tend to \textit{decrease} median $\eta$, from 0.25 (pure Brusselator) to $\sim$0.11 (with 5 additions), at a rate of $-0.027$ per addition.
+\item The mechanism is structural dilution: $r_S$ grows faster than $D_2$ when reactions are added without topological optimization.
+\item Autocatalytic and non-autocatalytic additions produce indistinguishable $\eta$ distributions (both median 0.142). The dilution is stoichiometric, not specific to autocatalysis.
+\item The distinction between structural possibility ($r_S$) and dynamical realization ($D_2$) is essential; formal autocatalysis does not guarantee functional activation.
+\end{enumerate}
+
+These results demonstrate that the $\eta$ framework successfully distinguishes structural from dynamical complexity. For origin-of-life research, they suggest that prebiotic chemical evolution required selection for specific network topologies, not merely accumulation of autocatalytic cycles.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments}
+This work was conducted as part of an independent research program exploring connections between dynamical systems theory and prebiotic chemistry. Computational analysis was performed using the \texttt{dimensional\_opening} Python package developed for this project.
+\end{acknowledgments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{99}
+
+\bibitem{kauffman1986}
+S.~A.~Kauffman, ``Autocatalytic sets of proteins,''
+J.\ Theor.\ Biol.\ \textbf{119}, 1 (1986).
+
+\bibitem{eigen1971}
+M.~Eigen, ``Selforganization of matter and the evolution of biological macromolecules,''
+Naturwissenschaften \textbf{58}, 465 (1971).
+
+\bibitem{hordijk2010}
+W.~Hordijk and M.~Steel, ``Detecting autocatalytic, self-sustaining sets in chemical reaction systems,''
+J.\ Theor.\ Biol.\ \textbf{227}, 451 (2004).
+
+\bibitem{grassberger1983}
+P.~Grassberger and I.~Procaccia, ``Characterization of strange attractors,''
+Phys.\ Rev.\ Lett.\ \textbf{50}, 346 (1983).
+
+\bibitem{prigogine1968}
+I.~Prigogine and R.~Lefever, ``Symmetry breaking instabilities in dissipative systems. II,''
+J.\ Chem.\ Phys.\ \textbf{48}, 1695 (1968).
+
+\end{thebibliography}
+
+\end{document}
