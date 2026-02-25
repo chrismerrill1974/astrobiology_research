@@ -427,4 +427,196 @@ class TestDiagnosticPlot:
         
         save_path = tmp_path / "diagnostic.png"
         cd.plot_diagnostics(result, save_path=str(save_path), show=False)
-        
+
+
+# ===========================================================================
+# Phase 1 additional tests — Guard against silent wrong answers
+# ===========================================================================
+
+
+class TestD2EmbeddingDimensionBound:
+    """Phase 1.1: D2 should not exceed the embedding dimension.
+
+    An estimated D2 greater than the number of trajectory dimensions is
+    physically meaningless and would silently inflate eta = D2 / r_S.
+    """
+
+    def test_2d_system_d2_bounded(self):
+        """D2 from a known 2D system should not exceed 2."""
+        np.random.seed(42)
+        traj = generate_henon(n_points=10000, discard=1000)
+        assert traj.shape[1] == 2
+
+        cd = CorrelationDimension()
+        result = cd.compute(traj, random_state=42)
+
+        if result.quality != QualityFlag.FAILED:
+            assert result.D2 <= 2.5, (
+                f"D2={result.D2:.2f} exceeds embedding dim=2 with tolerance"
+            )
+
+    def test_limit_cycle_2d_bounded(self):
+        """A simple limit cycle in 2D should give D2 <= 2."""
+        np.random.seed(42)
+        traj = generate_limit_cycle(n_points=3000)
+        assert traj.shape[1] == 2
+
+        cd = CorrelationDimension()
+        result = cd.compute(traj, random_state=42)
+
+        if result.quality != QualityFlag.FAILED:
+            assert result.D2 <= 2.5, (
+                f"D2={result.D2:.2f} exceeds embedding dim=2 with tolerance"
+            )
+
+    def test_uniform_cube_d2_bounded_by_dimension(self):
+        """D2 of uniform hypercube should not exceed its intrinsic dimension.
+
+        Parameterized over several dimensions to guard against systematic bias.
+        """
+        cd = CorrelationDimension()
+        for dim in [2, 3, 5]:
+            np.random.seed(42)
+            points = generate_uniform_cube(n_points=3000, dim=dim)
+            result = cd.compute(points, theiler_window=1, random_state=42)
+
+            if result.quality != QualityFlag.FAILED:
+                assert result.D2 <= dim + 0.5, (
+                    f"dim={dim}: D2={result.D2:.2f} exceeds dim + 0.5"
+                )
+
+    def test_embedding_dimension_stored(self):
+        """Result should record the embedding dimension used."""
+        cd = CorrelationDimension()
+        traj = generate_lorenz(n_points=2000, discard=500)
+        result = cd.compute(traj)
+
+        assert result.embedding_dimension == 3
+
+
+class TestComputeFromSimulation:
+    """Phase 1.2: Direct tests for compute_from_simulation().
+
+    This method bridges SimulationResult to D2 and is the core pipeline
+    seam. It is currently only tested indirectly through ActivationTracker.
+    """
+
+    def setup_method(self):
+        self.cd = CorrelationDimension()
+
+    def test_brusselator_limit_cycle(self):
+        """Brusselator via compute_from_simulation should give D2 ~ 1.
+
+        Note: compute_from_simulation uses the raw concentration matrix.
+        With chemostat mode, A and B are removed by the simulator, but
+        waste products D and E are still present and monotonically
+        increasing. We select only X, Y columns to get a clean trajectory
+        — the ActivationTracker does this filtering automatically, but
+        compute_from_simulation does not.
+        """
+        from dimensional_opening.simulator import (
+            ReactionSimulator, SimulationResult, DrivingMode,
+        )
+
+        sim = ReactionSimulator()
+        network = sim.build_network([
+            "A -> X",
+            "2X + Y -> 3X",
+            "B + X -> Y + D",
+            "X -> E",
+        ])
+        sim_result = sim.simulate(
+            network,
+            rate_constants=[1.0, 1.0, 1.0, 1.0],
+            initial_concentrations={
+                "A": 1.0, "B": 3.0, "X": 1.0, "Y": 1.0,
+                "D": 0.0, "E": 0.0,
+            },
+            t_span=(0, 100),
+            n_points=5000,
+            driving_mode=DrivingMode.CHEMOSTAT,
+            chemostat_species={"A": 1.0, "B": 3.0},
+        )
+
+        # Extract only oscillating species (X, Y) — waste species D, E
+        # are monotonically increasing and would corrupt the D2 estimate.
+        x_idx = sim_result.species_names.index("X")
+        y_idx = sim_result.species_names.index("Y")
+        filtered = SimulationResult(
+            time=sim_result.time,
+            concentrations=sim_result.concentrations[:, [x_idx, y_idx]],
+            species_names=["X", "Y"],
+            n_species=2,
+            driving_mode=sim_result.driving_mode,
+            driving_params=sim_result.driving_params,
+            rate_constants=sim_result.rate_constants,
+            initial_concentrations=sim_result.initial_concentrations,
+            solver_message=sim_result.solver_message,
+            n_function_evals=sim_result.n_function_evals,
+            success=sim_result.success,
+        )
+
+        result = self.cd.compute_from_simulation(
+            filtered, remove_transient=0.5,
+        )
+
+        assert result.quality != QualityFlag.FAILED, (
+            f"Failed: {result.failure_reason}"
+        )
+        # Limit cycle on chemostatted Brusselator — D2 should be ~1
+        assert 0.7 < result.D2 < 1.5, f"D2={result.D2:.2f}, expected ~1.0"
+
+    def test_transient_removal_fraction(self):
+        """remove_transient=0.9 should use only the final 10% of the data."""
+        from dimensional_opening.simulator import (
+            ReactionSimulator, DrivingMode,
+        )
+
+        sim = ReactionSimulator()
+        network = sim.build_network(["A -> X", "X -> Y"])
+        sim_result = sim.simulate(
+            network,
+            rate_constants=[1.0, 1.0],
+            initial_concentrations={"A": 1.0, "X": 0.0, "Y": 0.0},
+            t_span=(0, 100),
+            n_points=1000,
+            driving_mode=DrivingMode.CHEMOSTAT,
+            chemostat_species={"A": 1.0},
+        )
+
+        total_points = len(sim_result.time)
+
+        # Call with aggressive transient removal
+        result = self.cd.compute_from_simulation(
+            sim_result, remove_transient=0.9,
+        )
+
+        # The trajectory used should have only ~10% of the original points
+        assert result.n_trajectory_points == total_points - int(
+            total_points * 0.9
+        )
+
+    def test_monotonic_trajectory_handled(self):
+        """Pure decay (no driving) should still return a result, not crash."""
+        from dimensional_opening.simulator import (
+            ReactionSimulator, DrivingMode,
+        )
+
+        sim = ReactionSimulator()
+        network = sim.build_network(["A -> B", "B -> C"])
+        sim_result = sim.simulate(
+            network,
+            rate_constants=[1.0, 0.5],
+            initial_concentrations={"A": 2.0, "B": 0.0, "C": 0.0},
+            t_span=(0, 20),
+            n_points=500,
+            driving_mode=DrivingMode.NONE,
+        )
+
+        # This should not crash — the trajectory is monotonic / decaying
+        result = self.cd.compute_from_simulation(
+            sim_result, remove_transient=0.5,
+        )
+        assert isinstance(result, CorrelationDimensionResult)
+        # Quality is likely FAILED or MARGINAL for monotonic data
+        # (no interesting attractor), but it should not crash

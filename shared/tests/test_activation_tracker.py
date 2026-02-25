@@ -25,7 +25,11 @@ from dimensional_opening.activation_tracker import (
 )
 from dimensional_opening.correlation_dimension import QualityFlag
 from dimensional_opening import visualization as viz
-from dimensional_opening.simulator import ReactionSimulator, DrivingMode
+from dimensional_opening.simulator import (
+    ReactionSimulator,
+    SimulationResult,
+    DrivingMode,
+)
 
 
 class TestActivationTracker:
@@ -418,3 +422,258 @@ class TestVisualization:
             assert Path(path).stat().st_size > 0
         finally:
             Path(path).unlink()
+
+
+# ===========================================================================
+# Phase 1 additional tests — Guard against silent wrong answers
+# ===========================================================================
+
+
+class TestTrajectoryExtraction:
+    """Phase 1.3: Tests for _extract_trajectory species filtering.
+
+    The tracker auto-excludes monotonically increasing/decreasing species
+    before computing D2. This logic determines which dimensions of the
+    trajectory are used, directly affecting D2 and eta.
+    """
+
+    def _make_sim_result(self, time, concentrations, species_names):
+        """Helper to build a SimulationResult for testing extraction."""
+        return SimulationResult(
+            time=time,
+            concentrations=concentrations,
+            species_names=species_names,
+            n_species=len(species_names),
+            driving_mode=DrivingMode.NONE,
+            driving_params={},
+            rate_constants=np.array([1.0]),
+            initial_concentrations=concentrations[0],
+            solver_message="ok",
+            n_function_evals=100,
+            success=True,
+        )
+
+    def test_waste_species_excluded(self):
+        """Monotonically increasing waste species should be excluded."""
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        # X oscillates, W monotonically increases (waste product)
+        c_x = 2.0 + 1.0 * np.sin(2 * np.pi * 0.1 * t)
+        c_y = 1.5 + 0.8 * np.cos(2 * np.pi * 0.1 * t)
+        c_w = np.linspace(0, 10, 1000)
+
+        sim_result = self._make_sim_result(
+            t,
+            np.column_stack([c_x, c_y, c_w]),
+            ["X", "Y", "W"],
+        )
+
+        traj = tracker._extract_trajectory(sim_result, None, None)
+
+        # Should include X and Y but not W
+        assert traj is not None
+        assert traj.shape[1] == 2, (
+            f"Expected 2 species after filtering, got {traj.shape[1]}"
+        )
+
+    def test_constant_species_excluded(self):
+        """Constant (e.g. chemostatted) species should be excluded."""
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        c_x = 2.0 + 1.0 * np.sin(2 * np.pi * 0.1 * t)
+        c_const = np.ones(1000) * 5.0  # Constant — monotonic (non-decreasing)
+
+        sim_result = self._make_sim_result(
+            t,
+            np.column_stack([c_x, c_const]),
+            ["X", "CONST"],
+        )
+
+        traj = tracker._extract_trajectory(sim_result, None, None)
+
+        assert traj is not None
+        assert traj.shape[1] == 1, (
+            f"Expected 1 species after filtering, got {traj.shape[1]}"
+        )
+
+    def test_all_monotonic_returns_none(self):
+        """If ALL species are monotonic, extraction should return None."""
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        c_a = np.exp(-0.1 * t)        # Monotonically decreasing
+        c_b = 1.0 - np.exp(-0.1 * t)  # Monotonically increasing
+
+        sim_result = self._make_sim_result(
+            t,
+            np.column_stack([c_a, c_b]),
+            ["A", "B"],
+        )
+
+        traj = tracker._extract_trajectory(sim_result, None, None)
+
+        assert traj is None
+
+    def test_single_non_monotonic_species_returns_1d(self):
+        """If only 1 species survives filtering, it should still be returned."""
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        c_x = 2.0 + 1.0 * np.sin(2 * np.pi * 0.1 * t)
+        c_sink = np.exp(-0.05 * t)  # Monotonically decreasing
+
+        sim_result = self._make_sim_result(
+            t,
+            np.column_stack([c_x, c_sink]),
+            ["X", "SINK"],
+        )
+
+        traj = tracker._extract_trajectory(sim_result, None, None)
+
+        assert traj is not None
+        assert traj.shape[1] == 1
+        assert traj.shape[0] == 1000
+
+
+class TestSimulationFailureSkip:
+    """Phase 1.4: Tracker should skip networks when simulation fails.
+
+    When solve_ivp returns success=False, the tracker should mark the
+    network as skipped rather than computing D2 on garbage data.
+    """
+
+    def test_tracker_skips_when_sim_success_false(self):
+        """Directly verify the sim_result.success check path."""
+        tracker = ActivationTracker(
+            t_span=(0, 10),
+            n_points=500,
+            remove_transient=0.0,
+            random_state=42,
+        )
+
+        # Monkey-patch the simulator to return a failed result
+        original_simulate = tracker.simulator.simulate
+
+        def fake_simulate(network, **kwargs):
+            result = original_simulate(network, **kwargs)
+            # Force success=False to test the skip path
+            object.__setattr__(result, 'success', False)
+            return result
+
+        tracker.simulator.simulate = fake_simulate
+
+        try:
+            result = tracker.analyze_network(
+                reactions=["A -> X", "X -> B"],
+                rate_constants=[1.0, 1.0],
+                initial_concentrations={"A": 1.0, "X": 0.5, "B": 0.0},
+                chemostat_species={"A": 1.0},
+                network_id="forced_failure",
+            )
+
+            assert result.skipped is True
+            assert "failed" in result.skip_reason.lower()
+        finally:
+            tracker.simulator.simulate = original_simulate
+
+
+class TestSpeciesToTrack:
+    """Phase 1.5: Tests for the species_to_track parameter.
+
+    Callers can override automatic species selection by passing an explicit
+    list of species names. This is used in paper scripts for reproducibility.
+    """
+
+    def _make_sim_result(self, time, concentrations, species_names):
+        """Helper to build a SimulationResult for testing extraction."""
+        return SimulationResult(
+            time=time,
+            concentrations=concentrations,
+            species_names=species_names,
+            n_species=len(species_names),
+            driving_mode=DrivingMode.NONE,
+            driving_params={},
+            rate_constants=np.array([1.0]),
+            initial_concentrations=concentrations[0],
+            solver_message="ok",
+            n_function_evals=100,
+            success=True,
+        )
+
+    def test_explicit_species_selection(self):
+        """species_to_track should select only the specified species."""
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        c_x = 2.0 + 1.0 * np.sin(2 * np.pi * 0.1 * t)
+        c_y = 1.5 + 0.8 * np.cos(2 * np.pi * 0.1 * t)
+        c_z = 3.0 + 0.5 * np.sin(2 * np.pi * 0.2 * t)
+
+        sim_result = self._make_sim_result(
+            t,
+            np.column_stack([c_x, c_y, c_z]),
+            ["X", "Y", "Z"],
+        )
+
+        traj = tracker._extract_trajectory(
+            sim_result, species_to_track=["X", "Y"], chemostat_species=None
+        )
+
+        assert traj is not None
+        assert traj.shape[1] == 2, (
+            f"Expected 2 species, got {traj.shape[1]}"
+        )
+        # Verify the columns are X and Y (not Z)
+        np.testing.assert_allclose(traj[:, 0], c_x, rtol=1e-10)
+        np.testing.assert_allclose(traj[:, 1], c_y, rtol=1e-10)
+
+    def test_nonexistent_species_silently_skipped(self):
+        """species_to_track with a non-existent name should not crash.
+
+        The current implementation uses a list comprehension with
+        ``if sp in species_names``, so non-existent names are silently
+        filtered out. This test documents that behavior.
+        """
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        c_x = 2.0 + 1.0 * np.sin(2 * np.pi * 0.1 * t)
+
+        sim_result = self._make_sim_result(
+            t,
+            c_x.reshape(-1, 1),
+            ["X"],
+        )
+
+        traj = tracker._extract_trajectory(
+            sim_result,
+            species_to_track=["NONEXISTENT"],
+            chemostat_species=None,
+        )
+
+        # No valid species matched — should return None
+        assert traj is None
+
+    def test_single_tracked_species(self):
+        """Tracking a single species should return a 1-column trajectory."""
+        tracker = ActivationTracker(remove_transient=0.0)
+
+        t = np.linspace(0, 100, 1000)
+        c_x = 2.0 + 1.0 * np.sin(2 * np.pi * 0.1 * t)
+        c_y = 1.5 + 0.8 * np.cos(2 * np.pi * 0.1 * t)
+
+        sim_result = self._make_sim_result(
+            t,
+            np.column_stack([c_x, c_y]),
+            ["X", "Y"],
+        )
+
+        traj = tracker._extract_trajectory(
+            sim_result, species_to_track=["X"], chemostat_species=None,
+        )
+
+        assert traj is not None
+        assert traj.shape == (1000, 1)
+        np.testing.assert_allclose(traj[:, 0], c_x, rtol=1e-10)

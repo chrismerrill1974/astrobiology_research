@@ -520,3 +520,58 @@ class TestEdgeCases:
         # Should have removed first 50% of points
         assert len(result.time) == 50
         assert result.time[0] > 4.0  # Should start around t=5
+
+
+# ===========================================================================
+# Phase 1 additional tests — Guard against silent wrong answers
+# ===========================================================================
+
+
+class TestSolverFailureHandling:
+    """Phase 1.4: ODE solver failure should be surfaced, not hidden.
+
+    When solve_ivp returns success=False, the result should clearly
+    indicate failure so downstream code can skip it.
+    """
+
+    def setup_method(self):
+        self.sim = ReactionSimulator()
+
+    def test_result_has_success_field(self):
+        """Every simulation result should have a success boolean."""
+        network = self.sim.build_network(["A -> B"])
+        result = self.sim.simulate(
+            network,
+            rate_constants=[1.0],
+            initial_concentrations={"A": 1.0, "B": 0.0},
+            t_span=(0, 10),
+        )
+
+        assert hasattr(result, 'success')
+        assert isinstance(result.success, bool)
+
+    def test_normal_simulation_succeeds(self):
+        """A well-behaved system should have success=True."""
+        network = self.sim.build_network(["A -> B"])
+        result = self.sim.simulate(
+            network,
+            rate_constants=[1.0],
+            initial_concentrations={"A": 1.0, "B": 0.0},
+            t_span=(0, 10),
+        )
+
+        assert result.success is True
+
+    def test_result_has_solver_message(self):
+        """Simulation result should include the solver's message for debugging."""
+        network = self.sim.build_network(["A -> B"])
+        result = self.sim.simulate(
+            network,
+            rate_constants=[1.0],
+            initial_concentrations={"A": 1.0, "B": 0.0},
+            t_span=(0, 10),
+        )
+
+        assert hasattr(result, 'solver_message')
+        assert isinstance(result.solver_message, str)
+        assert len(result.solver_message) > 0
