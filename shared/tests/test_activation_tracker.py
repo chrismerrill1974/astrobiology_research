@@ -726,3 +726,88 @@ class TestEnsembleEdgeCases:
         # D2 and eta should be finite
         assert np.isfinite(result.D2)
         assert np.isfinite(result.eta)
+
+
+# ===========================================================================
+# Phase 3 additional tests — Robustness, error handling, statistical code
+# ===========================================================================
+
+
+class TestCheckpointErrorHandling:
+    """Phase 3.2: Checkpoint error handling for load_results_json().
+
+    Long batch runs that crash mid-checkpoint could leave corrupted files.
+    The loader should give clear errors, not cryptic decoder exceptions.
+    """
+
+    def test_truncated_json_raises_error(self):
+        """Truncated JSON should raise a clear error."""
+        # Write valid JSON prefix, then cut mid-object
+        truncated = '{"timestamp": "2026-01-01", "n_results": 1, "results": [{"network_id": "net1"'
+
+        with tempfile.NamedTemporaryFile(
+            mode='w', suffix='.json', delete=False
+        ) as f:
+            f.write(truncated)
+            path = f.name
+
+        try:
+            with pytest.raises((json.JSONDecodeError, Exception)):
+                load_results_json(path)
+        finally:
+            Path(path).unlink()
+
+    def test_missing_required_fields_raises_error(self):
+        """JSON with missing required fields should raise an error."""
+        # Valid JSON but missing required ActivationResult fields
+        data = {
+            "timestamp": "2026-01-01",
+            "n_results": 1,
+            "results": [{"network_id": "net1"}],  # Missing most fields
+        }
+
+        with tempfile.NamedTemporaryFile(
+            mode='w', suffix='.json', delete=False
+        ) as f:
+            json.dump(data, f)
+            path = f.name
+
+        try:
+            with pytest.raises((KeyError, TypeError, Exception)):
+                load_results_json(path)
+        finally:
+            Path(path).unlink()
+
+    def test_empty_file_raises_error(self):
+        """An empty file should raise an error."""
+        with tempfile.NamedTemporaryFile(
+            mode='w', suffix='.json', delete=False
+        ) as f:
+            path = f.name
+            # Write nothing — empty file
+
+        try:
+            with pytest.raises((json.JSONDecodeError, Exception)):
+                load_results_json(path)
+        finally:
+            Path(path).unlink()
+
+
+class TestEmptyBatch:
+    """Phase 3.3: analyze_batch([]) should not crash.
+
+    An empty batch is a degenerate but valid input that can arise when
+    a filter removes all candidate networks before analysis.
+    """
+
+    def test_empty_batch_returns_zero_total(self):
+        """analyze_batch([]) should return BatchResult with n_total=0."""
+        tracker = ActivationTracker()
+        batch = tracker.analyze_batch([], verbose=False)
+
+        assert isinstance(batch, BatchResult)
+        assert batch.n_total == 0
+        assert batch.n_analyzed == 0
+        assert batch.n_successful == 0
+        assert np.isnan(batch.eta_median)
+        assert np.isnan(batch.D2_median)

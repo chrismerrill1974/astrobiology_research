@@ -704,3 +704,54 @@ class TestRemoveTransientBoundary:
 
         # Should NOT be empty — guard prevents it
         assert len(result.time) >= 10
+
+
+# ===========================================================================
+# Phase 3 additional tests — Robustness, error handling, statistical code
+# ===========================================================================
+
+
+class TestNegativeRateConstantValidation:
+    """Phase 3.5: Negative rate constant behavior.
+
+    Negative rate constants are physically meaningless for mass-action
+    kinetics. This test documents the current behavior — whether a
+    ValueError is raised or the simulation proceeds — so that future
+    validation changes can be tracked.
+    """
+
+    def setup_method(self):
+        self.sim = ReactionSimulator()
+
+    def test_negative_rate_constant(self):
+        """Negative rate constant should either raise ValueError or be documented.
+
+        Currently the simulator does NOT validate rate constants, so a
+        negative k will cause the ODE to have reversed flux. This test
+        documents that behavior: the simulation runs (success may be True
+        or False) but produces non-physical concentrations.
+
+        If validation is added later, this test should be updated to
+        expect a ValueError.
+        """
+        network = self.sim.build_network(["A -> B"])
+
+        try:
+            result = self.sim.simulate(
+                network,
+                rate_constants=[-1.0],
+                initial_concentrations={"A": 1.0, "B": 0.0},
+                t_span=(0, 5),
+                n_points=50,
+            )
+            # If no error is raised, the simulation ran with a negative k.
+            # Document that it ran (success field should still be accessible).
+            assert hasattr(result, 'success')
+            # With k=-1, A grows and B goes negative — non-physical
+            B_final = result.get_species("B")[-1]
+            assert B_final < 0, (
+                "Negative k should produce negative concentrations"
+            )
+        except ValueError:
+            # If validation is added, a ValueError is the expected behavior
+            pass

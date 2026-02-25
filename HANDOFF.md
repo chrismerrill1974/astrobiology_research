@@ -6,7 +6,7 @@
 
 **Phase 2 — Complete.** 15 new tests added, all passing. Full suite: 205 passed, 4 skipped, 0 failures.
 
-**Phase 3 — Not started.** Robustness, error handling, and statistical code coverage.
+**Phase 3 — Complete.** 14 new tests added, all passing. Full suite: 219 passed, 4 skipped, 0 failures.
 
 ## What Was Done
 
@@ -24,15 +24,13 @@
 - `test_network_generator.py`: `TestSpeciesNameCollisions` (2 tests), `TestDuplicateReactionDetection` (2 tests)
 - `test_activation_tracker.py`: `TestEnsembleEdgeCases` (1 test) — n_runs=1 fallback
 
-## What Remains (Phase 3)
+### Phase 3: Robustness, error handling, and statistical code
 
-Per `ADDITIONAL_TESTING_PLAN.md`:
-
-- 3.1: `experiments.py` smoke tests (8 tests) — the largest gap, zero coverage on ~1200 lines
-- 3.2: Checkpoint error handling (3 tests)
-- 3.3: Empty batch (1 test)
-- 3.4: Diagnostic plot with FAILED result (1 test)
-- 3.5: Negative rate constant validation (1 test)
+- `test_experiments.py` (new file): `TestExperiment1Smoke` (1 test), `TestExperiment2Smoke` (1 test), `TestExperiment3Smoke` (1 test), `TestExperimentPaper2Smoke` (1 test), `TestComputePaper2Statistics` (3 tests), `TestPaper2ResultSerialization` (1 test) — 8 smoke tests covering ~1200 lines of previously untested code
+- `test_activation_tracker.py`: `TestCheckpointErrorHandling` (3 tests) — truncated JSON, missing fields, empty file
+- `test_activation_tracker.py`: `TestEmptyBatch` (1 test) — analyze_batch([]) edge case
+- `test_correlation_dimension.py`: `TestDiagnosticPlotFailed` (1 test) — plot_diagnostics() on FAILED result
+- `test_simulator.py`: `TestNegativeRateConstantValidation` (1 test) — documents no-validation behavior
 
 ## How to Run Tests
 

@@ -620,3 +620,32 @@ class TestComputeFromSimulation:
         assert isinstance(result, CorrelationDimensionResult)
         # Quality is likely FAILED or MARGINAL for monotonic data
         # (no interesting attractor), but it should not crash
+
+
+# ===========================================================================
+# Phase 3 additional tests — Robustness, error handling, statistical code
+# ===========================================================================
+
+
+class TestDiagnosticPlotFailed:
+    """Phase 3.4: Diagnostic plot with FAILED result should not crash.
+
+    When D2 estimation fails (quality=FAILED), arrays like r_values and
+    C_values may be empty. plot_diagnostics() must handle this gracefully.
+    """
+
+    def test_plot_diagnostics_on_constant_trajectory(self):
+        """plot_diagnostics() on a constant trajectory (FAILED) should not crash."""
+        import matplotlib
+        matplotlib.use('Agg')
+
+        cd = CorrelationDimension()
+
+        # Constant trajectory — no structure, D2 will fail
+        traj = np.ones((200, 2)) * 3.0
+        result = cd.compute(traj)
+
+        assert result.quality == QualityFlag.FAILED
+
+        # This is the actual test: calling plot on a FAILED result must not crash
+        cd.plot_diagnostics(result, show=False)
