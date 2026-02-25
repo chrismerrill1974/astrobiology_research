@@ -575,3 +575,132 @@ class TestSolverFailureHandling:
         assert hasattr(result, 'solver_message')
         assert isinstance(result.solver_message, str)
         assert len(result.solver_message) > 0
+
+
+# ===========================================================================
+# Phase 2 additional tests — Edge cases for Paper 5
+# ===========================================================================
+
+
+class TestStiffSystemAccuracy:
+    """Phase 2.2: Stiff systems with widely separated rate constants.
+
+    Paper 5 may involve larger networks with timescales spanning several
+    orders of magnitude. The default solver (LSODA) should handle this,
+    but these tests verify correctness on known stiff problems.
+    """
+
+    def setup_method(self):
+        self.sim = ReactionSimulator()
+
+    def test_two_timescale_mass_conservation(self):
+        """Fast equilibrium A<->B coupled with slow B->C.
+
+        With k_fwd=k_rev=100 and k_slow=0.01 the fast sub-system
+        equilibrates rapidly. Total mass A+B+C should be conserved.
+        """
+        network = self.sim.build_network(["A -> B", "B -> A", "B -> C"])
+
+        result = self.sim.simulate(
+            network,
+            rate_constants=[100.0, 100.0, 0.01],
+            initial_concentrations={"A": 1.0, "B": 0.0, "C": 0.0},
+            t_span=(0, 50),
+            n_points=500,
+        )
+
+        total = (
+            result.get_species("A")
+            + result.get_species("B")
+            + result.get_species("C")
+        )
+        assert_allclose(total, 1.0, rtol=1e-4), (
+            "Mass conservation violated in stiff system"
+        )
+
+    def test_two_timescale_slow_product(self):
+        """Slow product C should grow at roughly k_slow * [B]_eq.
+
+        With fast equilibrium A<->B (k=100 each) and slow B->C (k=0.01),
+        A and B rapidly equilibrate to [A]=[B]=0.5, then C grows at
+        rate ~ 0.01 * 0.5 = 0.005 per unit time.
+        """
+        network = self.sim.build_network(["A -> B", "B -> A", "B -> C"])
+
+        result = self.sim.simulate(
+            network,
+            rate_constants=[100.0, 100.0, 0.01],
+            initial_concentrations={"A": 1.0, "B": 0.0, "C": 0.0},
+            t_span=(0, 50),
+            n_points=500,
+        )
+
+        C = result.get_species("C")
+        # After initial transient (~0.1 time units), C should grow
+        # At t=50, C ~ 0.005 * 50 = 0.25 (approximate, A+B are depleting)
+        assert C[-1] > 0.1, f"C_final={C[-1]:.4f}, expected > 0.1"
+        assert C[-1] < 0.5, f"C_final={C[-1]:.4f}, expected < 0.5"
+
+
+class TestRemoveTransientBoundary:
+    """Phase 2.3: Boundary values for remove_transient parameter.
+
+    Only tested at 0.5 in the existing suite. Extreme values could
+    produce empty or near-empty trajectories.
+    """
+
+    def setup_method(self):
+        self.sim = ReactionSimulator()
+
+    def test_remove_transient_zero(self):
+        """remove_transient=0.0 should keep the full trajectory."""
+        result = simulate_reactions(
+            ["A -> B"],
+            rate_constants=[1.0],
+            initial_concentrations={"A": 1.0, "B": 0.0},
+            t_span=(0, 10),
+            n_points=100,
+            remove_transient=0.0,
+        )
+
+        assert len(result.time) == 100
+        assert_allclose(result.time[0], 0.0, atol=0.2)
+
+    def test_remove_transient_099(self):
+        """remove_transient=0.99 with 100 points.
+
+        The simulator guards against removing too many points
+        (requires at least 10 remaining). With n_points=100 and
+        remove_transient=0.99, n_remove=99, which exceeds len-10=90,
+        so the transient removal is skipped.
+        """
+        result = simulate_reactions(
+            ["A -> B"],
+            rate_constants=[1.0],
+            initial_concentrations={"A": 1.0, "B": 0.0},
+            t_span=(0, 10),
+            n_points=100,
+            remove_transient=0.99,
+        )
+
+        # The guard `n_remove < len(t) - 10` prevents removing 99 of 100.
+        # So either all 100 points remain, or only the safe amount is removed.
+        assert len(result.time) >= 10
+
+    def test_remove_transient_1_0(self):
+        """remove_transient=1.0 should not produce an empty trajectory.
+
+        With n_points=100, n_remove=100, which fails the guard
+        n_remove < len(t) - 10, so no points are removed.
+        """
+        result = simulate_reactions(
+            ["A -> B"],
+            rate_constants=[1.0],
+            initial_concentrations={"A": 1.0, "B": 0.0},
+            t_span=(0, 10),
+            n_points=100,
+            remove_transient=1.0,
+        )
+
+        # Should NOT be empty — guard prevents it
+        assert len(result.time) >= 10

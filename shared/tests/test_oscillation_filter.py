@@ -230,3 +230,46 @@ class TestFilterEdgeCases:
         c = c.reshape(-1, 1)
         result = check_oscillation(c, t, ["X"])
         assert result.passes is True
+
+
+# ===========================================================================
+# Phase 2 additional tests — Edge cases for Paper 5
+# ===========================================================================
+
+
+class TestNaNAndNegativeConcentrations:
+    """Phase 2.4: Graceful handling of NaN and negative concentrations.
+
+    Stiff or divergent simulations can produce NaN or negative values.
+    The filter should fail gracefully rather than crash or false-positive.
+    """
+
+    def test_nan_in_trajectory_fails_gracefully(self):
+        """Trajectory with NaN values should not crash, should fail."""
+        t = np.linspace(0, 100, 2000)
+        c = 2.0 + 1.0 * np.sin(2 * np.pi * 0.5 * t)
+        # Inject NaN at various points
+        c[500] = np.nan
+        c[1000] = np.nan
+        c[1500] = np.nan
+        c = c.reshape(-1, 1)
+
+        result = check_oscillation(c, t, ["X"])
+
+        # Should not crash — just return a result
+        assert isinstance(result, OscillationResult)
+        # NaN contamination should cause failure (not a false positive)
+        assert result.passes is False
+
+    def test_negative_concentrations_fail_gracefully(self):
+        """Trajectory with negative values (solver overshoot) should not crash."""
+        t = np.linspace(0, 100, 2000)
+        c = 0.1 + 1.0 * np.sin(2 * np.pi * 0.5 * t)  # Goes negative
+        c = c.reshape(-1, 1)
+
+        result = check_oscillation(c, t, ["X"])
+
+        # Should not crash
+        assert isinstance(result, OscillationResult)
+        # Negative concentrations are unphysical, but the filter may
+        # still detect oscillation. The key test is no crash.

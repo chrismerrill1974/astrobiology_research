@@ -2,33 +2,37 @@
 
 ## Current Status
 
-**Phase 1 — Complete.** 18 new tests added, all passing. No regressions (190 passed, 4 skipped).
+**Phase 1 — Complete.** 18 new tests added, all passing.
 
-**Phase 2 — In Progress.** Edge cases likely to appear in Paper 5.
+**Phase 2 — Complete.** 15 new tests added, all passing. Full suite: 205 passed, 4 skipped, 0 failures.
 
-## What Was Done (Phase 1)
+**Phase 3 — Not started.** Robustness, error handling, and statistical code coverage.
 
-Tests guarding against silent wrong answers in eta. Added to existing test files in `shared/tests/`:
+## What Was Done
+
+### Phase 1: Guard against silent wrong answers in eta
 
 - `test_correlation_dimension.py`: `TestD2EmbeddingDimensionBound` (4 tests), `TestComputeFromSimulation` (3 tests)
 - `test_activation_tracker.py`: `TestTrajectoryExtraction` (4 tests), `TestSimulationFailureSkip` (1 test), `TestSpeciesToTrack` (3 tests)
 - `test_simulator.py`: `TestSolverFailureHandling` (3 tests)
 
-## What Is Being Done (Phase 2)
+### Phase 2: Edge cases for Paper 5
 
-Edge cases for Paper 5 scenarios, per `ADDITIONAL_TESTING_PLAN.md` sections 2.1–2.7:
-
-- 2.1: Larger networks in stoichiometry (10+ species)
-- 2.2: Stiff system accuracy in simulator
-- 2.3: `remove_transient` boundary values
-- 2.4: NaN/negative concentrations in oscillation filter
-- 2.5: Species name collisions in network generator
-- 2.6: Duplicate reaction detection in network generator
-- 2.7: Ensemble with n_runs=1 in activation tracker
+- `test_stoichiometry.py`: `TestLargerNetworks` (3 tests) — 10-species networks, SVD tolerance boundary
+- `test_simulator.py`: `TestStiffSystemAccuracy` (2 tests), `TestRemoveTransientBoundary` (3 tests)
+- `test_oscillation_filter.py`: `TestNaNAndNegativeConcentrations` (2 tests)
+- `test_network_generator.py`: `TestSpeciesNameCollisions` (2 tests), `TestDuplicateReactionDetection` (2 tests)
+- `test_activation_tracker.py`: `TestEnsembleEdgeCases` (1 test) — n_runs=1 fallback
 
 ## What Remains (Phase 3)
 
-Per the plan: `experiments.py` smoke tests, checkpoint error handling, empty batch, diagnostic plot with FAILED result, negative rate constant validation.
+Per `ADDITIONAL_TESTING_PLAN.md`:
+
+- 3.1: `experiments.py` smoke tests (8 tests) — the largest gap, zero coverage on ~1200 lines
+- 3.2: Checkpoint error handling (3 tests)
+- 3.3: Empty batch (1 test)
+- 3.4: Diagnostic plot with FAILED result (1 test)
+- 3.5: Negative rate constant validation (1 test)
 
 ## How to Run Tests
 
@@ -39,6 +43,6 @@ pytest tests/ -v
 
 ## Key Files
 
-- Plan: `/Users/chris/Documents/systems_analysis/astrobiology_research/ADDITIONAL_TESTING_PLAN.md`
+- Plan: `ADDITIONAL_TESTING_PLAN.md`
 - Shared code: `shared/dimensional_opening/`
 - Tests: `shared/tests/`

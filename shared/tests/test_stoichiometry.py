@@ -429,3 +429,83 @@ class TestEdgeCases:
         """Empty reaction list."""
         with pytest.raises((ValueError, IndexError)):
             self.analyzer.from_reaction_strings([])
+
+
+# ===========================================================================
+# Phase 2 additional tests — Edge cases for Paper 5
+# ===========================================================================
+
+
+class TestLargerNetworks:
+    """Phase 2.1: Stoichiometric analysis of larger networks (10+ species).
+
+    All existing tests use systems with 2-6 species. Paper 5 may push
+    network sizes, and numerical rank determination via SVD can become
+    sensitive at scale.
+    """
+
+    def setup_method(self):
+        self.analyzer = StoichiometricAnalyzer()
+
+    def test_10_species_known_rank(self):
+        """10-species, 8-reaction network with analytically known rank.
+
+        Block 1 (A,B,C,D,E): A->B, B->C, C->D, A->E  — rank 4
+        Block 2 (F,G,H,I,J): F->G, G->H, I->J, F->J  — rank 4
+        Total rank = 4 + 4 = 8, conservation laws = 10 - 8 = 2.
+        """
+        reactions = [
+            # Block 1: 4 reactions, 5 species
+            "A -> B",
+            "B -> C",
+            "C -> D",
+            "A -> E",
+            # Block 2: 4 reactions, 5 species
+            "F -> G",
+            "G -> H",
+            "I -> J",
+            "F -> J",
+        ]
+        result = self.analyzer.from_reaction_strings(reactions)
+
+        assert result.n_species == 10
+        assert result.n_reactions == 8
+        assert result.rank == 8
+        assert result.n_conservation_laws == 2
+
+    def test_svd_tolerance_boundary(self):
+        """Rank determination near SVD tolerance boundary.
+
+        Construct a matrix where one singular value is far below the
+        NumPy tolerance threshold. The tolerance is
+        max(m,n) * eps * sigma_max, so with sigma_max=10 and a 4x3
+        matrix the threshold is ~8.8e-15. A singular value of 1e-15
+        should be treated as zero.
+        """
+        # Build a 4x3 matrix with singular values [10, 5, 1e-15]
+        U = np.eye(4, 3)
+        S_diag = np.array([10.0, 5.0, 1e-15])
+        V = np.eye(3)
+        S = U @ np.diag(S_diag) @ V
+
+        result = self.analyzer.from_matrix(S)
+
+        assert result.rank == 2
+        assert result.n_conservation_laws == 2  # 4 species - rank 2
+
+    def test_larger_network_from_reactions(self):
+        """A 10-species reaction network parsed from strings.
+
+        Linear chain A->B->C->...->J has rank 9 and 1 conservation law
+        (total mass A+B+...+J is conserved).
+        """
+        reactions = [
+            "A -> B", "B -> C", "C -> D", "D -> E", "E -> F",
+            "F -> G", "G -> H", "H -> I", "I -> J",
+        ]
+        result = self.analyzer.from_reaction_strings(reactions)
+
+        assert result.n_species == 10
+        assert result.n_reactions == 9
+        assert result.rank == 9
+        assert result.n_conservation_laws == 1

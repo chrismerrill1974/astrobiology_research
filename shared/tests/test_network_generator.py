@@ -255,3 +255,109 @@ class TestTrackerIntegration:
         
         result = tracker.analyze_network(**input_dict)
         assert result.network_id == net.network_id
+
+
+# ===========================================================================
+# Phase 2 additional tests — Edge cases for Paper 5
+# ===========================================================================
+
+
+class TestSpeciesNameCollisions:
+    """Phase 2.5: Extra species names should not collide with template species.
+
+    Extra species are auto-named Z0, Z1, Z2, etc. If a template already
+    uses these names, reactions would silently conflate species.
+    """
+
+    def test_default_templates_no_z_prefix(self):
+        """Default templates should NOT use Z-prefixed species names.
+
+        This is a regression guard — if someone modifies a template to
+        use species like Z0, the auto-naming scheme would collide.
+        """
+        for name, template in TEMPLATES.items():
+            all_species = set()
+            for rxn in template.reactions:
+                # Extract species names from reaction
+                for side in rxn.split(" -> "):
+                    for term in side.split(" + "):
+                        term = term.strip()
+                        # Remove leading coefficient
+                        sp = term.lstrip("0123456789")
+                        if sp:
+                            all_species.add(sp)
+
+            # Also check initial concentrations and feed species
+            all_species.update(template.initial_concentrations.keys())
+            all_species.update(template.feed_species.keys())
+
+            z_names = [s for s in all_species if s.startswith("Z") and
+                       len(s) > 1 and s[1:].isdigit()]
+            assert len(z_names) == 0, (
+                f"Template '{name}' uses Z-prefixed species {z_names} "
+                f"which would collide with auto-generated extra species"
+            )
+
+    def test_extra_species_are_distinct_from_template(self):
+        """Generated extra species should not overlap with template species."""
+        for name in TEMPLATES:
+            gen = NetworkGenerator(template=name, n_extra_species=10)
+
+            template_species = set(gen.template_species)
+            extra = set(gen.extra_species)
+
+            overlap = template_species & extra
+            assert len(overlap) == 0, (
+                f"Template '{name}': overlap {overlap} between template "
+                f"species and auto-generated extra species"
+            )
+
+
+class TestDuplicateReactionDetection:
+    """Phase 2.6: Duplicate reaction detection in the generator.
+
+    The generator uses _format_reaction(sorted(reactants), sorted(products))
+    to build an exclusion set. This tests that ordering doesn't fool it
+    and that large batches don't accumulate duplicates.
+    """
+
+    def test_sorted_exclusion_catches_reordered_reactants(self):
+        """Reactions A + B -> C and B + A -> C should be detected as duplicates.
+
+        The generator normalizes by sorting reactants and products before
+        comparison. Verify this works.
+        """
+        gen = NetworkGenerator(seed=42)
+
+        # The internal method sorts before adding to exclude set
+        rxn1 = gen._format_reaction(sorted(["B", "A"]), sorted(["C"]))
+        rxn2 = gen._format_reaction(sorted(["A", "B"]), sorted(["C"]))
+        assert rxn1 == rxn2, (
+            f"Sorted format should be identical: '{rxn1}' vs '{rxn2}'"
+        )
+
+    def test_large_batch_no_duplicate_stoichiometry(self):
+        """Generate 20 networks with 5 added reactions each.
+
+        No single network should contain two reactions with identical
+        net stoichiometry (after accounting for the template reactions).
+        """
+        gen = NetworkGenerator(seed=42)
+
+        for i in range(20):
+            gen_i = NetworkGenerator(seed=42 + i)
+            net = gen_i.generate_control(n_added=5)
+
+            # Build set of normalized reaction strings
+            seen = set()
+            for rxn in net.reactions:
+                parts = rxn.split(" -> ")
+                lhs = " + ".join(sorted(parts[0].split(" + ")))
+                rhs = " + ".join(sorted(parts[1].split(" + ")))
+                normalized = f"{lhs} -> {rhs}"
+
+                assert normalized not in seen, (
+                    f"Network seed={42+i}: duplicate reaction '{rxn}' "
+                    f"(normalized: '{normalized}')"
+                )
+                seen.add(normalized)

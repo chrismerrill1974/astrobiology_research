@@ -677,3 +677,52 @@ class TestSpeciesToTrack:
         assert traj is not None
         assert traj.shape == (1000, 1)
         np.testing.assert_allclose(traj[:, 0], c_x, rtol=1e-10)
+
+
+# ===========================================================================
+# Phase 2 additional tests — Edge cases for Paper 5
+# ===========================================================================
+
+
+class TestEnsembleEdgeCases:
+    """Phase 2.7: Ensemble analysis with n_runs=1.
+
+    The ensemble method is designed for multiple runs, but n_runs=1 is a
+    natural edge case (e.g., quick sanity check). It should degrade
+    gracefully to a single-run result.
+    """
+
+    def test_ensemble_nruns_1(self):
+        """analyze_network_ensemble with n_runs=1 should not crash.
+
+        With n_runs=1, only 1 trajectory is generated. If it succeeds,
+        len(trajectories) < 2 triggers the fallback to the base result.
+        The method should return a valid ActivationResult either way.
+        """
+        tracker = ActivationTracker(
+            t_span=(0, 100),
+            n_points=5000,
+            remove_transient=0.5,
+            random_state=42,
+        )
+
+        result = tracker.analyze_network_ensemble(
+            reactions=["A -> X", "2X + Y -> 3X", "B + X -> Y + D", "X -> E"],
+            rate_constants=[1.0, 1.0, 1.0, 1.0],
+            initial_concentrations={
+                "A": 1.0, "B": 3.0, "X": 1.0, "Y": 1.0,
+                "D": 0.0, "E": 0.0,
+            },
+            chemostat_species={"A": 1.0, "B": 3.0},
+            n_runs=1,
+            ic_perturbation=0.1,
+            network_id="ensemble_1run",
+        )
+
+        assert isinstance(result, ActivationResult)
+        assert not result.skipped
+        # Should fall back to base result (single run)
+        assert result.r_S >= 2
+        # D2 and eta should be finite
+        assert np.isfinite(result.D2)
+        assert np.isfinite(result.eta)
