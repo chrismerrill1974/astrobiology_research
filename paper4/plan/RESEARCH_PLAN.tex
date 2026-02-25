@@ -1,0 +1,498 @@
+\documentclass[aps,prl,twocolumn,superscriptaddress,floatfix]{revtex4-2}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\newcommand{\tauexp}{\tau_{>1.2}}
+\newcommand{\Tlock}{T_{\mathrm{lock}}}
+\newcommand{\Dtwo}{D_2}
+\newcommand{\kcat}{k_{\mathrm{cat}}}
+\newcommand{\Kd}{K_d}
+\newcommand{\Gtot}{G_{\mathrm{total}}}
+
+\begin{document}
+
+\title{Paper~4 Research Plan: Evolutionary Selection on Transient Dynamical Retention Time}
+\date{\today}
+
+\maketitle
+
+%% ----------------------------------------------------------------
+\section{Objective}
+
+Determine whether simple evolutionary selection pressure,
+acting on a measurable dynamical phenotype---transient retention time
+$\tauexp$---can drive a population of enzyme-complex coupled networks
+toward prolonged high-dimensional exploration.  The network topology
+is held fixed; only kinetic parameters are subject to mutation.
+
+%% ----------------------------------------------------------------
+\section{Model Summary}
+
+We use the enzyme-complex coupled Brusselator from Paper~3
+(pilot~5b): two Brusselator cores sharing a slow energy pool $E$
+gated by a catalytic enzyme complex $G/GE$.  The dynamic species
+are $\{X_1, Y_1, X_2, Y_2, E, G, GE\}$; waste accumulators
+$\{D_1, W_1, D_2^{\mathrm{sp}}, W_2, E_w\}$ are excluded from analysis.
+Integration via LSODA, $t \in [0, 20000]$, 40\,000 points,
+rtol $= 10^{-6}$, atol $= 10^{-9}$.
+
+Correlation dimension $\Dtwo$ is computed on the 5D projection
+$\{X_1, Y_1, X_2, Y_2, E\}$ using the Grassberger--Procaccia
+algorithm with Theiler window correction (existing
+\texttt{dimensional\_opening} library).
+
+%% ----------------------------------------------------------------
+\section{Phenotype Definition}
+
+The \textbf{primary fitness metric} throughout this study is
+$\tauexp$: the number of 2\,500-unit sliding windows in which
+$\Dtwo > 1.2$.  This is the sole selection target.
+
+$\Tlock$ (earliest window after which $\Dtwo$ remains $< 1.1$)
+is recorded as a \textbf{secondary diagnostic} but is never used
+as a selection criterion.  No metric substitutions are permitted
+mid-analysis.
+
+The measurement protocol matches Paper~3 exactly: same
+sliding-window method, same Grassberger--Procaccia $\Dtwo$
+estimator, same threshold ($\Dtwo > 1.2$).  No new dynamical
+diagnostics are introduced.
+
+%% ----------------------------------------------------------------
+\section{Numerical Safeguards}
+
+\begin{itemize}
+  \item \textbf{$\gamma$ lower bound.}  Hard floor at
+    $\gamma_{\min} = 10^{-4}$.  Below this, the energy pool
+    timescale $1/\gamma > 10^4$ exceeds the integration window
+    and induces severe stiffness.  Mutations that would push
+    $\gamma < \gamma_{\min}$ are reflected:
+    $\gamma' = \gamma_{\min} + |\gamma' - \gamma_{\min}|$.
+
+  \item \textbf{$\gamma$ upper bound.}  Ceiling at
+    $\gamma_{\max} = 0.1$.  Above this, no timescale separation
+    exists (energy pool equilibrates within one oscillation period).
+
+  \item \textbf{Solver stability.}  If LSODA returns a failed
+    integration (step size underflow, excessive stiffness
+    warnings, or \texttt{nfev} $> 10^7$), assign the individual
+    fitness $\tauexp = 0$ (lethal phenotype).  Log the failure.
+
+  \item \textbf{NaN/Inf guard.}  If any concentration value is
+    non-finite (\texttt{NaN} or $\pm\infty$) after integration,
+    assign $\tauexp = 0$ immediately.  This catches edge cases
+    where LSODA reports \texttt{success=True} but produces
+    degenerate output.
+
+  \item \textbf{Stiff-regime step cap.}  Pass
+    \texttt{max\_step\,=\,10.0} to the LSODA integrator to prevent
+    excessively large adaptive steps through stiff regions that
+    may produce spurious solutions.
+
+  \item \textbf{Wall-clock timeout.}  Each individual evaluation
+    (single integration + $\Dtwo$ computation) is subject to a
+    300\,s wall-clock alarm (\texttt{SIGALRM}).  If the solver
+    becomes trapped in internal step-size reduction without
+    converging or raising an exception, the evaluation is
+    terminated and assigned $\tauexp = 0$.  This prevents a single
+    stiff parameterisation from hanging overnight batch runs.
+
+  \item \textbf{Pathological regime detection.}  If any species
+    concentration exceeds $10^6$ or becomes negative, terminate
+    the integration early and assign $\tauexp = 0$.
+
+  \item \textbf{Maximum $\tauexp$.}  Capped at 7 (the total
+    number of 2\,500-unit windows in $[2500, 20000]$).  This is
+    a hard ceiling, not a target.
+\end{itemize}
+
+%% ----------------------------------------------------------------
+\section{Predefined Success Criteria}
+\label{sec:success}
+
+Before running the evolutionary experiments, the following
+criteria are fixed:
+
+\begin{enumerate}
+  \item \textbf{Positive result (selection acts):}
+    Mean $\tauexp$ at generation $G_{\max}$ is significantly greater
+    than generation~0 ($p < 0.05$, Wilcoxon signed-rank across
+    10~replicates) \emph{and} significantly greater than the
+    neutral drift control (Phase~3) at the same generation.
+
+  \item \textbf{Strong positive:}  In addition,
+    $\gamma$ converges directionally (population mean decreases
+    monotonically over the final 20~generations in $\geq 8/10$
+    replicates) and Cohen's $d > 0.8$ vs.\ neutral.
+
+  \item \textbf{Negative result:}  $p > 0.05$ vs.\ neutral
+    control, or effect size $d < 0.3$.  Reported as:
+    \emph{selection cannot act on $\tauexp$ in this regime.}
+
+  \item \textbf{Ambiguous:}  $0.05 > p$ but $d < 0.5$, or
+    $\gamma$ drift is non-monotonic.  Investigate in Phase~5
+    before concluding.
+
+  \item \textbf{Boundary collapse:}  Population $\gamma$ converges
+    to $\gamma_{\min}$ in $\geq 8/10$ replicates, with a high
+    fraction of lethal phenotypes ($>20\%$ of individuals per
+    generation receiving $\tauexp = 0$ due to solver failure).
+    Interpreted as: strong selection pressure toward extreme
+    timescale separation, but limited physical viability---the
+    system is driven against a numerical/physical boundary.
+    This is a distinct, informative outcome: selection acts, but
+    the accessible parameter space is insufficient to sustain the
+    favoured regime.
+\end{enumerate}
+
+%% ----------------------------------------------------------------
+\section{Phased Experimental Plan}
+
+%% ---- PHASE 0 ----
+\subsection{Phase~0: Baseline Characterisation}
+\label{sec:phase0}
+
+\textbf{Goal.} Establish the null distribution of $\tauexp$ and
+$\Tlock$ under random parameter draws (no selection), and validate
+that the fitness landscape is non-trivial.
+
+\begin{enumerate}[label=0.\arabic*]
+  \item \textbf{Random parameter sample.}
+    Draw $N_{\mathrm{sample}} = 200$ parameter vectors
+    $\theta = (\gamma, J, \kcat)$ from the Paper~3 sweep grid
+    neighbourhood:
+    \begin{align}
+      \gamma &\in [0.0005,\; 0.01], \quad \text{log-uniform} \\
+      J      &\in [2,\; 12], \quad \text{uniform} \\
+      \kcat  &\in [0.05,\; 0.8], \quad \text{uniform}
+    \end{align}
+    Hold fixed: $K_d = 1.0$, $\Gtot = 1.0$, $k_{\mathrm{on}} = k_{\mathrm{off}} = 10.0$,
+    $A = 1.0$, $B = 3.0$.
+
+  \item \textbf{Sliding-window $\Dtwo$ measurement.}
+    For each $\theta$, run 5~seeds.  Partition $t \in [2500, 20000]$
+    into 2\,500-unit windows; compute $\Dtwo$ per window.  Record
+    $\tauexp$ (number of windows with $\Dtwo > 1.2$) and $\Tlock$
+    (earliest window after which $\Dtwo$ remains $< 1.1$).
+
+  \item \textbf{Deliverables.}
+    \begin{itemize}
+      \item Distribution of $\tauexp$ and $\Tlock$ across random draws.
+      \item Scatter plots: $\tauexp$ vs.\ $\gamma$, $J$, $\kcat$.
+      \item Identify whether $\tauexp$ varies sufficiently for selection
+            to act (variance $> 0$, non-degenerate).
+    \end{itemize}
+
+  \item \textbf{Go/no-go.}  If $>90\%$ of random draws yield
+    $\tauexp = 0$ (no transient complexity at all), widen the
+    parameter ranges or add $J$ and $\kcat$ as mutable dimensions before
+    proceeding.
+\end{enumerate}
+
+\textbf{Estimated cost:} $200 \times 5 = 1\,000$ integrations.
+
+%% ---- PHASE 1 ----
+\subsection{Phase~1: Single-Parameter Selection ($\gamma$ Only)}
+\label{sec:phase1}
+
+\textbf{Goal.} Test the core hypothesis in the simplest possible
+setting: mutations in $\gamma$ alone, with all other parameters
+fixed at a permissive baseline.
+
+\begin{enumerate}[label=1.\arabic*]
+  \item \textbf{Baseline parameters.}
+    Choose a ``moderately complex'' $\theta_0$ from Phase~0
+    (e.g., median $\tauexp \approx 1$--2 windows).  Fix $J$, $\kcat$
+    at those values.  Mutable parameter: $\gamma$ only.
+
+  \item \textbf{Evolutionary algorithm.}
+    \begin{itemize}
+      \item Population: $N = 40$ individuals, each characterised by
+            a scalar $\gamma_i$.
+      \item Initialisation: all $\gamma_i = \gamma_0$ (from $\theta_0$).
+      \item \textbf{Mutation}: Gaussian perturbation in log-space,
+            $\log\gamma' = \log\gamma + \mathcal{N}(0, \sigma_m^2)$
+            with $\sigma_m = 0.1$.  Enforce bounds
+            $\gamma' \in [\gamma_{\min}, \gamma_{\max}]$ via
+            reflection (see Numerical Safeguards).
+      \item \textbf{Fitness evaluation}: For each individual, run
+            3~seeds; fitness $= \mathrm{mean}(\tauexp)$ across seeds.
+            Failed integrations receive $\tauexp = 0$.
+      \item \textbf{Selection}: Tournament selection ($k = 3$).
+            Fitness-proportionate (roulette wheel) selection is
+            excluded to avoid instability amplification from
+            high-variance fitness values.
+      \item \textbf{Reproduction}: Selected parents produce offspring
+            with mutation.  Population size held constant at $N$.
+      \item \textbf{Generations}: $G_{\max} = 80$.
+    \end{itemize}
+
+  \item \textbf{Replicates.}  Run 10 independent evolutionary
+    trajectories (different random seeds for mutation/selection).
+
+  \item \textbf{Measurements per generation.}
+    \begin{itemize}
+      \item Population mean, median, max of $\tauexp$.
+      \item Population mean and std of $\gamma$.
+      \item Population variance of $\gamma$ (expected to narrow
+            under directional selection).
+      \item Best-individual $\Dtwo$ trajectory (all windows).
+      \item Number of lethal phenotypes (failed integrations).
+    \end{itemize}
+
+  \item \textbf{Deliverables.}
+    \begin{itemize}
+      \item $\tauexp$ vs.\ generation curves (10 replicates, mean $\pm$ SE).
+      \item $\gamma$ vs.\ generation (population mean $\pm$ std).
+      \item Final $\gamma$ distribution across replicates.
+      \item Statistical test: paired comparison of generation~0 vs.\
+            generation $G_{\max}$ mean $\tauexp$ (Wilcoxon signed-rank,
+            $n = 10$ replicates).
+    \end{itemize}
+
+  \item \textbf{Expected outcome.}  If selection is effective,
+    $\gamma$ should drift downward (slower energy leak $\Rightarrow$
+    longer timescale separation $\Rightarrow$ longer transient).
+\end{enumerate}
+
+\textbf{Estimated cost:} $10 \times 80 \times 40 \times 3 = 96\,000$
+integrations.  At $\sim$2\,s each $\approx$ 53\,hours serial;
+parallelise across seeds and individuals.
+
+%% ---- PHASE 2 ----
+\subsection{Phase~2: Multi-Parameter Selection (Conditional)}
+\label{sec:phase2}
+
+\textbf{Goal.} Extend to joint mutation in $(\gamma, J, \kcat)$
+and test whether the evolutionary trajectory follows a
+qualitatively different path.
+
+\textbf{Trigger condition.}  Phase~2 is executed only if one of
+the following holds after Phase~1:
+\begin{itemize}
+  \item $\gamma$-only selection saturates prematurely (population
+        $\gamma$ converges to $\gamma_{\min}$ with no further
+        $\tauexp$ gain).
+  \item No directional drift in $\gamma$ is observed despite
+        non-zero $\tauexp$ variance (fitness landscape may be
+        flat along the $\gamma$ axis alone).
+  \item Phase~1 yields a positive result, and multi-parameter
+        comparison is scientifically informative (not merely
+        confirmatory).
+\end{itemize}
+
+\begin{enumerate}[label=2.\arabic*]
+  \item \textbf{Setup.}  Identical to Phase~1 except:
+    \begin{itemize}
+      \item Mutable parameters: $(\gamma, J, \kcat)$.
+      \item Mutation: independent Gaussian in log-space for each,
+            $\sigma_m = 0.1$ per dimension.  Enforce bounds via
+            reflection to Phase~0 ranges.
+    \end{itemize}
+
+  \item \textbf{Generations}: $G_{\max} = 80$, 10~replicates.
+
+  \item \textbf{Additional measurements.}
+    \begin{itemize}
+      \item Joint parameter trajectories in $(\gamma, J, \kcat)$ space.
+      \item Principal component of the evolutionary displacement vector
+            (which parameter axis dominates the adaptive response?).
+      \item Comparison to Phase~1: does multi-parameter selection
+            achieve higher $\tauexp$ or converge to the same $\gamma$
+            regime?
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Estimated cost:} Same as Phase~1 ($\sim$96\,000 integrations).
+
+%% ---- PHASE 3 ----
+\subsection{Phase~3: Controls}
+\label{sec:phase3}
+
+\textbf{Goal.} Confirm that any observed increase in $\tauexp$ is
+due to selection and not drift, regression to the mean, or
+artefact.
+
+\begin{enumerate}[label=3.\arabic*]
+  \item \textbf{Neutral drift control.}
+    Run the Phase~1 algorithm with \emph{random} (uniform) selection
+    instead of fitness-based selection.  Same $N$, $G_{\max}$,
+    mutation rate, 10~replicates.
+
+  \item \textbf{Reversed selection control.}
+    Select for \emph{minimum} $\tauexp$ (penalise transient
+    complexity).  If the system responds symmetrically, this
+    validates that the fitness landscape is non-flat.
+
+  \item \textbf{Frozen-parameter control.}
+    Run 10 populations with no mutation ($\sigma_m = 0$) to
+    confirm that $\tauexp$ does not drift due to stochastic
+    seed variation alone.
+
+  \item \textbf{Deliverables.}
+    \begin{itemize}
+      \item Side-by-side $\tauexp$ trajectories: selection vs.\
+            neutral vs.\ reversed vs.\ frozen.
+      \item Effect size (Cohen's $d$) for selection vs.\ neutral
+            at generation $G_{\max}$.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Estimated cost:} $3 \times 96\,000 = 288\,000$ integrations
+(but neutral and frozen runs are cheap---no fitness evaluation
+overhead beyond integration).
+
+%% ---- PHASE 4 ----
+\subsection{Phase~4: Robustness and Sensitivity}
+\label{sec:phase4}
+
+\textbf{Goal.}  Assess sensitivity to algorithmic choices and
+confirm the result is not an artefact of hyperparameter tuning.
+
+\begin{enumerate}[label=4.\arabic*]
+  \item \textbf{Mutation rate sweep.}
+    $\sigma_m \in \{0.02, 0.05, 0.1, 0.2, 0.5\}$, 5~replicates
+    each, Phase~1 setup.
+
+  \item \textbf{Population size sweep.}
+    $N \in \{10, 20, 40, 80\}$, 5~replicates each.
+
+  \item \textbf{Selection method.}
+    Compare truncation (top 50\%) vs.\ tournament ($k = 3$)
+    vs.\ tournament ($k = 5$).  Fitness-proportionate selection
+    is excluded (see Numerical Safeguards).
+
+  \item \textbf{Window size sensitivity.}
+    Repeat Phase~1 best-case with $\Dtwo$ window sizes of
+    1\,250 and 5\,000 time units (in addition to the default 2\,500).
+
+  \item \textbf{Deliverable.}
+    Heatmap of final $\tauexp$ gain (generation $G_{\max}$ minus
+    generation~0) across hyperparameter grid.  Identify
+    qualitative robustness vs.\ sensitivity.
+\end{enumerate}
+
+%% ---- PHASE 5 ----
+\subsection{Phase~5: Mechanistic Characterisation}
+\label{sec:phase5}
+
+\textbf{Goal.}  Understand \emph{why} selection succeeds (or fails)
+in dynamical terms.
+
+\begin{enumerate}[label=5.\arabic*]
+  \item \textbf{Evolved vs.\ ancestral trajectories.}
+    Compare the best individual at generation $G_{\max}$ with the
+    ancestor ($\theta_0$):
+    \begin{itemize}
+      \item Full $\Dtwo$ sliding-window profile.
+      \item Lyapunov exponent ($\lambda_1$) via Rosenstein algorithm
+            with block bootstrap CI (existing Paper~3 code).
+      \item Phase portraits in $(X_1, X_2)$ and $(E, GE)$ space.
+      \item Power spectral density of $X_1(t)$ and $E(t)$.
+    \end{itemize}
+
+  \item \textbf{Fitness landscape section.}
+    Sweep $\gamma$ finely ($n = 100$ values, log-spaced in
+    $[10^{-4}, 0.1]$) at fixed $(J, \kcat) = (J_0, \kcat^0)$
+    from the baseline.  Plot $\tauexp(\gamma)$ to visualise the
+    landscape the evolutionary algorithm traverses.
+
+  \item \textbf{Timescale ratio analysis.}
+    Compute the effective timescale ratio
+    $\rho = (1/\gamma) / T_{\mathrm{osc}}$, where
+    $T_{\mathrm{osc}}$ is the dominant oscillation period of the
+    uncoupled Brusselator.  Plot $\tauexp$ vs.\ $\rho$ to test
+    whether selection exploits timescale separation directly.
+
+  \item \textbf{Boundary collapse analysis.}
+    If the boundary collapse outcome (Success Criterion~5) is
+    observed:
+    \begin{itemize}
+      \item Characterise the lethal-phenotype fraction vs.\
+            generation curve.
+      \item Identify the $\gamma$ value at which solver failures
+            onset (effective viability boundary).
+      \item Determine whether $\tauexp$ peaks at an intermediate
+            $\gamma > \gamma_{\min}$ or increases monotonically
+            to the boundary.
+      \item Interpret: does the system face a fundamental
+            trade-off between timescale separation and dynamical
+            viability?
+    \end{itemize}
+
+  \item \textbf{Deliverables.}
+    \begin{itemize}
+      \item Mechanistic narrative: what dynamical feature does
+            selection tune?
+      \item Identify whether there is a $\gamma^*$ threshold
+            (phase boundary) or a smooth gradient.
+      \item If boundary collapse: characterise the
+            viability--exploration trade-off.
+    \end{itemize}
+\end{enumerate}
+
+%% ----------------------------------------------------------------
+\section{Computational Infrastructure}
+
+\begin{itemize}
+  \item All simulations use the existing \texttt{dimensional\_opening}
+        library and \texttt{pilot5b\_enzyme\_complex.py} model.
+  \item New code: \texttt{phase1\_evolution\_v2.py} implementing
+        the population loop (mutation, evaluation, selection).
+        Single-process, batch-mode, with incremental JSONL output
+        and crash-resumable state recovery.
+  \item Execution: single-threaded sequential evaluation.
+        Parallelisation across replicates via independent processes
+        on separate nodes (AWS spot instances for the pilot).
+  \item Output: per-generation JSONL append (one line per generation
+        containing all individual fitnesses, gammas, and diagnostic
+        statuses); consolidated JSON after analysis.
+  \item Estimated total compute: $\sim$600\,000 integrations
+        ($\sim$350 core-hours at 2\,s/run).
+\end{itemize}
+
+%% ----------------------------------------------------------------
+\section{Decision Points}
+
+\begin{enumerate}
+  \item \textbf{After Phase~0:} If the fitness landscape is flat
+    ($\tauexp$ variance $\approx 0$), reassess parameter ranges
+    or integration time before proceeding.
+
+  \item \textbf{After Phase~1:} If $\tauexp$ does not increase
+    significantly ($p > 0.05$ vs.\ neutral), the negative result
+    is reported.  Phase~2 is optional but may still reveal
+    multi-parameter escape routes.
+
+  \item \textbf{After Phase~3:} If controls show comparable
+    $\tauexp$ gains, the selection result is confounded.
+    Investigate and report as negative.
+
+  \item \textbf{After Phase~5:} Determines the narrative framing.
+    Sharp threshold $\Rightarrow$ selection finds a phase boundary.
+    Smooth gradient $\Rightarrow$ selection hill-climbs a
+    continuous landscape.
+\end{enumerate}
+
+%% ----------------------------------------------------------------
+\section{Scope Guardrails}
+
+\begin{itemize}
+  \item No genotype encoding.  No reaction rewiring.
+  \item No population ecology (density dependence, spatial structure).
+  \item No fitness landscapes beyond $\tauexp$.
+  \item No environmental noise or time-varying parameters
+    (stochastic/periodic perturbations of $J$ or $\gamma$ are
+    reserved for a future study).
+  \item No new dynamical diagnostics beyond those established
+    in Paper~3.
+  \item Claims are restricted to: \emph{selection can (or cannot) act
+    on transient dynamical retention time in this model class.}
+  \item Do not overinterpret as evidence for or against abiogenesis
+    inevitability.
+\end{itemize}
+
+\end{document}

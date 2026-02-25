@@ -1,0 +1,60 @@
+{
+  "phase": "phase1_pilot",
+  "verdict": "NEGATIVE",
+  "script_version": "v2",
+  "config": {
+    "pop_size": 20,
+    "g_max": 40,
+    "n_selection_reps": 10,
+    "n_neutral_reps": 10,
+    "n_fitness_seeds": 2,
+    "sigma_m": 0.1,
+    "gamma_min": 0.0001,
+    "gamma_max": 0.1,
+    "tournament_k": 3,
+    "max_step": 10.0,
+    "eval_timeout_s": 60
+  },
+  "selection_reps": [
+    {
+      "replicate_id": 0,
+      "gen0_fitness": 1.5,
+      "genmax_fitness": 3.775,
+      "final_mean_gamma": 0.00037156434521851676
+    },
+    {
+      "replicate_id": 1,
+      "gen0_fitness": 1.375,
+      "genmax_fitness": 3.825,
+      "final_mean_gamma": 0.00038756582024739527
+    },
+    {
+      "replicate_id": 2,
+      "gen0_fitness": 1.5,
+      "genmax_fitness": 3.65,
+      "final_mean_gamma": 0.00035912545245955416
+    }
+  ],
+  "neutral_reps": [
+    {
+      "replicate_id": 0,
+      "genmax_fitness": 0.825,
+      "final_mean_gamma": 0.004030255604045319
+    },
+    {
+      "replicate_id": 1,
+      "genmax_fitness": 2.325,
+      "final_mean_gamma": 0.0020118305955970097
+    },
+    {
+      "replicate_id": 2,
+      "genmax_fitness": 1.625,
+      "final_mean_gamma": 0.0030897193498403827
+    }
+  ],
+  "statistics": {
+    "p_wilcoxon": 0.125,
+    "p_mannwhitney": 0.05,
+    "cohens_d": 4.945234157010478
+  }
+}

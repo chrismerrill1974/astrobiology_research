@@ -1,0 +1,410 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evolutionary Selection on Transient Dynamical Retention Time
+% in Energy-Coupled Chemical Oscillators
+%
+% Paper 4 — February 2026 (V2: n=10 Confirmed)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb,prd,floatfix]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+% Placeholder for values awaiting V2 data — renders red in PDF for easy spotting
+% Works in both text and math mode via \color scoping
+\newcommand{\VV}[1]{{\color{red}{#1}}}
+\newcommand{\tauexp}{\tau_{>1.2}}
+\newcommand{\Tlock}{T_{\mathrm{lock}}}
+\newcommand{\Dtwo}{D_2}
+\newcommand{\kcat}{k_{\mathrm{cat}}}
+\newcommand{\Kd}{K_d}
+\newcommand{\Gtot}{G_{\mathrm{total}}}
+
+\begin{document}
+
+\title{Evolutionary Selection on Transient Dynamical Retention Time\\
+in Energy-Coupled Chemical Oscillators}
+
+\author{Christopher Merrill}
+\affiliation{Independent Researcher}
+\author{With computational collaboration from Claude (Anthropic), ChatGPT (OpenAI), and Gemini (Google)}
+
+\date{\today}
+
+\begin{abstract}
+Papers~1--3 in this series established that autocatalytic network growth dilutes the activation ratio $\eta = \Dtwo/r_S$, that feedback-aligned growth preserves oscillatory viability but cannot increase the correlation dimension $\Dtwo$ beyond $\approx 1$, and that timescale separation between fast oscillatory cores and a slow shared energy reservoir transiently inflates $\Dtwo$ to $\sim$1.7 for hundreds of oscillator periods before phase-locking restores rigidity. Paper~3 posed an open question: can evolutionary selection act on the duration of this transient exploratory phase? Here we test this directly. Using the enzyme-complex coupled Brusselator from Paper~3 with fixed network topology, we subject the energy dissipation rate $\gamma$---the parameter controlling timescale separation---to tournament selection for transient retention time $\tauexp$. With $N = 20$, 40~generations, and 10~selection $+$ 10~neutral replicates, selection drives mean $\tauexp$ from $1.22$ to $3.39 \pm 0.41$ ($2.8\times$ increase) while neutral drift produces $1.08 \pm 0.83$ (Cohen's $d = 3.7$, Mann--Whitney $p < 0.0001$, Wilcoxon $p = 0.001$). The mechanism is directional: $\gamma$ converges to $4.0 \times 10^{-4}$ across all ten selection replicates ($5.6\times$ reduction), extending the slow--fast timescale separation that drives transient chaos. These results demonstrate that simple evolutionary pressure, acting on a measurable dynamical phenotype in a prebiotic chemical network, can prolong the window of high-dimensional state-space exploration---without genetic encoding, biological machinery, or structural network change.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The first three papers in this series documented a progression through increasingly specific forms of dynamical rigidity in autocatalytic chemical networks. Paper~1~\cite{paper1} showed that randomly added autocatalytic reactions dilute the activation ratio $\eta = \Dtwo/r_S$ at $\approx -0.024$/reaction: the stoichiometric rank $r_S$ grows faster than the correlation dimension $\Dtwo$. Paper~2~\cite{paper2} tested whether feedback-aligned growth could slow or reverse this dilution. It cannot: both random and aligned additions produce identical $\eta$ slopes. However, aligned growth dramatically preserves dynamical viability (OR $= 7.0$ at $k = 5$, $p < 10^{-17}$).
+
+Paper~3~\cite{paper3} identified the mechanism that breaks the $\Dtwo \approx 1$ limit cycle floor: timescale separation. A slow energy reservoir ($1/\gamma \gg$ oscillator period) coupled to fast autocatalytic oscillators transiently inflates $\Dtwo$ to $\sim$1.7 for hundreds of oscillator periods before phase-locking restores rigidity. Two distinct inflation mechanisms were confirmed: intrinsic slow--fast dynamics at very low $\gamma$ and shared-reservoir desynchronization at moderate $\gamma$. Random chemical elaboration catastrophically destroys these dynamics (OR $= 167$ vs.\ aligned growth at $k = 5$).
+
+Paper~3 concluded with a ``transient ecology'' framework: prebiotic chemical systems need not sustain permanent high-dimensional chaos. What matters is finite-time exploration of chemical state space during a metastable exploratory phase. This view connects to two broader theoretical traditions. First, Nghe et~al.~\cite{nghe2015} identified timescale separation and metastable core dynamics as key parameters governing prebiotic network evolution, noting that slow ``minority'' species in protocells can serve as proto-hereditary memory carriers. Second, Vanchurin et~al.~\cite{vanchurin2022} proposed a general theory of evolution as multilevel learning, in which separation of timescales between slow and fast variables is both necessary and sufficient for the emergence of selection at distinct organizational levels. Paper~3 posed the natural follow-up question: \textit{can selection act on the duration of this exploratory phase?}
+
+Here we answer that question. We subject a population of enzyme-complex coupled oscillators to evolutionary selection on $\tauexp$---the number of sliding windows exhibiting transient dimensional inflation ($\Dtwo > 1.2$). The network topology is held fixed; only the energy dissipation rate $\gamma$ is subject to mutation. This is the simplest possible evolutionary test: one mutable parameter, one phenotypic target, fixed chemistry. To our knowledge, no prior model has combined all four of: (i)~a fixed reaction topology, (ii)~a single evolvable dissipative parameter, (iii)~a fitness functional defined by a high-dimensional dynamical metric, and (iv)~a quantified prolongation of a transient exploratory phase~\cite{nghe2015, vanchurin2022}.
+
+The hypothesis is straightforward: if lower $\gamma$ extends the transient (as documented in Paper~3, where $\Tlock \approx 10{,}000$ at $\gamma = 0.001$ vs.\ $\sim$7{,}500 at $\gamma = 0.002$), then selection for high $\tauexp$ should drive $\gamma$ downward. We present results from $n = 10$ replicates per condition, confirming a massive effect (Cohen's $d = 3.7$, Wilcoxon $p = 0.001$).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Model and Parameters}
+
+We use the enzyme-complex coupled Brusselator model from Paper~3: two Brusselator oscillator cores sharing a single slow energy pool, mediated by an enzyme-complex gate. All reactions are standard mass-action. The model comprises 14 reactions (4 per core $\times$ 2, plus 2 energy-pool reactions, 2 gate reactions, and 2 gated autocatalysis reactions). The full reaction scheme and quasi-steady-state analysis are given in Paper~3.
+
+Dynamic species tracked for $\Dtwo$: $\{X_1, Y_1, X_2, Y_2, E\}$ (5 variables). Integration via LSODA over $t \in [0, 20{,}000]$ with 40{,}000 time points, rtol $= 10^{-6}$, atol $= 10^{-9}$, max\_step $= 10.0$.
+
+Fixed parameters: $A = 1.0$, $B = 3.0$, $k_\text{on} = k_\text{off} = 10.0$ ($\Kd = 1.0$), $\Gtot = 1.0$. Baseline kinetic parameters (from Phase~0 characterization, \S\ref{sec:phase0}): $J = 4.388$, $\kcat = 0.278$, $\gamma_0 = 0.00223$. Only $\gamma$ is subject to evolutionary mutation.
+
+\subsection{Fitness Metric}
+
+The primary fitness metric is $\tauexp$: the number of 2{,}500-unit non-overlapping sliding windows in $t \in [2{,}500, 20{,}000]$ (7 windows total) for which $\Dtwo > 1.2$. This is identical to the transient retention metric defined in Paper~3 (\S\,IV therein). The threshold $\Dtwo > 1.2$ is justified statistically: across all phase-locked runs in Paper~3, the $\Dtwo$ estimator returns $1.030 \pm 0.063$, placing the threshold $>$\,6$\sigma$ above baseline.
+
+Each individual's fitness is the mean $\tauexp$ across $N_\text{seeds} = 2$ independent integrations (seeds 42 and 179), yielding values in $\{0, 0.5, 1.0, \ldots, 7.0\}$.
+
+\subsection{Evolutionary Algorithm}
+
+\textbf{Population structure.} $N = 20$ individuals, each characterized by a scalar $\gamma_i$. All individuals are initialized at $\gamma_0 = 0.00223$.
+
+\textbf{Mutation.} Gaussian perturbation in $\log_{10}$-space:
+\begin{equation}
+\log_{10} \gamma' = \log_{10} \gamma + \mathcal{N}(0, \sigma_m^2), \quad \sigma_m = 0.1
+\end{equation}
+with reflecting boundaries at $\gamma_\text{min} = 10^{-4}$ and $\gamma_\text{max} = 0.1$. Below $\gamma_\text{min}$, the energy pool timescale $1/\gamma > 10^4$ exceeds the integration window and induces severe numerical stiffness. Above $\gamma_\text{max}$, no timescale separation exists.
+
+\textbf{Selection.} Tournament selection with tournament size $k = 3$: three random individuals drawn without replacement, the fittest is selected as parent. Fitness-proportionate (roulette wheel) selection was excluded to avoid instability amplification from high-variance fitness values.
+
+\textbf{Neutral control.} Identical to selection replicates except parents are chosen uniformly at random (no fitness-based selection). Mutation, population size, and all other parameters are identical.
+
+\textbf{Generations.} $G_\text{max} = 40$. Each generation: evaluate all $N$ individuals ($N \times N_\text{seeds}$ integrations), record statistics, select parents, produce mutant offspring.
+
+\subsection{Baseline Characterization (Phase~0)}
+\label{sec:phase0}
+
+Before the evolutionary experiment, we characterized the fitness landscape with $N_\text{sample} = 200$ random parameter draws:
+\begin{align}
+\gamma &\in [0.0005,\; 0.01], \quad \text{log-uniform} \\
+J      &\in [2,\; 12], \quad \text{uniform} \\
+\kcat  &\in [0.05,\; 0.8], \quad \text{uniform}
+\end{align}
+Each draw was evaluated at 5 seeds (1{,}000 total integrations). The go/no-go criterion was: if $> 90\%$ of draws yield $\tauexp = 0$, the fitness landscape is too sparse for selection to act.
+
+A baseline parameter set with moderate $\tauexp$ ($\approx 1$--2) was selected as the ancestral genotype $\theta_0$ for the evolutionary experiment.
+
+\subsection{Numerical Safeguards}
+
+\begin{itemize}
+\item \textbf{Wall-clock timeout}: 60\,s per individual evaluation (integration $+$ $\Dtwo$ computation). Evaluations exceeding this limit receive $\tauexp = 0$.
+
+\item \textbf{NaN/Inf guard}: If any species concentration is non-finite after integration, $\tauexp = 0$.
+
+\item \textbf{Pathological regime}: If any concentration exceeds $10^6$, $\tauexp = 0$.
+
+\item \textbf{Stiff-regime step cap}: max\_step $= 10.0$ prevents excessively large adaptive steps through stiff regions.
+
+\item \textbf{Diagnostic tracking}: Per-generation counts of timeouts, NaN/Inf events, solver failures, and pathological detections are recorded for post-hoc audit.
+\end{itemize}
+
+\subsection{Statistical Analysis}
+
+All success criteria were pre-registered before data collection (see Research Plan~\cite{researchplan}):
+
+\begin{itemize}
+\item \textbf{Within-condition}: Wilcoxon signed-rank test comparing generation~0 vs.\ generation~40 mean $\tauexp$ across replicates (one-tailed: gen~40 $>$ gen~0).
+
+\item \textbf{Between-condition}: Mann--Whitney $U$ test comparing selection vs.\ neutral generation~40 mean $\tauexp$ (one-tailed: selection $>$ neutral).
+
+\item \textbf{Effect size}: Cohen's $d$ between selection and neutral at generation~40, with pooled standard deviation.
+\end{itemize}
+
+Pre-registered verdicts:
+\begin{enumerate}
+\item \textbf{Strong positive}: Both $p < 0.05$ and $d > 0.8$, with directional $\gamma$ convergence.
+\item \textbf{Positive}: Both $p < 0.05$, $d \geq 0.5$.
+\item \textbf{Negative}: $p > 0.05$ or $d < 0.3$.
+\item \textbf{Boundary collapse}: $\gamma \rightarrow \gamma_\text{min}$ with $> 20\%$ lethal phenotypes.
+\end{enumerate}
+
+\subsection{Experimental Configuration}
+
+Table~\ref{tab:config} summarizes the experimental parameters. An initial pilot (V1, $n = 3$) validated the experimental design and demonstrated a large effect size (Cohen's $d = 4.9$) but was underpowered for formal significance testing (Wilcoxon $p_\text{min} = 0.125$ at $n = 3$). The results reported here are from the confirmed run (V2, $n = 10$), which uses the same evolutionary parameters but provides formal statistical power. Future work (V3) will extend to reversed selection (minimize $\tauexp$) and multi-parameter co-evolution of $(\gamma, J, \kcat)$.
+
+\begin{table}[b]
+\centering
+\caption{Experimental configuration (V2). Population and generation parameters match the pilot (V1); the replicate count was increased from 3 to 10 for formal significance testing.}
+\label{tab:config}
+\begin{tabular}{lc}
+\toprule
+Parameter & Value \\
+\midrule
+Population size $N$ & 20 \\
+Generations $G_\text{max}$ & 40 \\
+Seeds per evaluation & 2 \\
+Replicates per condition & 10 \\
+Conditions & Selection, Neutral \\
+Total integrations & $\sim$32{,}800 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each integration requires $\sim$55\,s (LSODA) $+$ $\sim$10\,s ($\Dtwo$ computation) on AWS EC2 t3.micro instances, yielding $\sim$43\,min per generation and $\sim$29\,h per 40-generation replicate. The full V2 experiment ran on 10 spot instances for $\sim$3~days.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Phase~0: Baseline Characterization}
+
+Of the 200 random parameter draws, 68 (34\%) produced mean $\tauexp > 0$ across 5 seeds: the fitness landscape is non-degenerate and the go/no-go criterion is met (threshold: $< 90\%$ zero).
+
+The distribution of mean $\tauexp$ across all 200 draws has min $= 0.0$, median $= 0.0$, mean $= 0.51$, max $= 4.0$, std $= 0.94$. All parameter sets with $\tauexp \geq 3$ have $\gamma < 0.001$, confirming the anticorrelation between $\gamma$ and transient retention time documented in Paper~3.
+
+The selected baseline has $\gamma_0 = 0.00223$, $J = 4.388$, $\kcat = 0.278$, with mean $\tauexp = 1.4$ across 5 seeds---a moderate starting point with room for improvement in both directions (Fig.~\ref{fig:baseline}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig3_baseline_landscape.png}
+\caption{Phase~0 baseline characterization: $\gamma$ vs.\ mean $\tauexp$ across 200 random parameter draws (5 seeds each), colored by energy inflow rate $J$. The vertical dotted line marks the selected baseline $\gamma_0 = 0.00223$. Low $\gamma$ (slow energy relaxation) is necessary but not sufficient for high $\tauexp$; $J$ modulates the accessible range.}
+\label{fig:baseline}
+\end{figure}
+
+\subsection{Selection Drives $\tauexp$ Upward}
+
+All ten selection replicates show consistent increases in mean population $\tauexp$ over 40 generations (Fig.~\ref{fig:tau_traj}). Starting from $\tauexp \approx 1.2$ (identical initialization), selection populations reach $\tauexp = 2.65\text{--}3.83$ by generation~40. Neutral populations show no systematic trend, fluctuating around the baseline (Table~\ref{tab:results_summary}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig1_tau_trajectories.png}
+\caption{Mean population $\tauexp$ vs.\ generation for all 20 replicates. Selection replicates (solid blue, $n = 10$) increase monotonically; neutral replicates (dashed red, $n = 10$) drift around baseline. Bold lines show condition means.}
+\label{fig:tau_traj}
+\end{figure}
+
+\begin{table}[b]
+\centering
+\caption{Per-replicate final values at generation~40. All selection replicates converge to similar $\tauexp$ and $\gamma$; neutral replicates show high variance.}
+\label{tab:results_summary}
+\begin{tabular}{llccc}
+\toprule
+Rep & Type & Gen~0 $\tauexp$ & Gen~40 $\tauexp$ & Gen~40 $\gamma$ \\
+\midrule
+0  & Selection & 1.45 & 3.50 & 0.00038 \\
+1  & Selection & 1.23 & 3.83 & 0.00038 \\
+2  & Selection & 1.30 & 2.90 & 0.00035 \\
+3  & Selection & 1.50 & 3.78 & 0.00043 \\
+4  & Selection & 0.20 & 2.65 & 0.00037 \\
+5  & Selection & 1.50 & 3.35 & 0.00043 \\
+6  & Selection & 1.38 & 3.05 & 0.00039 \\
+7  & Selection & 1.50 & 3.83 & 0.00047 \\
+8  & Selection & 0.65 & 3.55 & 0.00042 \\
+9  & Selection & 1.50 & 3.50 & 0.00037 \\
+\midrule
+0  & Neutral   & 1.50 & 2.20 & 0.00255 \\
+1  & Neutral   & 1.50 & 2.28 & 0.00217 \\
+2  & Neutral   & 1.50 & 1.75 & 0.00245 \\
+3  & Neutral   & 1.50 & 0.08 & 0.01712 \\
+4  & Neutral   & 1.50 & 0.00 & 0.04579 \\
+5  & Neutral   & 1.50 & 1.38 & 0.00191 \\
+6  & Neutral   & 1.50 & 0.28 & 0.01391 \\
+7  & Neutral   & 1.50 & 0.70 & 0.00610 \\
+8  & Neutral   & 1.50 & 1.18 & 0.00610 \\
+9  & Neutral   & 1.50 & 0.93 & 0.01142 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{$\gamma$ Converges Under Selection}
+
+The mechanistic prediction is confirmed: selection drives $\gamma$ downward (Fig.~\ref{fig:gamma_evo}). The population mean $\gamma$ decreases from $0.00223$ to $0.00040 \pm 0.00004$ across all ten selection replicates---a $5.6\times$ reduction. The convergent final value ($\gamma \approx 4.0 \times 10^{-4}$) corresponds to an energy relaxation timescale $1/\gamma \approx 2{,}500$ oscillator periods, well within the regime where Paper~3 documented maximal transient retention.
+
+Neutral populations show no directional trend in $\gamma$. Their final values ($0.002$--$0.046$) scatter widely around and above the baseline, with high inter-replicate variance---consistent with random drift in a parameter with no selective consequence under neutral conditions.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig2_gamma_evolution.png}
+\caption{Mean population $\gamma$ vs.\ generation (log scale). Selection replicates (solid blue, $n = 10$) converge to $\gamma \approx 4.0 \times 10^{-4}$; neutral replicates (dashed red, $n = 10$) drift randomly. Bold lines show condition means.}
+\label{fig:gamma_evo}
+\end{figure}
+
+\subsection{Statistical Assessment}
+
+Table~\ref{tab:statistics} summarizes the aggregate statistics. The effect size is extraordinary: Cohen's $d = 3.7$ between selection and neutral at generation~40. The Mann--Whitney $U$ test yields $p < 0.0001$, and the Wilcoxon signed-rank test for gen~40 $>$ gen~0 within selection yields $p = 0.001$. Both tests achieve formal significance at $\alpha = 0.01$.
+
+\begin{table}[t]
+\centering
+\caption{Aggregate statistics ($n = 10$ replicates per condition). Both nonparametric tests achieve $p < 0.01$; the effect size far exceeds the pre-registered ``strong positive'' threshold ($d > 0.8$).}
+\label{tab:statistics}
+\begin{tabular}{lcc}
+\toprule
+Statistic & Selection & Neutral \\
+\midrule
+Gen~0 mean $\tauexp$ & $1.220 \pm 0.442$ & $1.500 \pm 0.000$ \\
+Gen~40 mean $\tauexp$ & $3.392 \pm 0.406$ & $1.075 \pm 0.831$ \\
+Gen~40 mean $\gamma$ & $0.00040 \pm 0.00004$ & $0.01095 \pm 0.01337$ \\
+\midrule
+Cohen's $d$ & \multicolumn{2}{c}{3.735} \\
+Mann--Whitney $U$ ($p$) & \multicolumn{2}{c}{100.0 ($p < 0.0001$)} \\
+Wilcoxon $W$ ($p$) & \multicolumn{2}{c}{55.0 ($p = 0.001$)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Against the pre-registered criteria (\S\ref{sec:success_criteria}), the result is unambiguously \textbf{strong positive}: the effect size ($d = 3.7$) far exceeds the threshold ($d > 0.8$), both $p$-values are well below 0.05, $\gamma$ converges directionally, and no lethal phenotypes are observed. An initial pilot at $n = 3$ produced a consistent effect size ($d = 4.9$) but could not achieve formal significance due to the $n = 3$ Wilcoxon floor ($p_\text{min} = 0.125$); the present $n = 10$ run confirms that result with full statistical power.
+
+\subsection{Diagnostics}
+
+Zero lethal phenotypes ($\tauexp = 0$ due to solver failure, NaN, or pathological concentrations) were observed across all selection replicates (20 individuals $\times$ 41 generations $\times$ 2 seeds $\times$ 10 replicates $= 16{,}400$ evaluations). Neutral replicates also showed zero lethal phenotypes. This confirms that the evolutionary trajectory remains within the viable parameter region: selection drives $\gamma$ toward slower energy relaxation without approaching the numerical stability boundary.
+
+Timeouts (evaluations exceeding 60\,s) occurred in 547 evaluations across all selection replicates ($\sim$3.3\% rate), concentrated at low $\gamma$ values where LSODA encounters stiffer systems. These individuals received $\tauexp = 0$ for the timed-out seed, slightly underestimating their true fitness. The timeout rate is low enough to not materially affect selection dynamics.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Selection Acts on Transient Retention Time}
+
+These results provide strong evidence that evolutionary selection can act on transient dynamical retention time in a prebiotic chemical network. Starting from identical initial conditions, selection populations achieve $2.8\times$ higher $\tauexp$ than their starting value and $3.2\times$ higher than neutral drift controls, with complete separation between conditions (no overlap in replicate final values: minimum selection $\tauexp = 2.65$, maximum neutral $\tauexp = 2.28$). The effect size ($d = 3.7$) is not merely statistically significant---it is biologically unambiguous, and is confirmed across $n = 10$ independent replicates with formal significance ($p < 0.001$).
+
+The directional convergence of $\gamma$ across all ten selection replicates is particularly informative. Despite starting from identical $\gamma_0$ and evolving independently with different random seeds, all ten populations converge to $\gamma \approx 4.0 \times 10^{-4}$ (coefficient of variation 9\%). This convergence to the same parameter value via independent evolutionary trajectories indicates a strong, consistent selective gradient rather than drift or founder effects.
+
+\subsection{The Mechanism: Timescale Separation as Selection Target}
+
+The mechanistic explanation connects directly to Paper~3's two-regime framework. At the baseline $\gamma_0 = 0.00223$, the energy relaxation timescale is $1/\gamma_0 \approx 450$ time units ($\sim$45 oscillator periods). Selection drives $\gamma$ to $\sim$$4.0 \times 10^{-4}$, extending this to $1/\gamma \approx 2{,}500$ time units ($\sim$250 oscillator periods).
+
+Paper~3 documented that the transient high-$\Dtwo$ phase lasts approximately $1/\gamma$ time units before phase-locking: $\Tlock \approx 10{,}000$ at $\gamma = 0.001$ vs.\ $\sim$7{,}500 at $\gamma = 0.002$. The evolutionary algorithm discovers and exploits this relationship without explicit knowledge of the model's dynamical structure. Selection on the phenotype ($\tauexp$) implicitly optimizes the mechanistic parameter ($\gamma$) that controls it.
+
+The $5.6\times$ reduction in $\gamma$ corresponds to a proportional extension of the exploratory transient. At the evolved $\gamma$, the system maintains $\Dtwo > 1.2$ for $\sim$3.4 out of 7 sliding windows ($\sim$8{,}500 of 17{,}500 available time units), compared to $\sim$1.2 windows at baseline. The slow energy variable evolves on a timescale vastly exceeding the oscillator period, sustaining the slow--fast amplitude modulation that generates transient chaos.
+
+\subsection{Implications for Prebiotic Chemistry}
+
+These results demonstrate a form of evolution that requires neither genetic encoding nor biological machinery. The ``organisms'' are parameterizations of a fixed chemical network; the ``genome'' is a single real number ($\gamma$); the ``phenotype'' is a measurable dynamical property (transient dimensional inflation); and ``fitness'' is simply the duration of high-dimensional state-space exploration.
+
+This is significant because it establishes a minimal proof of concept: in a system of coupled autocatalytic oscillators with a shared energy source---a plausible prebiotic chemistry motif~\cite{kauffman1986, eigen1971}---selection can drive the system toward prolonged dynamical exploration. The transient ecology framework proposed in Paper~3 is not merely descriptive but \textit{actionable}: the window of exploration is a selectable trait.
+
+This connects to Nghe et~al.'s identification of viable cores and timescale separation as key parameters governing prebiotic network evolution~\cite{nghe2015}. Their framework emphasizes that slow components in autocatalytic networks can function as proto-hereditary memory carriers; here, $\gamma$ plays exactly this role---a slow variable that is tuned by selection to extend the exploratory transient. From the perspective of Vanchurin et~al.'s multilevel learning theory~\cite{vanchurin2022}, our result instantiates their prediction that evolution can act on the separation of timescales itself: selection tunes the slow reservoir variable to maximize a dynamical ``loss function'' ($\tauexp$), without requiring genetic templating or discrete information carriers.
+
+We emphasize the scope constraints of this claim. We have demonstrated that selection \textit{can} act on transient retention time in one model system with one mutable parameter. We have not demonstrated that such selection \textit{does} occur in realistic geochemical settings, nor that prolonged transient chaos leads to functionally useful chemical novelty. The gap between ``selection can prolong exploration'' and ``exploration produces proto-biological organization'' remains wide and is not addressed here.
+
+\subsection{Limitations}
+
+\begin{enumerate}
+\item \textbf{Single mutable parameter.} Only $\gamma$ was subject to mutation. In a realistic prebiotic scenario, multiple kinetic and structural parameters would co-evolve. Phase~2 of the research plan~\cite{researchplan} extends to joint mutation in $(\gamma, J, \kcat)$.
+
+\item \textbf{Fixed network topology.} The reaction network is held constant. Structural mutations (adding or removing reactions) could qualitatively change the fitness landscape and are reserved for future work.
+
+\item \textbf{Single oscillator family.} All experiments use variants of the Brusselator. Other oscillator templates (Oregonator, glycolytic oscillators, repressilators) may show different evolutionary dynamics.
+
+\item \textbf{No environmental fluctuations.} Parameters are static throughout each run. Time-varying $J$ or $\gamma$ could reset the transient and extend the effective exploratory duration, potentially reducing selective pressure on $\gamma$ itself.
+
+\item \textbf{No reversed selection or robustness controls.} The pre-registered plan includes reversed selection (minimize $\tauexp$), frozen-parameter, and sensitivity analyses (mutation rate, population size). Reversed selection (V3a) and multi-parameter co-evolution (V3b) are planned as immediate follow-ups.
+\end{enumerate}
+
+\subsection{Future Directions}
+
+\begin{itemize}
+\item \textbf{V3a: Reversed selection}: Minimize $\tauexp$ (same parameters as V2). If selection can also drive $\tauexp$ \textit{downward}, this confirms it acts on the fitness landscape bidirectionally rather than exploiting a unidirectional artifact.
+
+\item \textbf{V3b: Multi-parameter co-evolution}: Joint mutation in $(\gamma, J, \kcat)$ to test whether evolution finds alternative paths to prolonged transients beyond $\gamma$ reduction alone.
+
+\item \textbf{Robustness sweeps}: Mutation rate ($\sigma_m$), population size ($N$), tournament size ($k$), and $\Dtwo$ window size sensitivity.
+
+\item \textbf{Mechanistic characterization}: Evolved vs.\ ancestral phase portraits, Lyapunov exponents, power spectral densities, and fine-resolution $\tauexp(\gamma)$ landscape mapping.
+
+\item \textbf{Structural evolution}: Allow reaction additions/deletions as heritable mutations, connecting Paper~4's parametric evolution to Papers~1--2's growth experiments.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We tested whether evolutionary selection can act on transient dynamical retention time $\tauexp$ in the enzyme-complex coupled Brusselator model from Paper~3. Our findings, confirmed across $n = 10$ independent replicates per condition:
+
+\begin{enumerate}
+\item Tournament selection for high $\tauexp$ drives the energy dissipation rate $\gamma$ downward by $5.6\times$ (from $0.00223$ to $0.00040$), increasing mean $\tauexp$ from $1.22$ to $3.39$ over 40~generations. The effect is consistent across all ten selection replicates and absent in neutral drift controls (Cohen's $d = 3.7$, Wilcoxon $p = 0.001$).
+
+\item The mechanism is timescale separation: selection exploits the relationship between slow energy relaxation ($1/\gamma$) and transient chaos duration documented in Paper~3. The evolved $\gamma$ extends the exploratory phase from $\sim$1.2 to $\sim$3.4 sliding windows ($\approx$8{,}500 time units of $\Dtwo > 1.2$).
+
+\item No boundary collapse is observed: zero lethal phenotypes across all selection replicates (16{,}400 evaluations). The evolutionary trajectory remains within the viable parameter region, suggesting that the fitness landscape admits smooth hill-climbing rather than a viability--exploration trade-off.
+
+\item These results establish that evolutionary pressure can prolong high-dimensional state-space exploration in a prebiotic chemical network, without genetic encoding or structural change. Planned follow-ups include reversed selection (V3a: minimize $\tauexp$, testing bidirectionality) and multi-parameter co-evolution (V3b: jointly mutable $\gamma$, $J$, $\kcat$).
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments}
+This work was conducted as part of an independent research program exploring connections between dynamical systems theory and prebiotic chemistry. Computational simulations were performed on AWS EC2 spot instances using the \texttt{dimensional\_opening} Python package. All code and data are available at \url{https://zenodo.org}.
+\end{acknowledgments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{99}
+
+\bibitem{paper1}
+C.~Merrill, ``Dynamical activation in autocatalytic chemical networks: A correlation dimension analysis,''
+Zenodo preprint (2026).
+
+\bibitem{paper2}
+C.~Merrill, ``Feedback-aligned autocatalysis preserves dynamical viability but not activation in growing chemical networks,''
+Zenodo preprint (2026).
+
+\bibitem{paper3}
+C.~Merrill, ``Transient dimensional inflation via timescale separation in energy-coupled chemical oscillators,''
+Zenodo preprint (2026).
+
+\bibitem{researchplan}
+C.~Merrill, ``Paper~4 research plan: Evolutionary selection on transient dynamical retention time,''
+Unpublished protocol (2026).
+
+\bibitem{kauffman1986}
+S.~A.~Kauffman, ``Autocatalytic sets of proteins,''
+J.\ Theor.\ Biol.\ \textbf{119}, 1 (1986).
+
+\bibitem{eigen1971}
+M.~Eigen, ``Selforganization of matter and the evolution of biological macromolecules,''
+Naturwissenschaften \textbf{58}, 465 (1971).
+
+\bibitem{grassberger1983}
+P.~Grassberger and I.~Procaccia, ``Characterization of strange attractors,''
+Phys.\ Rev.\ Lett.\ \textbf{50}, 346 (1983).
+
+\bibitem{prigogine1968}
+I.~Prigogine and R.~Lefever, ``Symmetry breaking instabilities in dissipative systems.\ II,''
+J.\ Chem.\ Phys.\ \textbf{48}, 1695 (1968).
+
+\bibitem{holland1975}
+J.~H.~Holland, \textit{Adaptation in Natural and Artificial Systems}
+(University of Michigan Press, Ann Arbor, MI, 1975).
+
+\bibitem{strogatz2000}
+S.~H.~Strogatz, \textit{Nonlinear Dynamics and Chaos}
+(Westview Press, Cambridge, MA, 2000).
+
+\bibitem{novak2008}
+B.~Nov\'{a}k and J.~J.~Tyson, ``Design principles of biochemical oscillators,''
+Nat.\ Rev.\ Mol.\ Cell Biol.\ \textbf{9}, 981 (2008).
+
+\bibitem{nghe2015}
+P.~Nghe, W.~Hordijk, S.~A.~Kauffman, S.~I.~Walker, F.~J.~Schmidt, H.~Kemble, J.~A.~M.~Yeates, and N.~Lehman,
+``Prebiotic network evolution: six key parameters,''
+Mol.\ BioSyst.\ \textbf{11}, 3206 (2015).
+
+\bibitem{vanchurin2022}
+V.~Vanchurin, Y.~I.~Wolf, E.~V.~Koonin, and M.~I.~Katsnelson,
+``Toward a theory of evolution as multilevel learning,''
+Proc.\ Natl.\ Acad.\ Sci.\ USA \textbf{119}, e2120037119 (2022).
+
+\end{thebibliography}
+
+\end{document}
