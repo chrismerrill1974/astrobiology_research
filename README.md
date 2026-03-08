@@ -48,9 +48,9 @@ astrobiology_research/
 │   ├── paper/            # LaTeX manuscript
 │   └── plan/             # Research plan document
 ├── paper4/
-│   ├── scripts/          # Evolutionary selection, baseline sweep, figures
-│   ├── data/             # Phase 0 baseline + Phase 1 results (v1 pilot, v2 confirmed)
-│   ├── figures/          # Publication figures (PNG)
+│   ├── scripts/          # Evolutionary selection (v2, v3a, v3b), baseline sweep, figures
+│   ├── data/             # Phase 0 baseline + Phase 1 results (v1 pilot, v2 confirmed, v3a reversed, v3b multi-param)
+│   ├── figures/          # Publication figures (PNG) — V2 + V3
 │   ├── paper/            # LaTeX manuscript
 │   └── plan/             # Research plan document
 └── shared/
@@ -114,10 +114,27 @@ python phase1_evolution_v2.py --replicate 0 --neutral    # neutral replicate 0
 python phase1_evolution_v2.py --analyse                  # analyse all results
 ```
 
+**Run Paper 4 V3a reversed selection:**
+```bash
+cd paper4/scripts
+python v3a_reversed_selection.py --replicate 0            # reversed selection replicate 0
+python v3a_reversed_selection.py --replicate 0 --neutral   # neutral replicate 0
+python v3a_reversed_selection.py --analyse                 # analyse all results
+```
+
+**Run Paper 4 V3b multi-parameter evolution:**
+```bash
+cd paper4/scripts
+python v3b_multi_parameter.py --replicate 0               # selection replicate 0
+python v3b_multi_parameter.py --replicate 0 --neutral      # neutral replicate 0
+python v3b_multi_parameter.py --analyse                    # analyse all results
+```
+
 **Generate Paper 4 figures:**
 ```bash
-cd paper4/scripts && python make_figures.py              # from v2_confirmed data
-python make_figures.py --results-dir ../data/v1_pilot    # from v1 pilot data
+cd paper4/scripts && python make_figures.py              # V2 figures from v2_confirmed data
+python make_figures.py --results-dir ../data/v1_pilot    # V2 figures from v1 pilot data
+python make_figures_v3.py                                # V3a/V3b figures
 ```
 
 **Run shared library tests:**
