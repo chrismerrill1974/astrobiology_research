@@ -22,7 +22,11 @@ Identifies the mechanism that breaks the D₂ ≈ 1 floor: timescale separation 
 ### Paper 4: Evolutionary Selection on Transient Dynamical Retention Time in Energy-Coupled Chemical Oscillators
 **File:** `paper4/paper/paper4_evolutionary_retention.tex`
 
-Tests whether evolutionary selection pressure can prolong the transient high-dimensional exploration window discovered in Paper 3. Using the same enzyme-complex coupled Brusselator with fixed network topology, a population of 20 individuals evolves the energy dissipation rate γ over 40 generations via tournament selection on τ_{>1.2} (the number of time windows with D₂ > 1.2). Selection drives γ downward by 5.6x (from 0.00223 to 0.00040), increasing mean τ from 1.22 to 3.39 (Wilcoxon p=0.001, Mann-Whitney vs neutral p<0.0001, Cohen's d=3.74). Confirmed with 10 selection + 10 neutral replicates.
+Tests whether evolutionary selection pressure can prolong the transient high-dimensional exploration window discovered in Paper 3. Using the same enzyme-complex coupled Brusselator with fixed network topology, a population of 20 individuals evolves the energy dissipation rate γ over 40 generations via tournament selection on τ_{>1.2} (the number of time windows with D₂ > 1.2). Three experiments confirm the result:
+
+- **V2 (forward selection, γ only):** γ down 5.6x, τ from 1.22 to 3.39 (Cohen's d=3.74, p<0.001). 10+10 replicates.
+- **V3a (reversed selection, γ only):** γ up 13.8x, τ→0 across all 10 replicates. Confirms bidirectional selectability.
+- **V3b (forward selection, γ+J+k_cat):** Coordinated strategy (γ down 5.7x, J up 1.55x, k_cat unchanged), τ=3.06. Gamma-dominated but alternative paths exist.
 
 ## Repository Structure
 
