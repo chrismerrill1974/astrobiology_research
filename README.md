@@ -28,6 +28,15 @@ Tests whether evolutionary selection pressure can prolong the transient high-dim
 - **V3a (reversed selection, γ only):** γ up 13.8x, τ→0 across all 10 replicates. Confirms bidirectional selectability.
 - **V3b (forward selection, γ+J+k_cat):** Coordinated strategy (γ down 5.7x, J up 1.55x, k_cat unchanged), τ=3.06. Gamma-dominated but alternative paths exist.
 
+### Paper 5: Topological Modulation of Transient Dimensional Inflation in Energy-Coupled Chemical Oscillators
+**File:** `paper5/paper/paper5_topological_modulation.tex`
+
+Tests whether reaction-network topology can buffer the fragility of transient dimensional inflation documented in Papers 3–4. Five designed motifs and 20 random-wiring controls are grafted onto the enzyme-complex coupled Brusselator via a standardized embedding protocol (all couple through the shared energy pool E). Three main findings:
+
+- **Phase 1 (ridge-width screen, 14,400 evaluations):** All designed motifs *suppress* transient dimensionality (R_w = 0.04–0.09 vs. baseline 0.37; p < 10⁻⁹⁷). Random wirings split bimodally: 8/20 completely dead, 12/20 alive with R_w up to 0.40.
+- **Phase 2 (drift sensitivity, 4,808 evaluations):** All topologies degrade at the same rate under parameter drift (~42% R_w loss at σ_d = 0.5). Topology controls ridge *size* but not drift *sensitivity*.
+- **Phase 4 (structural predictor):** The alive/dead split is predicted by the net flow into the E-coupled motif species (Fisher p = 0.0007). Augmentations survive only if the energy-coupling point disperses rather than accumulates concentration.
+
 ## Repository Structure
 
 ```
@@ -51,6 +60,12 @@ astrobiology_research/
 │   ├── scripts/          # Evolutionary selection (v2, v3a, v3b), baseline sweep, figures
 │   ├── data/             # Phase 0 baseline + Phase 1 results (v1 pilot, v2 confirmed, v3a reversed, v3b multi-param)
 │   ├── figures/          # Publication figures (PNG) — V2 + V3
+│   ├── paper/            # LaTeX manuscript
+│   └── plan/             # Research plan document
+├── paper5/
+│   ├── scripts/          # Topology library, Phase 1 screen, Phase 2 drift, figure generation
+│   ├── data/             # (large JSONL results not included — regenerate via scripts)
+│   ├── figures/          # Publication figures (PNG)
 │   ├── paper/            # LaTeX manuscript
 │   └── plan/             # Research plan document
 └── shared/
@@ -79,7 +94,10 @@ astrobiology_research/
 | λ₁ | Largest Lyapunov exponent |
 | γ | Energy dissipation rate |
 | kc | Inter-oscillator coupling strength |
-| J | Number of chemical species |
+| J | Energy inflow rate |
+| R_w | Ridge width — fraction of parameter draws with τ_{>1.2} > 0 |
+| σ_d | Drift magnitude (Gaussian perturbation scale) |
+| f_net | Net flow into E-coupled species (in-degree − out-degree) |
 
 ## Quick Start
 
@@ -137,6 +155,26 @@ python make_figures.py --results-dir ../data/v1_pilot    # V2 figures from v1 pi
 python make_figures_v3.py                                # V3a/V3b figures
 ```
 
+**Run Paper 5 Phase 1 ridge-width screen (single topology):**
+```bash
+cd paper5/scripts && python paper5_phase1_screen.py --topology T0 --results-dir ../data
+```
+
+**Run Paper 5 Phase 2 drift test (single topology):**
+```bash
+cd paper5/scripts && python paper5_phase2_drift.py --topology T0 --results-dir ../data
+```
+
+**Analyse Paper 5 Phase 1 results:**
+```bash
+cd paper5/scripts && python paper5_phase1_screen.py --analyse --results-dir ../data
+```
+
+**Generate Paper 5 figures:**
+```bash
+cd paper5/scripts && python make_figures.py
+```
+
 **Run shared library tests:**
 ```bash
 cd shared && pip install -e . && pytest tests/
@@ -144,4 +182,4 @@ cd shared && pip install -e . && pytest tests/
 
 ## Author
 
-Christopher Merrill (Independent Researcher), with computational collaboration from Claude (Anthropic) and ChatGPT (OpenAI).
+Christopher Merrill (Independent Researcher), with computational collaboration from Claude (Anthropic), ChatGPT (OpenAI), and Gemini (Google).
