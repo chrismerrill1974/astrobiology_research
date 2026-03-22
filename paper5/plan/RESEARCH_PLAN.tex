@@ -1,0 +1,671 @@
+\documentclass[aps,prl,twocolumn,superscriptaddress,floatfix]{revtex4-2}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\newcommand{\tauexp}{\tau_{>1.2}}
+\newcommand{\Tlock}{T_{\mathrm{lock}}}
+\newcommand{\Dtwo}{D_2}
+\newcommand{\kcat}{k_{\mathrm{cat}}}
+\newcommand{\Kd}{K_d}
+\newcommand{\Gtot}{G_{\mathrm{total}}}
+\newcommand{\Rw}{R_{\mathrm{w}}}
+
+\begin{document}
+
+\title{Paper~5 Research Plan: Topological Buffering of Transient\\
+Dynamical Complexity in Prebiotic Reaction Networks}
+\date{\today}
+
+\maketitle
+
+%% ----------------------------------------------------------------
+\section{Objective}
+
+Determine whether reaction-network topology buffers the fragility
+of high-dimensional transient dynamics under parameter drift.
+Paper~4 showed that expanding the mutable parameter space from
+1D to 3D accelerated neutral decay ($\tauexp = 0.55$ vs.\ $1.08$,
+with $12.9$ lethals per population in V3b).  Paper~5 asks whether
+specific network motifs can \emph{widen the evolutionary ridge}---the
+region of parameter space that sustains transient dimensional
+inflation---thereby mitigating this mutational hazard.
+
+The central hypothesis:
+
+\emph{Network motifs that create redundant slow-variable pathways
+widen the viable region of parameter space for transient chaos,
+reducing the effective mutational hazard quantified in Paper~4's V3b.}
+
+%% ----------------------------------------------------------------
+\section{Model Framework}
+
+\subsection{Base System}
+
+The Paper~3/4 enzyme-complex coupled Brusselator: two Brusselator
+oscillator cores sharing a slow energy pool $E$, gated by the
+catalytic complex $G/GE$.  Dynamic species:
+$\{X_1, Y_1, X_2, Y_2, E\}$ (5 variables projected for $\Dtwo$).
+14 reactions, all mass-action.  This is topology \textbf{T0}
+(the baseline).
+
+Fixed parameters carried from Paper~4: $A = 1.0$, $B = 3.0$,
+$k_{\mathrm{on}} = k_{\mathrm{off}} = 10.0$
+($\Kd = 1.0$), $\Gtot = 1.0$.
+
+Integration: LSODA, $t \in [0, 20{,}000]$, 40\,000 points,
+rtol $= 10^{-6}$, atol $= 10^{-9}$, max\_step $= 10.0$.
+
+\subsection{Topology Augmentation Protocol}
+\label{sec:embedding}
+
+This is the critical methodological decision.  All topology
+augmentations follow a \textbf{standard embedding protocol} to
+ensure fair comparison:
+
+\begin{enumerate}
+  \item All new species couple to the existing system through the
+    shared energy pool $E$, maintaining the slow--fast architecture
+    that generates transients.
+
+  \item All new reactions are mass-action, with rate constants
+    drawn from the same prior distributions used in Phase~0
+    sampling (see \S\ref{sec:phase0}).
+
+  \item New species initial conditions are drawn from the same
+    scale as existing species ($\mathcal{O}(1)$).
+
+  \item The $\Dtwo$ projection is computed on all dynamic species
+    (baseline 5 plus any additions).  This means augmented
+    topologies have higher embedding dimension.
+\end{enumerate}
+
+The embedding protocol ensures that the ``interface'' between
+the motif and the base system is identical across all topologies.
+Differences in $\tauexp$ and ridge width are therefore attributable
+to \emph{how} the motif is wired, not to coupling mechanism.
+
+%% ----------------------------------------------------------------
+\section{Topology Panel}
+\label{sec:panel}
+
+Eight topology classes, spanning three structural groups:
+
+\subsection{Group A: Baseline and Controls}
+
+\begin{description}
+  \item[T0: Baseline.] The unmodified coupled Brusselator.
+    5 species, 14 reactions.
+
+  \item[T1a, T1b: Random-wiring controls.] Same number of added
+    species and reactions as the largest motif in Group~B, but
+    with random connectivity (drawn uniformly from the space of
+    directed graphs with matching node and edge count).  Two
+    independent random draws to avoid single-draw artifacts.
+\end{description}
+
+\subsection{Group B: Candidate Buffering Motifs}
+
+Each motif adds 2--3 species and 3--5 reactions to T0, coupled
+through the energy pool per the embedding protocol
+(\S\ref{sec:embedding}).
+
+\begin{description}
+  \item[T2: Simple 3-cycle.]
+    $A \to B \to C \to A$.  Minimal cyclic redundancy.
+
+  \item[T3: Parallel dual-path cycle.]
+    $A \to B \to D \to A$ and $A \to C \to D \to A$.
+    Two routes through the same loop.
+
+  \item[T4: Branch-and-rejoin.]
+    $A \to B \to D$, $A \to C \to D$, $D \to A$.
+    Branching with closure.
+
+  \item[T5: Feed-forward with return.]
+    $A \to B \to C$, $A \to C$, $C \to A$.
+    Tests whether a short-circuit path stabilises or destabilises.
+
+  \item[T6: Nested dual loop.]
+    $A \to B \to C \to A$, $B \to D \to B$.
+    Local redundancy nested inside a larger cycle.
+\end{description}
+
+For each topology, the following structural descriptors are
+computed before any simulations:
+
+\begin{itemize}
+  \item Total species count and reaction count
+  \item Cyclomatic number: $\mu = M - N + C$
+    ($M$ = edges, $N$ = nodes, $C$ = connected components)
+  \item Weak reversibility (yes/no): every reaction lies on
+    some directed cycle
+  \item Network deficiency (computed on the full augmented
+    stoichiometric network, not the motif fragment alone;
+    see \S\ref{sec:crnt_note})
+\end{itemize}
+
+\subsection{Note on CRNT Deficiency}
+\label{sec:crnt_note}
+
+Deficiency is computed on the complete augmented reaction network
+(base $+$ motif), not the motif subgraph in isolation.  Because
+the Brusselator model includes quasi-steady-state enzyme gating
+(not pure mass-action throughout), classical CRNT deficiency
+theorems do not directly apply.  Deficiency is used here as a
+\textbf{structural descriptor to test}, not a theorem to invoke.
+If deficiency correlates with ridge width, that is an empirical
+finding requiring dynamical explanation.
+
+%% ----------------------------------------------------------------
+\section{Primary Metric: Ridge Width}
+\label{sec:ridge_width}
+
+The primary comparison metric is ridge width $\Rw$:
+
+\begin{equation}
+\Rw = \frac{\#\{\text{parameter draws with } \tauexp > 0\}}
+           {\#\{\text{total draws}\}}
+\end{equation}
+
+This is the fraction of randomly sampled parameter space that
+sustains any transient dimensional inflation.  A stricter variant
+$\Rw^{(k)}$ (requiring $\tauexp > k$ for threshold $k = 1, 2, 3$)
+is recorded as a secondary metric.
+
+To maintain comparability with Paper~4, the mutable parameter set
+for the main ridge-width comparison is $(\gamma, J, \kcat)$---the
+same three parameters from V3b.  Rate constants of new motif
+reactions are drawn randomly and then \emph{held fixed} during
+each parameter draw.  This means we are measuring ``how robust
+is this topology to drift in the energy-balance parameters?''
+not ``how robust is it to drift in everything?''
+
+A supplementary analysis varies all parameters (including new
+reaction rates) and reports $\Rw$ alongside the parameter
+dimensionality $d$.
+
+%% ----------------------------------------------------------------
+\section{Phenotype Definition}
+
+Identical to Paper~4.  $\tauexp$: number of 2\,500-unit
+non-overlapping sliding windows in $t \in [2{,}500, 20{,}000]$
+(7~windows total) with $\Dtwo > 1.2$.  Same Grassberger--Procaccia
+estimator, same Theiler window correction, same threshold.  No
+metric substitutions.
+
+$\Tlock$ is recorded as a secondary diagnostic but never used
+as a selection criterion or comparison metric.
+
+%% ----------------------------------------------------------------
+\section{Numerical Safeguards}
+
+Carried forward from Paper~4 without modification:
+
+\begin{itemize}
+  \item $\gamma$ bounds: $[\gamma_{\min} = 10^{-4},\;
+    \gamma_{\max} = 0.1]$ with reflection.
+  \item Solver failure $\Rightarrow \tauexp = 0$.
+  \item NaN/Inf guard $\Rightarrow \tauexp = 0$.
+  \item Pathological concentrations ($> 10^6$) $\Rightarrow
+    \tauexp = 0$.
+  \item Stiff-regime step cap: max\_step $= 10.0$.
+  \item Wall-clock timeout: 120\,s per evaluation (increased
+    from 60\,s to accommodate larger networks).
+  \item Maximum $\tauexp = 7$.
+\end{itemize}
+
+%% ----------------------------------------------------------------
+\section{Predefined Success Criteria}
+\label{sec:success}
+
+\begin{enumerate}
+  \item \textbf{Positive (topology matters):}
+    At least one Group~B motif has $\Rw > 2\times$ the mean
+    $\Rw$ of the random-wiring controls (T1a, T1b), and the
+    difference survives a permutation test at $p < 0.05$
+    (10\,000 permutations of topology labels within the
+    parameter-draw pool).
+
+  \item \textbf{Strong positive (design principle):}
+    In addition, a computable structural descriptor (cyclomatic
+    number, deficiency, or weak reversibility) correlates with
+    $\Rw$ across the panel (Spearman $|\rho| > 0.7$, $p < 0.05$).
+
+  \item \textbf{Negative:}
+    No Group~B motif exceeds the random-wiring controls by
+    $> 50\%$, or no motif exceeds T0 baseline.  Reported as:
+    \emph{topology does not buffer transient fragility in this
+    model class.}
+
+  \item \textbf{Dimensionality artefact:}
+    Group~B motifs outperform T0 but do not outperform the
+    random-wiring controls.  Interpreted as: the effect is
+    driven by added species/reactions, not specific wiring.
+\end{enumerate}
+
+%% ----------------------------------------------------------------
+\section{Phased Experimental Plan}
+
+%% ---- PHASE 0 ----
+\subsection{Phase~0: Topology Construction \& Structural Census}
+\label{sec:phase0}
+
+\textbf{Goal.}  Build all 8 topology classes, implement the
+embedding protocol, and compute structural descriptors.  No
+simulations.
+
+\begin{enumerate}[label=0.\arabic*]
+  \item Implement each topology as a variant of the Paper~4
+    model file (\texttt{pilot5b\_enzyme\_complex.py}), with
+    the additional species and reactions appended.
+
+  \item For each topology, compute and tabulate: species count,
+    reaction count, cyclomatic number, weak reversibility,
+    deficiency.
+
+  \item Generate 2 independent random-wiring instantiations
+    (T1a, T1b) matched for species and reaction count to the
+    largest Group~B motif.
+
+  \item \textbf{Validation:}  Run 10 integration sanity checks
+    per topology at the Paper~4 baseline parameters
+    ($\gamma_0 = 0.00223$, $J = 4.388$, $\kcat = 0.278$)
+    to confirm numerical stability.
+\end{enumerate}
+
+\textbf{Estimated cost:} $8 \times 10 = 80$ integrations.  Local.
+
+\textbf{Decision point:}  If any topology cannot produce stable
+integrations at baseline parameters, debug or remove it before
+proceeding.
+
+%% ---- PHASE 1 ----
+\subsection{Phase~1: Ridge-Width Screen (All Topologies)}
+\label{sec:phase1}
+
+\textbf{Goal.}  Measure $\Rw$ for all 8 topologies via random
+parameter sampling.  This is the cheap screen that determines
+which topologies are promoted to full testing.
+
+\begin{enumerate}[label=1.\arabic*]
+  \item For each of the 8 topologies, draw
+    $N_{\mathrm{sample}} = 300$ parameter vectors:
+    \begin{align}
+      \gamma &\in [0.0005,\; 0.01], \quad \text{log-uniform} \\
+      J      &\in [2,\; 12], \quad \text{uniform} \\
+      \kcat  &\in [0.05,\; 0.8], \quad \text{uniform}
+    \end{align}
+    Rate constants for motif reactions are drawn once per
+    topology instantiation and held fixed across all 300 draws.
+    To average over motif-rate variation, repeat with 3
+    independent motif-rate draws per topology (900 total
+    parameter evaluations per topology).
+
+  \item Each parameter draw is evaluated at 2~seeds
+    (seeds 42, 179, matching Paper~4).
+
+  \item \textbf{Metrics per topology:}
+    \begin{itemize}
+      \item $\Rw$: fraction of draws with $\tauexp > 0$
+      \item $\Rw^{(2)}$: fraction with $\tauexp > 2$
+      \item Mean $\tauexp$ (across all draws, including zeros)
+      \item Mean $\tauexp$ conditional on $\tauexp > 0$
+    \end{itemize}
+
+  \item \textbf{Deliverables:}
+    \begin{itemize}
+      \item Bar chart: $\Rw$ by topology, annotated with
+        structural descriptors (Fig.~1 of paper)
+      \item Scatter plots: $\Rw$ vs.\ cyclomatic number,
+        $\Rw$ vs.\ deficiency
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Estimated cost:}
+$8 \text{ topologies} \times 900 \text{ draws} \times 2 \text{ seeds}
+= 14{,}400$ integrations.
+
+At $\sim$65\,s per integration on t3.micro:
+$14{,}400 \times 65 = 936{,}000\text{\,s} \approx 260\text{\,h}$.
+
+With 10 nodes: $\sim$26\,h elapsed.
+
+\textbf{Node assignment:}  Each node runs 1--2 topologies
+(see \S\ref{sec:aws}).
+
+\textbf{Decision point:}  If no Group~B motif exceeds the
+random controls by $> 50\%$, the result is negative
+(\S\ref{sec:success}, criterion~3).  Report and stop.
+If Group~B motifs exceed T0 but not random controls, the result
+is a dimensionality artefact (criterion~4).  Report and stop.
+
+%% ---- PHASE 2 ----
+\subsection{Phase~2: Drift-Buffering Test (Promoted Topologies)}
+\label{sec:phase2}
+
+\textbf{Goal.}  For the promoted topologies, measure how far
+kinetic parameters can drift before transient complexity
+collapses.
+
+\textbf{Promotion rule:}  From Phase~1, promote 4 topologies:
+\begin{itemize}
+  \item Widest-ridge Group~B motif
+  \item Second-widest Group~B motif
+  \item Narrowest-ridge Group~B motif
+  \item Best random-wiring control (T1a or T1b)
+\end{itemize}
+
+\begin{enumerate}[label=2.\arabic*]
+  \item For each promoted topology, identify the parameter
+    region with highest $\tauexp$ from Phase~1 data.
+
+  \item Starting from the best parameter set, apply controlled
+    drift: perturb all three parameters $(\gamma, J, \kcat)$
+    simultaneously by increasing magnitudes.  Perturbation
+    protocol: multiplicative noise in each parameter,
+    $\theta' = \theta \cdot 10^{\mathcal{N}(0, \sigma_d^2)}$
+    for $\sigma_d \in \{0.05, 0.1, 0.15, 0.2, 0.3, 0.5\}$.
+
+  \item At each drift magnitude $\sigma_d$, run 100 perturbed
+    draws $\times$ 2 seeds.
+
+  \item \textbf{Metric:}  Survival probability
+    $S(\sigma_d) = \Pr[\tauexp > 0 \mid \sigma_d]$.
+    Plot $S(\sigma_d)$ vs.\ $\sigma_d$ for all 4 topologies
+    on the same axes (Fig.~3 of paper).
+
+  \item \textbf{Also measure:}  Mean $\tauexp$ conditional
+    on survival; critical drift $\sigma_d^*$ at which
+    $S < 0.5$.
+\end{enumerate}
+
+\textbf{Estimated cost:}
+$4 \text{ topologies} \times 6 \text{ drift levels} \times
+100 \text{ draws} \times 2 \text{ seeds} = 4{,}800$ integrations.
+$\sim$87\,h serial, $\sim$9\,h on 10 nodes.
+
+%% ---- PHASE 3 ----
+\subsection{Phase~3: Evolutionary Robustness (Promoted Topologies)}
+\label{sec:phase3}
+
+\textbf{Goal.}  Run Paper~4-style V3b multi-parameter evolution
+on the widest-ridge and narrowest-ridge promoted topologies, plus
+the random-wiring control.  Show that wider-ridge topologies
+exhibit less neutral decay.
+
+\begin{enumerate}[label=3.\arabic*]
+  \item \textbf{Setup:}  Identical to Paper~4 V3b.
+    \begin{itemize}
+      \item Population: $N = 20$.
+      \item Mutable parameters: $(\gamma, J, \kcat)$.
+      \item Mutation: same operators and bounds as Paper~4.
+      \item Selection: tournament, $k = 3$.
+      \item Generations: $G_{\max} = 40$.
+      \item Seeds per evaluation: 2.
+      \item Replicates: 5~selection $+$ 5~neutral per topology.
+    \end{itemize}
+
+  \item Run on 3 topologies: widest-ridge, narrowest-ridge,
+    random control.
+
+  \item \textbf{Metrics:}
+    \begin{itemize}
+      \item Gen-40 mean $\tauexp$ (selection vs.\ neutral)
+      \item Gen-40 lethals per population (neutral condition)
+      \item Cohen's $d$ between selection and neutral
+    \end{itemize}
+
+  \item \textbf{Key prediction:}  The widest-ridge topology
+    will show less neutral decay (higher neutral $\tauexp$
+    at gen~40, fewer lethals) than the narrowest-ridge topology.
+    This directly demonstrates that topology buffers the V3b
+    mutational hazard.
+\end{enumerate}
+
+\textbf{Estimated cost:}
+$3 \text{ topologies} \times 10 \text{ replicates} \times
+40 \text{ gen} \times 20 \text{ pop} \times 2 \text{ seeds}
+= 48{,}000$ integrations.
+At $\sim$65\,s: $\sim$867\,h serial, $\sim$87\,h on 10 nodes
+($\sim$3.6 days).
+
+\textbf{Node assignment:}  Each topology gets 3--4 nodes
+(see \S\ref{sec:aws}).
+
+%% ---- PHASE 4 ----
+\subsection{Phase~4: Structural Predictor Analysis}
+\label{sec:phase4}
+
+\textbf{Goal.}  Test whether a computable topological property
+predicts ridge width.  This phase is exploratory analysis of
+Phase~1 data---no new simulations.
+
+\begin{enumerate}[label=4.\arabic*]
+  \item Compute Spearman rank correlation between $\Rw$ and
+    each structural descriptor (cyclomatic number, deficiency,
+    weak reversibility) across the 8 topologies.
+
+  \item If any correlation achieves $|\rho| > 0.7$ with
+    $p < 0.05$, report as a candidate design principle.
+
+  \item If no single descriptor correlates, test simple
+    combinations (e.g., cyclomatic number $\times$ weak
+    reversibility indicator).
+
+  \item \textbf{Framing:}  Explicitly exploratory.  8 topologies
+    is a small sample; any correlation is a hypothesis for
+    future work, not a proven law.
+\end{enumerate}
+
+\textbf{Estimated cost:} Zero additional simulations.
+
+%% ---- PHASE 5 ----
+\subsection{Phase~5: Structural Redundancy Test (Optional)}
+\label{sec:phase5}
+
+\textbf{Goal.}  For the widest-ridge topology, measure structural
+redundancy by single-edge ablation.
+
+\begin{enumerate}[label=5.\arabic*]
+  \item For each reaction in the augmented network, remove it
+    and re-measure $\Rw$ (using 100 parameter draws $\times$
+    2 seeds from the Phase~1 protocol).
+
+  \item Identify which reactions are load-bearing (removal
+    collapses $\Rw$) vs.\ redundant (removal has minimal effect).
+
+  \item This provides a cheap proxy for structural mutation
+    robustness without requiring a full evolutionary run with
+    graph-mutation operators.
+\end{enumerate}
+
+\textbf{Estimated cost:}  Depends on reaction count of the
+winning topology.  If $\sim$20 reactions:
+$20 \times 100 \times 2 = 4{,}000$ integrations
+($\sim$72\,h serial, $\sim$7\,h on 10 nodes).
+
+%% ----------------------------------------------------------------
+\section{Computational Infrastructure}
+\label{sec:aws}
+
+\subsection{AWS Configuration}
+
+Matching Paper~4's V2 deployment:
+
+\begin{itemize}
+  \item 10 EC2 spot instances, t3.micro, us-west-2.
+  \item Spot bid: \$0.05/hr.  Expected cost: \$0.013/hr/node.
+  \item Ubuntu 22.04 LTS + 2GB swap.
+  \item Same deployment tooling: \texttt{deploy\_v2.sh},
+    \texttt{node\_controller.py}, \texttt{monitor.py}.
+  \item Project tag: \texttt{astro-paper5}.
+  \item Auth token: per-experiment random token.
+  \item Auto-terminate: 96\,h safety net.
+\end{itemize}
+
+\subsection{Node Assignment by Phase}
+
+\begin{table}[h]
+\centering
+\caption{Node assignment across phases.  Phases are run
+sequentially; nodes are reassigned between phases.}
+\label{tab:nodes}
+\begin{tabular}{llll}
+\toprule
+Phase & Task & Nodes & Elapsed \\
+\midrule
+0  & Topology construction  & Local  & 1 day \\
+1  & Ridge-width screen     & 10     & $\sim$26\,h \\
+   & \quad (analysis \& promotion) & Local & 1 day \\
+2  & Drift-buffering test   & 10     & $\sim$9\,h \\
+3  & Evolutionary robustness & 10    & $\sim$87\,h \\
+4  & Predictor analysis     & Local  & 1 day \\
+5  & Edge ablation (opt.)   & 10     & $\sim$7\,h \\
+\midrule
+   & \textbf{Total elapsed} &        & $\sim$8--10 days \\
+   & \textbf{Total compute} &        & $\sim$1{,}200 core-h \\
+   & \textbf{Est.\ AWS cost} &       & $\sim$\$15--20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Phase~1 node assignment (10 nodes, 8 topologies):
+Nodes~0--7 each run one topology.  Nodes~8--9 run the two
+topologies with the most draws (T1a and T1b random controls
+get extra draws for statistical power).
+
+Phase~3 node assignment (10 nodes, 3 topologies $\times$
+10 replicates):  Nodes~0--3 run widest-ridge topology
+(reps 0--3 selection, then 0--3 neutral via auto-advance).
+Nodes~4--6 run narrowest-ridge.  Nodes~7--9 run random
+control.  Remaining replicates (rep~4 for each condition)
+are queued as second jobs and auto-advance after the first
+completes.
+
+\subsection{Software}
+
+\begin{itemize}
+  \item Base: \texttt{dimensional\_opening} library (existing,
+    219-test-hardened).
+  \item Paper~4 code: \texttt{phase1\_evolution\_v2.py} (reused
+    for Phase~3 evolutionary runs).
+  \item New code: \texttt{paper5\_topology\_library.py}
+    (topology definitions and embedding protocol),
+    \texttt{paper5\_phase1\_screen.py} (Phase~1 random sampling),
+    \texttt{paper5\_phase2\_drift.py} (Phase~2 perturbation test).
+  \item Output format: per-topology JSONL (matching Paper~4
+    conventions), crash-resumable.
+\end{itemize}
+
+%% ----------------------------------------------------------------
+\section{Decision Points}
+
+\begin{enumerate}
+  \item \textbf{After Phase~0:}  If any topology produces
+    numerical instability at baseline parameters, debug or
+    remove it.  If more than 2 topologies fail, revisit the
+    embedding protocol.
+
+  \item \textbf{After Phase~1:}  Apply promotion rule and
+    success criteria.  If result is negative or dimensionality
+    artefact, report and stop.  Do not proceed to Phase~3
+    evolutionary runs.
+
+  \item \textbf{After Phase~2:}  If drift-buffering curves are
+    indistinguishable across promoted topologies, the Phase~1
+    $\Rw$ differences do not translate to dynamical robustness.
+    Investigate before committing to Phase~3 compute.
+
+  \item \textbf{After Phase~3:}  If the widest-ridge topology
+    does not show less neutral decay than the narrowest, the
+    evolutionary-buffering claim is not supported.  Report
+    Phase~1--2 results without the evolutionary extension.
+\end{enumerate}
+
+%% ----------------------------------------------------------------
+\section{Scope Guardrails}
+
+\begin{itemize}
+  \item No graph-mutation evolutionary operators.  Topology is
+    fixed within each experiment; only kinetic parameters mutate.
+    Structural mutation (edge addition/removal as heritable
+    mutations) is deferred to future work.
+
+  \item No second oscillator model.  All experiments use
+    Brusselator variants.  A Selkov cross-check is noted as a
+    future direction but is out of scope.
+
+  \item No more than 10 topologies in Phase~1.  If the panel
+    grows beyond 10, prune before running.
+
+  \item No environmental noise or time-varying parameters.
+
+  \item No new dynamical diagnostics beyond $\tauexp$ and $\Dtwo$.
+
+  \item Claims are restricted to: \emph{network topology does
+    (or does not) buffer the fragility of transient dynamical
+    complexity under parameter drift in this model class.}
+
+  \item Results are framed as ``selective retention of topologies''
+    (differential persistence), not ``evolution of topology''
+    (heritable structural variation).  Consistent with Paper~4's
+    retention framework.
+
+  \item The CRNT/deficiency analysis is explicitly exploratory
+    (\S\ref{sec:phase4}).  Do not claim CRNT theorems prove
+    the transient-buffering result.
+
+  \item Do not overinterpret as evidence for or against
+    abiogenesis inevitability.
+\end{itemize}
+
+%% ----------------------------------------------------------------
+\section{Null Model: Random-Wiring Controls}
+
+The random-wiring controls (T1a, T1b) are the most important
+methodological element of the paper.  They address the
+reviewer-critical concern:
+
+\emph{``Any improvement in $\tauexp$ could be due to adding
+species, not to specific topology.''}
+
+For the best-performing Group~B motif, an extended random
+ensemble is generated in Phase~1: 20--50 independent random
+rewirings, all preserving node count, edge count, and the
+energy-pool coupling interface.  The motif's $\Rw$ is compared
+to the full random ensemble (permutation test, $p < 0.05$).
+If the motif sits above the random-control distribution, the
+effect is topological, not dimensional.
+
+This is the direct analogue of Papers~1--2's ``random vs.\
+aligned growth'' comparison.
+
+%% ----------------------------------------------------------------
+\section{Expected Paper Structure}
+
+\begin{enumerate}
+  \item \textbf{Figure~1:}  Topology panel with structural
+    descriptors (Table).
+
+  \item \textbf{Figure~2:}  Phase~1 ridge-width screen
+    ($\Rw$ by topology, annotated with structural properties).
+    \emph{This is the headline result.}
+
+  \item \textbf{Figure~3:}  Phase~2 drift-buffering curves
+    ($S(\sigma_d)$ vs.\ drift magnitude, 4 topologies).
+
+  \item \textbf{Figure~4:}  Motif vs.\ random-wiring ensemble
+    (violin plot of random-control $\Rw$ with motif highlighted).
+
+  \item \textbf{Figure~5:}  Phase~3 evolutionary robustness
+    ($\tauexp$ trajectories and neutral-decay comparison,
+    3 topologies).
+
+  \item \textbf{Figure~6 (optional):}  Structural predictor
+    scatter plots ($\Rw$ vs.\ cyclomatic number, deficiency).
+\end{enumerate}
+
+\end{document}

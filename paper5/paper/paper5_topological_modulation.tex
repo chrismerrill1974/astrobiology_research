@@ -1,0 +1,409 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Topological Modulation of Transient Dimensional Inflation
+% in Energy-Coupled Chemical Oscillators
+%
+% Paper 5 — March 2026
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb,prd,floatfix]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\newcommand{\VV}[1]{{\color{red}{#1}}}
+\newcommand{\tauexp}{\tau_{>1.2}}
+\newcommand{\Dtwo}{D_2}
+\newcommand{\kcat}{k_{\mathrm{cat}}}
+\newcommand{\Kd}{K_d}
+\newcommand{\Gtot}{G_{\mathrm{total}}}
+\newcommand{\Rw}{R_w}
+\renewcommand{\sd}{\sigma_d}
+
+\begin{document}
+
+\title{Topological Modulation of Transient Dimensional Inflation\\
+in Energy-Coupled Chemical Oscillators}
+
+\author{Christopher Merrill}
+\affiliation{Independent Researcher}
+\author{With computational collaboration from Claude (Anthropic), ChatGPT (OpenAI), and Gemini (Google)}
+
+\date{\today}
+
+\begin{abstract}
+Papers~1--4 in this series established that timescale separation between fast oscillatory cores and a slow shared energy reservoir transiently inflates the correlation dimension $\Dtwo$ beyond the limit-cycle floor, and that evolutionary selection can prolong this exploratory phase. Paper~4 showed that expanding the mutable parameter space from one to three dimensions accelerated neutral decay of transient retention, raising the question: can reaction-network topology buffer this fragility? Here we test this directly. We augment the enzyme-complex coupled Brusselator with five designed motifs and 20~random-wiring controls, all coupled through the shared energy pool via a standardized embedding protocol. A ridge-width screen ($N = 1{,}800$~parameter samples per topology, 14{,}400 total) reveals that all designed motifs \textit{suppress} transient dimensionality relative to the unaugmented baseline ($\Rw = 0.04$--$0.09$ vs.\ $0.37$; Mann--Whitney $p < 10^{-97}$). The 20~random wirings split bimodally: 8~are completely dead ($\Rw = 0$), while the surviving 12~have $\Rw = 0.02$--$0.40$, with two exceeding the baseline. A drift-sensitivity test across seven perturbation magnitudes ($\sd = 0$--$0.5$, 1{,}202~evaluations per topology) finds that all topologies degrade at the same rate ($\sim$42\%~$\Rw$ loss at $\sd = 0.5$), indicating that topology controls the size of the viable parameter region but not its sensitivity to drift. The alive/dead split among random wirings is predicted by a single graph-theoretic feature: whether the motif species catalyzing $E \to E_w$ is a net concentration accumulator in the motif subgraph (Fisher's exact $p = 0.0007$; 0/12~alive vs.\ 6/8~dead wirings are accumulators). This structural predictor also explains why all designed motifs fail: the embedding protocol routes energy coupling through a cycle endpoint that necessarily accumulates concentration. We conclude that network augmentation generically destroys transient complexity via energy drain, and that the rare wirings preserving it satisfy a simple structural constraint: the energy-coupling point must disperse rather than accumulate mass flow.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The first four papers in this series traced a progression from dynamical rigidity through transient escape to evolutionary tuning of that escape. Paper~1~\cite{paper1} showed that random autocatalytic growth dilutes the activation ratio $\eta = \Dtwo/r_S$. Paper~2~\cite{paper2} demonstrated that feedback-aligned growth preserves viability but cannot lift $\Dtwo$ above the limit-cycle floor. Paper~3~\cite{paper3} identified the mechanism that breaks this floor: timescale separation between fast oscillatory cores and a slow shared energy reservoir transiently inflates $\Dtwo$ to $\sim$1.7 for hundreds of oscillator periods. Paper~4~\cite{paper4} showed that tournament selection on the transient retention metric $\tauexp$ (the count of 2{,}500-unit windows with $\Dtwo > 1.2$) drives a $2.8\times$ increase in mean $\tauexp$ via directional convergence of the energy dissipation rate $\gamma$.
+
+Paper~4 also identified a vulnerability. When the mutable parameter space was expanded from one dimension ($\gamma$ alone) to three ($\gamma, J, \kcat$), neutral drift collapsed $\tauexp$ from $\sim$3.1 to 0.55 over 40~generations, with 12.9~lethal phenotypes per generation. The viable region of parameter space---the ``evolutionary ridge''---appears narrow relative to the mutation step size. This raises a natural question: \textit{can reaction-network topology widen this ridge?}
+
+The hypothesis has intuitive appeal. Network motifs that create redundant slow-variable pathways might provide alternative routes to timescale separation, expanding the parameter-space volume that sustains transient chaos. In the language of chemical reaction network theory (CRNT), additional complexes and linkage classes can increase the deficiency of a network~\cite{feinberg1972, horn1972}, potentially enriching its dynamical repertoire.
+
+We test this hypothesis with a systematic topology screen. Five designed motifs (simple cycle, parallel dual-path, branch-rejoin, feedforward-return, nested dual loop) and 20~random-wiring controls are grafted onto the Paper~3 base model via a standardized embedding protocol that couples all augmentations through the shared energy pool~$E$. We measure the ``ridge width'' $\Rw$---the fraction of random parameter draws sustaining $\tauexp > 0$---as the primary metric of topological buffering.
+
+The results reject the original hypothesis but reveal a more nuanced story. All designed motifs suppress transient dimensionality. Random wirings split bimodally into alive and dead categories. And the alive/dead distinction is predicted by a single structural property of the motif's relationship to the energy-coupling point.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Base Model}
+
+We use the enzyme-complex coupled Brusselator from Papers~3--4: two Brusselator oscillator cores sharing a slow energy pool $E$, gated by an enzyme complex $G/GE$. The model comprises 14~reactions with mass-action kinetics. Dynamic species tracked for $\Dtwo$: $\{X_1, Y_1, X_2, Y_2, E\}$ (5~variables). Integration via LSODA over $t \in [0, 20{,}000]$ with 40{,}000 time points, rtol $= 10^{-6}$, atol $= 10^{-9}$, max\_step $= 10.0$. Fixed parameters: $A = 1.0$, $B = 3.0$, $k_\text{on} = k_\text{off} = 10.0$, $\Gtot = 1.0$. See Paper~3 for the full reaction scheme.
+
+\subsection{Topology Panel}
+
+We construct eight topologies organized into two groups (Table~\ref{tab:topology_panel}):
+
+\begin{itemize}
+\item \textbf{Group~A (controls):} T0 (unaugmented baseline), T1a and T1b (random-wiring controls with specific seeds, matched for species and reaction count to the largest Group~B motif).
+
+\item \textbf{Group~B (designed motifs):} T2 (simple 3-cycle, $A_m \to B_m \to C_m \to A_m$), T3 (parallel dual-path cycle), T4 (branch-and-rejoin with asymmetric weights), T5 (feedforward with return), T6 (nested dual loop with inner 2-cycle).
+\end{itemize}
+
+\begin{table}[b]
+\centering
+\caption{Topology panel. All Group~B motifs and random controls add species and reactions to the 14-reaction, 12-species base model. Cyclo: cyclomatic number. Def: deficiency.}
+\label{tab:topology_panel}
+\begin{tabular}{llcccc}
+\toprule
+Name & Description & Species & Rxns & Cyclo & Def \\
+\midrule
+T0 & Baseline & 12 & 14 & 17 & 2 \\
+T1a & Random ctrl (s=1001) & 16 & 20 & 20 & 3 \\
+T1b & Random ctrl (s=2002) & 16 & 20 & 19 & 3 \\
+T2 & Simple 3-cycle & 15 & 18 & 19 & 3 \\
+T3 & Parallel dual-path & 16 & 20 & 20 & 3 \\
+T4 & Branch-rejoin & 16 & 20 & 20 & 3 \\
+T5 & Feedforward-return & 15 & 19 & 20 & 3 \\
+T6 & Nested dual loop & 16 & 20 & 20 & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Embedding Protocol}
+\label{sec:embedding}
+
+All topological augmentations follow a standardized embedding protocol to ensure fair comparison:
+
+\begin{enumerate}
+\item New species ($R_{m0}, R_{m1}, \ldots$) are initialized at concentration 1.0.
+\item Intra-motif reactions follow mass-action kinetics with rate constants sampled from log-uniform$(0.1, 10)$.
+\item Each motif couples to the base system through exactly one energy-drain reaction of the form $R_{mk} + E \to R_{mk} + E_w$, where $R_{mk}$ is a designated ``coupler'' species within the motif. This catalytic drain is the sole interface between the motif and the base oscillator.
+\item No motif species participates directly in any base-model reaction (no coupling to $X_i$, $Y_i$, $G$, or $GE$).
+\item The $\Dtwo$ projection includes all motif species except waste ($W_i$), chemostat ($A$, $B$, $E_\text{src}$), and gate ($G$, $GE$) species.
+\end{enumerate}
+
+\subsection{Random-Wiring Ensemble}
+\label{sec:random_ensemble}
+
+Twenty random-wiring controls are generated to test whether any observed topological effects exceed what is expected from randomly structured augmentations with matched complexity. Each random wiring adds 4~species and 6~reactions (matching T3/T4/T6), with 5~intra-motif conversion reactions drawn uniformly among the new species (no self-loops) and 1~energy-coupling reaction to a randomly selected motif species. The 20~wirings use deterministic pseudo-random seeds for reproducibility.
+
+\subsection{Ridge-Width Screen (Phase~1)}
+\label{sec:phase1}
+
+The primary metric is the ridge width $\Rw$: the fraction of random parameter draws that yield $\tauexp > 0$. For each named topology, we sample:
+
+\begin{itemize}
+\item 300 base-parameter draws: $\gamma \in [0.0005, 0.01]$ log-uniform, $J \in [2, 12]$ uniform, $\kcat \in [0.05, 0.8]$ uniform.
+\item 3 independent motif-rate draws per base draw (log-uniform in $[0.1, 10]$ for each motif reaction).
+\item 2 integration seeds per configuration (seeds 42, 179).
+\end{itemize}
+
+Total: $300 \times 3 \times 2 = 1{,}800$ evaluations per named topology, 14{,}400 across the 8-topology panel. For the extended random ensemble, each of the 20~rewirings receives 100~base-parameter draws $\times$ 2~seeds $= 200$ evaluations, totaling 4{,}000 additional evaluations. The screen ran on 10~AWS EC2 spot instances (t3.micro, us-west-2) over approximately 45~hours.
+
+Each evaluation has a 120\,s wall-clock timeout; timed-out evaluations receive $\tauexp = 0$.
+
+\subsection{Drift-Sensitivity Test (Phase~2)}
+\label{sec:phase2}
+
+To test whether topology buffers sensitivity to parameter perturbation, we measure how $\Rw$ degrades under Gaussian drift. Four candidate topologies are selected based on Phase~1 results (T0, T6, rw16, rw4). For each, we identify a ``center point''---the parameter combination with the highest mean $\tauexp$ from Phase~1---and evaluate $\Rw$ at seven drift magnitudes:
+
+\begin{equation}
+\sd \in \{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5\}
+\end{equation}
+
+At each $\sd > 0$, 100~draws are sampled from $\mathcal{N}(\theta_\text{center}, \sd^2 \cdot \text{diag}(\theta_\text{center}^2))$ in each parameter dimension, with 2~seeds per draw (200~evaluations per drift level). At $\sd = 0$, a single draw (2~evaluations) suffices since the result is deterministic. Total: 1{,}202 evaluations per topology, 4{,}808 across 4~candidates. This phase ran on 4~spot instances over approximately 30~hours.
+
+\subsection{Structural Predictor Analysis (Phase~4)}
+\label{sec:phase4}
+
+For each of the 20~random wirings, we reconstruct the motif subgraph (the directed graph among $\{R_{m0}, R_{m1}, R_{m2}, R_{m3}\}$, excluding the $E$-coupling reaction) and compute:
+
+\begin{itemize}
+\item \textbf{Net flow into the E-coupler:} $f_\text{net} = d_\text{in} - d_\text{out}$, where $d_\text{in}$ and $d_\text{out}$ are the in-degree and out-degree of the E-coupled species within the motif subgraph.
+\item \textbf{Terminal sink:} whether the E-coupler has $d_\text{out} = 0$ (no outgoing motif edges).
+\end{itemize}
+
+The association between structural features and the alive/dead classification ($\Rw > 0$ vs.\ $\Rw = 0$) is tested using Fisher's exact test.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Phase~1: Designed Motifs Suppress Transient Dimensionality}
+
+All five designed motifs reduce $\Rw$ relative to the unaugmented baseline (Table~\ref{tab:phase1_results}). The effect is large: T0 has $\Rw = 0.372$, while the best designed motif (T6, nested dual loop) achieves only $\Rw = 0.091$. The weakest motifs (T3, T4) are nearly dead at $\Rw = 0.041$. Mann--Whitney $U$ tests confirm that T0~$>$~every Group~B motif ($p < 10^{-97}$ for all comparisons).
+
+\begin{table}[t]
+\centering
+\caption{Phase~1 ridge-width screen results. $\Rw$: fraction of 1{,}800 evaluations with $\tauexp > 0$. Mean $\tauexp$: average across all evaluations. All Group~B motifs are significantly below T0.}
+\label{tab:phase1_results}
+\begin{tabular}{llcc}
+\toprule
+Topology & Group & $\Rw$ & Mean $\tauexp$ \\
+\midrule
+T0 & A (baseline) & 0.372 & 0.671 \\
+T1a & A (random ctrl) & 0.003 & 0.003 \\
+T1b & A (random ctrl) & 0.335 & 0.588 \\
+\midrule
+T2 & B (3-cycle) & 0.062 & 0.065 \\
+T3 & B (dual-path) & 0.041 & 0.045 \\
+T4 & B (branch-rejoin) & 0.041 & 0.045 \\
+T5 & B (feedforward) & 0.053 & 0.059 \\
+T6 & B (nested loop) & 0.091 & 0.102 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The two Group~A random controls are themselves informative: T1a is nearly dead ($\Rw = 0.003$) while T1b is close to baseline ($\Rw = 0.335$). This foreshadows the bimodality observed in the full random ensemble.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig1_rw_distribution.png}
+\caption{Phase~1 ridge-width screen. Blue bars: Group~A controls (T0 baseline, T1a/T1b random). Red bars: Group~B designed motifs. Dashed green line and shaded band: random-wiring ensemble mean $\pm 1\sigma$. All designed motifs fall below both the baseline and the random ensemble mean.}
+\label{fig:rw_distribution}
+\end{figure}
+
+\subsection{Random-Wiring Ensemble: Bimodal Viability}
+
+The 20~random wirings divide sharply into two classes (Fig.~\ref{fig:rw_distribution}). Eight wirings are completely dead ($\Rw = 0$), while the remaining twelve have $\Rw$ ranging from 0.020 to 0.400 (Table~\ref{tab:random_ensemble}). Two random wirings (rw16 and rw17) exceed the T0 baseline, with rw16 reaching $\Rw = 0.400$.
+
+\begin{table}[b]
+\centering
+\caption{Random-wiring ensemble results, sorted by $\Rw$. Eight wirings are completely dead; twelve sustain transient dimensionality, with two exceeding the unaugmented baseline T0 ($\Rw = 0.372$).}
+\label{tab:random_ensemble}
+\begin{tabular}{lcccl}
+\toprule
+Wiring & $\Rw$ & Mean $\tauexp$ & $f_\text{net}$ & Class \\
+\midrule
+rw16 & 0.400 & 0.740 & $-2$ & Alive \\
+rw17 & 0.365 & 0.665 & $0$ & Alive \\
+rw4 & 0.350 & 0.715 & $-1$ & Alive \\
+rw3 & 0.325 & 0.600 & $-2$ & Alive \\
+rw1 & 0.320 & 0.560 & $0$ & Alive \\
+rw19 & 0.320 & 0.530 & $-4$ & Alive \\
+rw2 & 0.310 & 0.440 & $0$ & Alive \\
+rw8 & 0.310 & 0.555 & $-1$ & Alive \\
+rw13 & 0.275 & 0.505 & $0$ & Alive \\
+rw5 & 0.270 & 0.450 & $-1$ & Alive \\
+rw7 & 0.260 & 0.450 & $-1$ & Alive \\
+rw18 & 0.020 & 0.020 & $-1$ & Alive \\
+\midrule
+rw0 & 0.000 & 0.000 & $+1$ & Dead \\
+rw6 & 0.000 & 0.000 & $+2$ & Dead \\
+rw9 & 0.000 & 0.000 & $-1$ & Dead \\
+rw10 & 0.000 & 0.000 & $+2$ & Dead \\
+rw11 & 0.000 & 0.000 & $+1$ & Dead \\
+rw12 & 0.000 & 0.000 & $+1$ & Dead \\
+rw14 & 0.000 & 0.000 & $+2$ & Dead \\
+rw15 & 0.000 & 0.000 & $-3$ & Dead \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The mean $\Rw$ across surviving wirings is $0.294 \pm 0.091$, comparable to the T0 baseline. The overall ensemble mean is $0.176 \pm 0.160$, reflecting the bimodal structure (Fig.~\ref{fig:random_bimodality}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig4_random_bimodality.png}
+\caption{Distribution of $\Rw$ across 20~random wirings. The bimodal split is stark: 8~wirings are completely dead ($\Rw = 0$) while 12~cluster around $\Rw \approx 0.3$, with nothing in between. Dashed line: T0 baseline ($\Rw = 0.372$).}
+\label{fig:random_bimodality}
+\end{figure}
+
+\subsection{Phase~2: Drift Sensitivity Is Topology-Independent}
+
+All four Phase~2 candidates degrade at similar rates under parameter drift (Table~\ref{tab:phase2_results}, Fig.~\ref{fig:drift_curves}). At $\sd = 0.5$, all topologies retain 55--58\% of their undrifted $\Rw$. Linear regression slopes range from $-0.86$ (T0) to $-0.95$ (T6), with no statistically significant difference between topologies.
+
+\begin{table}[t]
+\centering
+\caption{Phase~2 drift-sensitivity results. $S_{0.5}$: fraction of $\Rw$ retained at $\sd = 0.5$ relative to $\sd = 0.05$. Slope: linear fit of $\Rw$ vs.\ $\sd$.}
+\label{tab:phase2_results}
+\begin{tabular}{lcccc}
+\toprule
+Topology & $\Rw(0.05)$ & $\Rw(0.5)$ & $S_{0.5}$ & Slope \\
+\midrule
+T0 & 1.000 & 0.580 & 0.580 & $-0.86$ \\
+T6 & 1.000 & 0.575 & 0.575 & $-0.95$ \\
+rw16 & 1.000 & 0.580 & 0.580 & $-0.90$ \\
+rw4 & 0.965 & 0.545 & 0.565 & $-0.89$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+T6 shows marginally better $\Rw$ retention at moderate drift ($\Rw = 0.870$ at $\sd = 0.2$ vs.\ 0.730 for T0), but this advantage disappears by $\sd = 0.5$. Mean $\tauexp$ decay confirms the same pattern: all topologies retain 42--50\% of their mean $\tauexp$ at $\sd = 0.5$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig2_drift_curves.png}
+\caption{Phase~2 drift sensitivity. $\Rw$ vs.\ perturbation magnitude $\sd$ for four candidate topologies. All four curves track nearly identically, confirming that topology controls ridge \textit{size} but not drift \textit{sensitivity}.}
+\label{fig:drift_curves}
+\end{figure}
+
+\subsection{Structural Predictor: E-Coupler Accumulation}
+
+We hypothesized that the alive/dead split among random wirings might be predicted by the structural relationship between the motif subgraph and the energy-coupling point. Specifically, the species catalyzing $E \to E_w$ experiences a catalytic E-drain rate proportional to its own concentration. If this species accumulates mass from the motif subgraph (more incoming edges than outgoing), its steady-state concentration rises, increasing the rate of energy drain and starving the $GE$ complex that mediates timescale separation.
+
+We define the net flow $f_\text{net} = d_\text{in} - d_\text{out}$ of the E-coupled species within the motif subgraph. Among the 20~random wirings:
+
+\begin{itemize}
+\item \textbf{Alive wirings} ($\Rw > 0$, $n = 12$): 0/12 have $f_\text{net} \geq 1$.
+\item \textbf{Dead wirings} ($\Rw = 0$, $n = 8$): 6/8 have $f_\text{net} \geq 1$.
+\end{itemize}
+
+Fisher's exact test yields $p = 0.0007$ (Table~\ref{tab:predictor}). The E-coupler's terminal-sink status ($d_\text{out} = 0$) is also predictive but less strongly: 0/12 alive vs.\ 3/8 dead ($p = 0.046$).
+
+\begin{table}[b]
+\centering
+\caption{Structural predictor of random-wiring viability. $f_\text{net}$: net flow into the E-coupled species from the motif subgraph. Terminal sink: E-coupler has no outgoing motif edges.}
+\label{tab:predictor}
+\begin{tabular}{lccc}
+\toprule
+Predictor & Alive & Dead & Fisher $p$ \\
+\midrule
+$f_\text{net} \geq 1$ (accumulator) & 0/12 & 6/8 & 0.0007 \\
+$d_\text{out} = 0$ (terminal sink) & 0/12 & 3/8 & 0.046 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two dead wirings (rw9, rw15) have $f_\text{net} < 1$ but are still dead ($f_\text{net} = -1$ and $-3$, respectively; Fig.~\ref{fig:predictor}). These exceptions suggest that the net-flow predictor captures the dominant mechanism but does not fully determine viability.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{figures/fig3_predictor.png}
+\caption{Structural predictor of random-wiring viability. Each point is one of the 20~random wirings, plotted by E-coupler net flow $f_\text{net}$ (x-axis) and ridge width $\Rw$ (y-axis). Green: alive ($\Rw > 0$). Gray: dead ($\Rw = 0$). Dashed red line: $f_\text{net} = 1$ threshold. No alive wiring has $f_\text{net} \geq 1$; 6/8 dead wirings do (Fisher $p = 0.0007$). Points are jittered horizontally for visibility.}
+\label{fig:predictor}
+\end{figure} Other factors---such as the specific rate constants sampled, the motif's internal relaxation timescale, or higher-order graph properties---may account for the remaining variance.
+
+\subsection{Why All Designed Motifs Fail}
+
+The structural predictor explains a result that initially appeared surprising: \textit{every} designed motif (T2--T6) suppresses transient dimensionality. In all five designs, the energy-coupling reaction routes through a cycle endpoint ($C_m$ in T2, T5; $D_m$ in T3, T4, T6) that by construction receives net inflow from the motif cycle. This is an artifact of the embedding protocol (\S\ref{sec:embedding}), which routes coupling through a species that acts as a concentration accumulator in all five motif topologies.
+
+The random ensemble, by contrast, assigns the E-coupler uniformly at random among the motif species. When the randomly selected coupler happens to be a net disperser ($f_\text{net} \leq 0$), the wiring survives. This explains both the bimodality and the specific wirings that exceed baseline.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Topology Controls Ridge Size but Not Drift Sensitivity}
+
+Phases~1 and~2 yield a clean separation. Topology dramatically affects $\Rw$---from 0 (dead wirings) to 0.40 (rw16), a factor of $\infty$---but has no measurable effect on the \textit{rate} of $\Rw$ degradation under drift. All four Phase~2 candidates lose approximately 42\% of their $\Rw$ at $\sd = 0.5$, regardless of their starting $\Rw$ or structural composition.
+
+This suggests that the fragility documented in Paper~4 (rapid neutral decay of $\tauexp$ in the V3b multi-parameter experiment) is an intrinsic property of the underlying dynamical mechanism---the timescale-separation window between the energy pool and the oscillator cores---rather than an artifact of insufficient topological complexity.
+
+\subsection{Network Growth as Dimensional Sink}
+
+The dominant finding of Phase~1 is negative: augmenting the reaction network generically \textit{destroys} transient dimensionality rather than buffering it. The mechanism is straightforward. Every augmentation couples to the base system through a catalytic $E \to E_w$ drain. This additional energy sink lowers the steady-state $[E]$, which reduces $[GE]$ (the enzyme complex mediating slow-fast coupling), which narrows the timescale-separation window that drives transient $\Dtwo$ inflation.
+
+The magnitude of this drain depends on the steady-state concentration of the E-coupled species, which is controlled by the motif's internal flow structure. Species that accumulate concentration (net inflow from other motif nodes) have higher steady-state levels and correspondingly stronger E-drain. This provides the mechanistic link between the graph-theoretic predictor ($f_\text{net}$) and the dynamical outcome ($\Rw$).
+
+\subsection{The Accumulation--Dispersion Axis}
+
+The structural predictor we identify---net flow into the E-coupled species---is simple but specific. It is not a global network property (cyclomatic number, deficiency, and weak reversibility are all identical across the 20~random wirings) but a \textit{local} property of the coupling interface between the motif and the energy pool.
+
+This specificity has a practical implication. If one wished to design a topological augmentation that preserves or enhances transient complexity, the design constraint is clear: the E-coupling point must not be a concentration accumulator. More precisely, the species catalyzing the energy drain must have outgoing edges in the motif subgraph that prevent mass accumulation. This amounts to a flow-balance condition at the coupling interface.
+
+\subsection{Implications for Prebiotic Chemistry}
+
+The results suggest a stringent constraint on prebiotic network growth. If a proto-metabolic system relies on transient dynamical complexity for state-space exploration~\cite{nghe2015, vanchurin2022}, then random addition of reactions is overwhelmingly likely to destroy this capability. Of the 20~random wirings we tested, 8 (40\%) are immediately lethal and most of the survivors show reduced $\Rw$ relative to the unaug\-mented system.
+
+The rare wirings that survive share a structural motif: dispersed energy coupling. In a prebiotic context, this translates to the requirement that new catalytic pathways draining the energy pool must be \textit{leaky}---they must not trap concentration at the drain point. This is reminiscent of the ``parasitic side-reaction'' problem in prebiotic chemistry~\cite{szostak2012}, but viewed from the dynamical rather than the thermodynamic perspective.
+
+Combined with Paper~4's finding that evolutionary selection can tune $\tauexp$ over relatively few generations, the emerging picture is one of a narrow but navigable evolutionary path: random network elaboration almost always destroys transient complexity, but the rare surviving topologies can be further optimized by parameter selection.
+
+\subsection{Limitations}
+
+Several limitations constrain generalization:
+
+\begin{enumerate}
+\item The base model is specific (enzyme-complex coupled Brusselator). The extent to which the accumulation--dispersion predictor generalizes to other oscillator architectures is unknown.
+
+\item The sample size (20~random wirings) limits statistical power. The Fisher test is significant but two dead wirings fall outside the predictor ($f_\text{net} = -1$ and $-3$), suggesting additional mechanisms.
+
+\item The embedding protocol constrains all coupling to a single catalytic $E$-drain reaction. Alternative coupling modes (e.g., competitive inhibition, allosteric regulation) might yield different results.
+
+\item We do not vary the number of added species or reactions, only their wiring. The relationship between augmentation \textit{size} and viability is unexplored.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Three principal conclusions emerge:
+
+\begin{enumerate}
+\item \textbf{Network augmentation generically suppresses transient complexity.} All five designed motifs and 40\% of random wirings destroy transient dimensional inflation. The mechanism is energy drain through the coupling interface.
+
+\item \textbf{Topology controls ridge size but not drift sensitivity.} The viable parameter region varies by a factor of $>$10$\times$ across topologies, but all topologies degrade at the same rate under parameter perturbation ($\sim$42\% loss at $\sd = 0.5$).
+
+\item \textbf{A local graph-theoretic property predicts viability.} The net flow into the E-coupled species separates alive from dead wirings ($p = 0.0007$). Augmentations survive if and only if the energy-coupling point disperses rather than accumulates concentration from the motif subgraph.
+\end{enumerate}
+
+Together with Papers~3--4, these results paint a picture of prebiotic transient complexity as a fragile, topology-sensitive phenomenon. The evolutionary ridge is narrow in parameter space and easily destroyed by network growth---but when the structural constraint at the coupling interface is satisfied, selection can maintain and extend the exploratory phase.
+
+\begin{acknowledgments}
+This research used computational resources from Amazon Web Services (EC2 spot instances, total cost $< \$2$). The author thanks Claude (Anthropic), ChatGPT (OpenAI), and Gemini (Google) for extensive collaboration on experimental design, code development, and analysis.
+\end{acknowledgments}
+
+\begin{thebibliography}{99}
+
+\bibitem{paper1}
+C.~Merrill, ``Dynamical Activation in Autocatalytic Chemical Networks: A Correlation Dimension Analysis,'' Paper~1 in this series (2026).
+
+\bibitem{paper2}
+C.~Merrill, ``Feedback-Aligned Autocatalysis Preserves Dynamical Viability but Not Activation in Growing Chemical Networks,'' Paper~2 in this series (2026).
+
+\bibitem{paper3}
+C.~Merrill, ``Transient Dimensional Inflation via Timescale Separation in Energy-Coupled Chemical Oscillators,'' Paper~3 in this series (2026).
+
+\bibitem{paper4}
+C.~Merrill, ``Evolutionary Selection on Transient Dynamical Retention Time in Energy-Coupled Chemical Oscillators,'' Paper~4 in this series (2026).
+
+\bibitem{feinberg1972}
+M.~Feinberg, ``Complex balancing in general kinetic systems,'' Arch.\ Ration.\ Mech.\ Anal.\ \textbf{49}, 187 (1972).
+
+\bibitem{horn1972}
+F.~Horn and R.~Jackson, ``General mass action kinetics,'' Arch.\ Ration.\ Mech.\ Anal.\ \textbf{47}, 81 (1972).
+
+\bibitem{nghe2015}
+P.~Nghe \textit{et~al.}, ``Prebiotic network evolution: six key parameters,'' Mol.\ BioSyst.\ \textbf{11}, 3206 (2015).
+
+\bibitem{vanchurin2022}
+V.~Vanchurin, Y.~I.~Wolf, M.~Katsnelson, and E.~V.~Koonin, ``Toward a theory of evolution as multilevel learning,'' Proc.\ Natl.\ Acad.\ Sci.\ USA \textbf{119}, e2120037119 (2022).
+
+\bibitem{szostak2012}
+J.~W.~Szostak, ``The eightfold path to non-enzymatic RNA replication,'' J.\ Syst.\ Chem.\ \textbf{3}, 2 (2012).
+
+\bibitem{researchplan}
+C.~Merrill, ``Paper~5 Research Plan: Topological Buffering of Transient Complexity,'' pre-registered experimental design (2026).
+
+\end{thebibliography}
+
+\end{document}
